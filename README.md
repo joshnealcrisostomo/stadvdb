@@ -16,10 +16,10 @@
     3. Choose the file "Power Generation by Fuel Source_utf8.csv" from the cloned Repository
     4. Finish the Import
 
-### Dataset #2: *Observed Climatology of Average Mean Surface Air Temperature*
+### Dataset #2: *Average Mean Surface Air Temperature*
     1. Right-click "Tables"
     2. Click "Table Data Import Wizard"
-    3. Choose the file "observed_seasonal_cycle_clean.csv" from the cloned Repository
+    3. Choose the file "observed_timeseries_clean.csv" from the cloned Repository
     4. Finish the Import
 
 ### Dataset #3: *Renewable Electricity Data World Bank*
