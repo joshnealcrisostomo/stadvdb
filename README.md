@@ -34,7 +34,7 @@
     2. In terminal, do "pip install mysql-connector-python"
     3. Run the py file "xml_importer.py"
 
-### Data Warehouse (data_warehouse schema): `MAIN DATAWAREHOUSE`
+### Data Warehouse (data_warehouse schema): `MAIN DATA WAREHOUSE`
     1. Run the 'Data_Warehouse_Star_Schema.sql' file
 
 ## **For now, all the schemas have their designated table/s.**
