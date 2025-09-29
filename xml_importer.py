@@ -13,7 +13,7 @@ DB_CONFIG = {
     "host": "localhost",
     "user": "stadvdb",
     "password": "admin123",
-    "database": "energy" 
+    "database": "renew_elect" 
 }
 
 XML_FILE = "API_EG.ELC.RNEW.ZS_DS2_en_xml_v2_864940.xml"
