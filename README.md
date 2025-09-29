@@ -1,30 +1,34 @@
-# **Importing Dataset to local MySQL (TO BE UPDATED -jn)**
+# **Importing Dataset to local MySQL (updated)**
 
-## *Clone the Repository first*
+## *Clone the repository first*
+
+---
+
+## MCO1 Steps 1 and 2 Procedure
 
 ### **Create a new MySQL Connection**
     - Connection Name: STADVDB
     - Username: stadvdb
     - Password: admin123
 
-# IGNORE THE STEPS BELOW AS OF NOW
+### **Create the Databases (Schemas)**
+    1. Run the 'Schemas.sql' file in MySQL.
 
-### **Create a Database**
-    - Database name: energy
-
-### Dataset #1: *Power Generation by Fuel Source*
+### Dataset #1 (power_gen schema): *Power Generation by Fuel Source*
     1. Right-click "Tables"
     2. Click "Table Data Import Wizard"
-    3. Choose the file "Power Generation by Fuel Source_utf8.csv" from the cloned Repository
-    4. Finish the Import
+    3. Choose the file 'Power_Generation_Clean.csv' from the cloned Repository
+    4. Rename the table to 'power_generation'
+    5. Finish the Import
 
-### Dataset #2: *Average Mean Surface Air Temperature*
+### Dataset #2 (air_temp schema): *Average Mean Surface Air Temperature*
     1. Right-click "Tables"
     2. Click "Table Data Import Wizard"
-    3. Choose the file "observed_timeseries_clean.csv" from the cloned Repository
-    4. Finish the Import
+    3. Choose the file 'observed_timeseries_clean.csv' from the cloned Repository
+    4. Rename the table to 'renewable_electricity'
+    5. Finish the Import
 
-### Dataset #3: *Renewable Electricity Data World Bank*
+### Dataset #3 (renew_elect schema): *Renewable Electricity Data World Bank*
     1. Create a new table in MySQL by running the query file "table_for_renewableElectricity.sql" in MySQL
     2. Open VSCode
     2. In terminal, do "pip install mysql-connector-python"
