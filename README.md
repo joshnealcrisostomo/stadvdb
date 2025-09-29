@@ -1,4 +1,4 @@
-# **Importing Dataset to local MySQL**
+# **Importing Dataset to local MySQL (TO BE UPDATED -jn)**
 
 ## *Clone the Repository first*
 
@@ -6,6 +6,8 @@
     - Connection Name: STADVDB
     - Username: stadvdb
     - Password: admin123
+
+# IGNORE THE STEPS BELOW AS OF NOW
 
 ### **Create a Database**
     - Database name: energy
