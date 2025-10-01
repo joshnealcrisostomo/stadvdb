@@ -29,7 +29,7 @@
     1. Right-click "Tables"
     2. Click "Table Data Import Wizard"
     3. Choose the file 'observed_timeseries_clean.csv' from the cloned Repository
-    4. Rename the table to 'renewable_electricity'
+    4. Rename the table to 'observed_timeseries_clean'
     5. Finish the Import
 
 ### Dataset #3 (renew_elect schema): `Renewable Electricity Data World Bank`

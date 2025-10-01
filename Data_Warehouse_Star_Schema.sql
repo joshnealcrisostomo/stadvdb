@@ -35,7 +35,7 @@ CREATE TABLE RENEWABLE_OUTPUT (
     dateKey INT NOT NULL,
     geoKey INT NOT NULL,
     tempKey INT NOT NULL,
-    renewOutPct DECIMAL(17,15),
+    renewOutPct DECIMAL(18,15),
     PRIMARY KEY (dateKey, geoKey, tempKey),
     FOREIGN KEY (dateKey) REFERENCES DIM_DATE(dateKey),
     FOREIGN KEY (geoKey) REFERENCES DIM_GEO(geoKey),
