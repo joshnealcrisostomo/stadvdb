@@ -7,13 +7,18 @@
 
 import xml.etree.ElementTree as ET
 import mysql.connector
+import os
+
+from dotenv import load_dotenv
 
 # DB connection configuration
+load_dotenv()
+
 DB_CONFIG = {
-    "host": "localhost",
-    "user": "stadvdb",
-    "password": "admin123",
-    "database": "renew_elect" 
+    "host": os.getenv("DB_HOST"),
+    "user": os.getenv("DB_USER"),
+    "password": os.getenv("DB_PASS"),
+    "database": os.getenv("DB_NAME")
 }
 
 XML_FILE = "API_EG.ELC.RNEW.ZS_DS2_en_xml_v2_864940.xml"
