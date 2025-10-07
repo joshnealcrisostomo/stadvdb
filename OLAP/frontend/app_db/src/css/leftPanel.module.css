@@ -1,0 +1,26 @@
+@import url('https://fonts.googleapis.com/css?family=Poppins:300,400,500,600&display=swap');
+
+.leftPanel {
+    width: 200px;
+    background-color: gray;
+    color: #ecf0f1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding-top: 20px;
+    height: 100vh;
+}
+
+.leftPanel ul {
+    list-style-type: none;
+    padding: 0;
+}
+
+.leftPanel li {
+    margin: 10px 0;
+    cursor: pointer;
+}
+
+.leftPanel li:hover {
+    text-decoration: underline;
+}

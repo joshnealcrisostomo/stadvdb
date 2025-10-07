@@ -1,0 +1,27 @@
+@import url('https://fonts.googleapis.com/css?family=Poppins:300,400,500,600&display=swap');
+
+.container {
+    height: 100vh;
+    width: 100%;
+    margin: 0;
+    padding: 0;
+    display: flex;
+    flex-direction: row;
+    overflow-x: hidden;
+    overflow-y: auto;
+    font-family: 'Poppins', sans-serif;
+}
+
+.mainPanel {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    justify-content: flex-start;
+    padding: 20px;
+}
+
+.content {
+    width: 100%;
+    text-align: center;
+}
