@@ -6,32 +6,32 @@ import os
 from dotenv import load_dotenv
 
 CREATE_TABLES_PGSQL = """
-CREATE TABLE dim_date (
+CREATE TABLE IF NOT EXISTS dim_date (
     date_key SERIAL PRIMARY KEY,
     calendar_year INT NOT NULL
 );
 
-CREATE TABLE dim_geo (
+CREATE TABLE IF NOT EXISTS dim_geo (
     geo_key SERIAL PRIMARY KEY,
     country_code VARCHAR(3) NOT NULL,
     country_name VARCHAR(100) NOT NULL,
     region_grp VARCHAR(50)
 );
 
-CREATE TABLE dim_fuel_source (
+CREATE TABLE IF NOT EXISTS dim_fuel_source (
     fuel_key SERIAL PRIMARY KEY,
     fuel_name VARCHAR(50) NOT NULL,
     is_renewable CHAR(1) CHECK (is_renewable IN ('Y','N')),
     energy_categ VARCHAR(20)
 );
 
-CREATE TABLE dim_temp (
+CREATE TABLE IF NOT EXISTS dim_temp (
     temp_key SERIAL PRIMARY KEY,
     year INT NOT NULL,
     avg_mean_temp_deg_c NUMERIC(4,2)
 );
 
-CREATE TABLE renewable_output (
+CREATE TABLE IF NOT EXISTS renewable_output (
     date_key INT NOT NULL,
     geo_key INT NOT NULL,
     temp_key INT NOT NULL,
@@ -42,7 +42,7 @@ CREATE TABLE renewable_output (
     FOREIGN KEY (temp_key) REFERENCES dim_temp(temp_key)
 );
 
-CREATE TABLE fuel_generation (
+CREATE TABLE IF NOT EXISTS fuel_generation (
     date_key INT NOT NULL,
     fuel_key INT NOT NULL,
     temp_key INT NOT NULL,
@@ -54,25 +54,9 @@ CREATE TABLE fuel_generation (
 );
 
 """
-TABLES_CSV = [
-    {
-        "table": "observed_timeseries_clean.csv",
-        "columns": [
-            "year, avg_mean_temp_deg_c"
-        ]
-    },
-    {
-        "table": "power_generation_clean.csv",
-        "columns": [
-            "year, biomass, coal, geothermal, hydro, natural gas, oil-based, solar, wind, grand total"
-        ]
-    },
-    {
-        "table":""
-    }
-    
-]
+
 temperature_csv = "observed_timeseries_clean.csv"
+power_csv = "power_generation_clean.csv"
 
 
 def run_etl():
@@ -96,6 +80,11 @@ def run_etl():
         with open(temperature_csv, 'r') as f:
             next(f)
             cur.copy_from(f, "dim_temp", sep=",", columns=("year", "avg_mean_temp_deg_c"))
+
+        with open(power_csv, 'r') as f:
+            next(f)
+            
+            cur.copy_from(f, "fuel_generation", sep=",", columns=("Years" , "Biomass" , "Coal" , "Geothermal" , "Hydro" , "Natural Gas" , "Oil-based" , "Solar" , "Wind" , "Grand Total"))
 
         conn.commit()
         cur.close()
