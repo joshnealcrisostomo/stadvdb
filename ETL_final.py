@@ -2,6 +2,7 @@ import xml.etree.ElementTree as ET
 import csv
 import psycopg2
 import os
+import requests
 from dotenv import load_dotenv
 
 # --- Load env variables ---
@@ -23,7 +24,7 @@ conn.autocommit = True
 cur = conn.cursor()
 
 drop_tables = """
-DROP TABLE IF EXISTS stg_temperature, stg_power, stg_renewable;
+DROP TABLE IF EXISTS stg_temperature, stg_power, stg_world_energy;
 """
 
 cur.execute(drop_tables)
@@ -56,20 +57,26 @@ CREATE TABLE IF NOT EXISTS stg_power (
 )
 """
 
-stg_renewable = """
-CREATE TABLE IF NOT EXISTS stg_renewable (
-    countryname TEXT NOT NULL,
+stg_world_energy = """
+CREATE TABLE IF NOT EXISTS stg_world_energy (
+    country_name TEXT NOT NULL,
     country_code TEXT NOT NULL,
     indicator_name TEXT NOT NULL,
     indicator_code TEXT NOT NULL,
     data_year  INT NOT NULL,
-    data_value NUMERIC
+    coal_value NUMERIC,
+    hydro_value NUMERIC,
+    natural_gas_value NUMERIC,
+    nuclear_value NUMERIC, 
+    oil_value NUMERIC,
+    renewable_value NUMERIC
+
 )
 """
 
 cur.execute(stg_temperature)
 cur.execute(stg_power)
-cur.execute(stg_renewable)
+cur.execute(stg_world_energy)
 
 # Load data into the staging tables
 
@@ -85,51 +92,79 @@ with open('power_generation_clean.csv', 'r') as f:
     for row in reader:
         cur.execute("INSERT INTO stg_power (year, biomass, coal, geothermal, hydro, natural_gas, oil_based, solar, wind, grand_total) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", row)
 
-sql = "INSERT INTO stg_renewable (country_name, country_code, indicator_name, indicator_code, data_year, data_value) VALUES (%s, %s, %s, %s, %s, %s)"
+indicators = [
+    'EG.ELC.COAL.ZS',
+    'EG.ELC.HYRO.ZS',
+    'EG.ELC.NGAS.ZS',
+    'EG.ELC.NUCL.ZS',
+    'EG.ELC.PETR.ZS',
+    'EG.ELC.RNWX.ZS'
+]
 
-try:
-        tree = ET.parse('worldbank.xml')
-        root = tree.getroot()
-        
-        insert_ctr = 0
+worldbank_data = {}
 
-        records = root.findall('.//record')
-        print(f"Found {len(records)} records in XML")
-        
-        for record in records:
-            data = {}
-            for field in record.findall('field'):
-                field_name = field.get('name')
-                field_key = field.get('key')
-                field_value = field.text
+for indicator in indicators:
+    api_url = 'https://api.worldbank.org/v2/country/all/indicator/{}?format=json&per_page=128'.format(indicator)
 
-                if field_name == 'Country or Area':
-                    data['country_name'] = field_value
-                    data['country_code'] = field_key
-                elif field_name == 'Item':
-                    data['indicator_name'] = field_value
-                    data['indicator_code'] = field_key
-                elif field_name == 'Year':
-                    data['data_year'] = int(field_value) if field_value else None
-                elif field_name == 'Value':
-                    data['data_value'] = float(field_value) if field_value else None
+    try:
+        print(api_url)
+        response = requests.get(api_url)
+        if response.status_code == 200:
+            data_json = response.json()
+            worldbank_data[indicator] = data_json
+            print(f"Successfully fetched data for indicator: {indicator}")
+            print(worldbank_data[indicator])
+    except Exception:
+        raise Exception(f"Failed to fetch API data: {response.status_code}")
 
-            values = (
-                data.get('country_name'),
-                data.get('country_code'),
-                data.get('indicator_name'),
-                data.get('indicator_code'),
-                data.get('data_year'),
-                data.get('data_value')
+
+for indicator, data_json in worldbank_data.items():
+    if data_json and len(data_json) > 1:  # make sure there are records
+        for record in data_json[1]:
+            cur.execute("""
+                INSERT INTO stg_world_energy (
+                    country_name,
+                    country_code,
+                    indicator_name,
+                    indicator_code,
+                    data_year,
+                    coal_value,
+                    hydro_value,
+                    natural_gas_value,
+                    nuclear_value, 
+                    oil_value,
+                    renewable_value
+                ) VALUES (%s, %s, %s, %s, %s,
+                          %s, %s, %s, %s, %s, %s)
+                """,
+                (
+                    record['country']['value'],
+                    record['country']['id'],
+                    record['indicator']['value'],
+                    record['indicator']['id'],
+                    int(record['date']),
+                    record['value'] if indicator=='EG.ELC.COAL.ZS' else None,
+                    record['value'] if indicator=='EG.ELC.HYRO.ZS' else None,
+                    record['value'] if indicator=='EG.ELC.NGAS.ZS' else None,
+                    record['value'] if indicator=='EG.ELC.NUCL.ZS' else None,
+                    record['value'] if indicator=='EG.ELC.PETR.ZS' else None,
+                    record['value'] if indicator=='EG.ELC.RNWX.ZS' else None,
+                )
             )
 
-            cur.execute("INSERT INTO stg_renewable (country_name, country_code, indicator_name, indicator_code, data_year, data_value) VALUES (%s, %s, %s, %s, %s, %s)", values)
-            conn.commit()
-
         
-except ET.ParseError as e:
-        print(f"XML Parsing Error: {e}")
 
+# -- TRANSFORMATION --
+cur.execute("""
+UPDATE stg_world_energy
+SET coal_value = coal_value / 100,
+    hydro_value = hydro_value / 100,
+    natural_gas_value = natural_gas_value / 100,
+    nuclear_value = nuclear_value / 100,
+    oil_value = oil_value / 100,
+    renewable_value = renewable_value / 100;
+            """)
+conn.close()
 cur.close()
 
 
