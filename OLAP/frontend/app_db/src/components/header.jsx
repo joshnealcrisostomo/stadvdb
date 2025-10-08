@@ -16,26 +16,17 @@ const Header = () => {
             >
                 <div className={styles.brand}>
                     <span className={styles.brandIcon}>🌍</span>
-                    <span className={styles.brandName}>Energy Mix & Weather</span>
                 </div>
             </div>
 
             <div className={styles.centerPanel}>
-                <div className={styles.searchBar}>
-                    <input type="text" placeholder="Search" className={styles.searchInput} />
-                    <FaSearch className={styles.searchIcon} />
-                </div>
+                <span className={styles.brandName}>ENERGY MIX & WEATHER</span>
             </div>
 
             <div className={styles.rightPanel}>
-                <div className={styles.userProfile}>
-                    <div className={styles.userAvatar}>🍔</div>
-                    <span className={styles.userName}>Josh Crisostomo</span>
-                    <span className={styles.userDropdown}>&lt;</span>
-                </div>
-                <div className={styles.notification}>
-                    <FaBell className={styles.notificationIcon} />
-                    <span className={styles.notificationBadge}></span>
+                <div className={styles.searchBar}>
+                    <input type="text" placeholder="Search" className={styles.searchInput} />
+                    <FaSearch className={styles.searchIcon} />
                 </div>
             </div>
         </header>

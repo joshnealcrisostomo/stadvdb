@@ -22,3 +22,152 @@
     height: 1px;
     background-color: #e0e0e0;
 }
+
+.content {
+    display: flex;
+    flex-direction: column; 
+}
+
+.filterTab {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 40px; 
+    padding: 20px 0;
+    border-bottom: 1px solid #e0e0e0;
+    align-items: center;
+}
+
+.filterLabel {
+    font-weight: 600;
+    color: #555;
+    margin-right: 15px; 
+    white-space: nowrap;
+}
+
+.yearFilter {
+    display: flex;
+    align-items: center;
+    min-width: 400px;
+}
+
+.yearControlGroup {
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.sliderAndDisplay {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.yearDisplay {
+    font-size: 24px;
+    font-weight: 700;
+    color: #333;
+    text-align: center;
+}
+
+.yearDisplay span {
+    font-weight: 300;
+    color: #888;
+    margin: 0 5px;
+}
+
+.sliderContainer {
+    position: relative;
+    display: grid;
+    grid-template-columns: 1fr;
+    grid-template-rows: 1fr;
+    height: 30px;
+    padding: 0 5px;
+}
+
+.yearSlider {
+    grid-column: 1 / 1;
+    grid-row: 1 / 1;
+    width: 100%;
+    -webkit-appearance: none;
+    background: transparent;
+    pointer-events: none;
+}
+
+.yearSlider::-webkit-slider-runnable-track {
+    width: 100%;
+    height: 5px;
+    background: #ccc;
+    border-radius: 3px;
+    cursor: pointer;
+}
+
+.yearSlider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    border: 1px solid #5A6ACF;
+    height: 16px;
+    width: 16px;
+    border-radius: 50%;
+    background: #5A6ACF;
+    cursor: grab;
+    margin-top: -6px;
+    pointer-events: all;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.4);
+    transition: background 0.2s ease;
+}
+
+.sourceFilter {
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+}
+
+.sourceFilter .filterLabel {
+    margin-right: 15px; 
+    margin-bottom: 0;
+}
+
+.sourceButtons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.sourceButton {
+    padding: 8px 15px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    background-color: #f0f0f0;
+    color: #333;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 14px;
+    font-weight: 500;
+    user-select: none;
+}
+
+.sourceButton.active {
+    background-color: #5A6ACF;
+    color: white;
+    border-color: black;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+}
+
+.sourceButton:hover {
+    opacity: 0.5;
+}
+
+.visualizationArea {
+    padding: 20px;
+    background-color: transparent;
+    border-radius: 8px;
+    min-height: 400px;
+}
+
+.filteredSourcesDisplay {
+    text-align: center;
+    margin-top: 10px;
+    font-size: 14px;
+    color: #6b7280;
+    padding: 0 20px;
+    line-height: 1.5;
+}
