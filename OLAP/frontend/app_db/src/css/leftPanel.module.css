@@ -1,26 +1,44 @@
 @import url('https://fonts.googleapis.com/css?family=Poppins:300,400,500,600&display=swap');
 
 .leftPanel {
-    width: 200px;
-    background-color: gray;
-    color: #ecf0f1;
+    width: 250px;
+    background-color: #F1F2F7;
+    color: #7D8198;
     display: flex;
     flex-direction: column;
     align-items: center;
-    padding-top: 20px;
+    padding-top: 55px;
     height: 100vh;
 }
 
-.leftPanel ul {
-    list-style-type: none;
-    padding: 0;
-}
-
-.leftPanel li {
-    margin: 10px 0;
+.menuItem {
+    display: flex;
+    align-items: center;
+    padding: 10px 40px;
     cursor: pointer;
+    transition: background-color 0.1s ease, color 0.1s ease;
+    width: 90%; 
+    box-sizing: border-box; 
+    font-size: 14px;
 }
 
-.leftPanel li:hover {
-    text-decoration: underline;
+.menuItem:hover {
+    color: #5A6ACF;
+    background-color: rgba(90, 106, 207, 0.1);
+    border-radius: 10px;
+    font-weight: bold;
+}
+
+.active {
+    color: #18299a;
+    background-color: rgba(90, 106, 207, 0.1);
+    border-radius: 10px;
+    font-weight: bold;
+}
+
+.separator {
+    width: 80%;
+    height: 1px;
+    background-color: #e0e0e0;
+    margin: 10px 0;
 }

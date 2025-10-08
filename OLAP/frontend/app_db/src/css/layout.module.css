@@ -1,0 +1,34 @@
+@import url('https://fonts.googleapis.com/css?family=Poppins:300,400,500,600&display=swap');
+
+.container {
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+    font-family: 'Poppins', sans-serif;
+    background-color: #fafafa;
+}
+    
+.panelsWrapper {
+    display: flex;
+    flex: 1;
+    overflow: hidden;
+}
+    
+.leftPanel {
+    width: 280px;
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
+    
+.mainPanel {
+    flex-grow: 1;
+    overflow-y: auto;
+    width: calc(100% - 280px - 220px);
+}
+    
+.rightPanel {
+    background-color: #fff;
+    border-radius: 12px;
+    box-shadow: 0 4px 6px rgba(0, 0, 0, 0.05);
+}
