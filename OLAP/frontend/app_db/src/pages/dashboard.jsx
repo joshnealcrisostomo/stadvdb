@@ -29,7 +29,7 @@ const Dashboard = () => {
                             className={styles.leftCard}
                             onClick={() => handleCardClick('/energyMix')}
                         >
-                            <h3 className={styles.sectionTitle}>Philippines' Energy Mix Comparison</h3>
+                            <h3 className={styles.sectionTitle}>Energy Mix Comparison of Countries</h3>
                             <div className={styles.chartPlaceholder}>
                                 [Bar Chart Visualization]
                             </div>
