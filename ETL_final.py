@@ -24,7 +24,7 @@ conn.autocommit = True
 cur = conn.cursor()
 
 drop_tables = """
-DROP TABLE IF EXISTS stg_temperature, stg_power, stg_world_energy;
+DROP TABLE IF EXISTS stg_temperature, stg_power, stg_world_energy, tr_world_energy;
 """
 
 cur.execute(drop_tables)
@@ -93,64 +93,82 @@ with open('power_generation_clean.csv', 'r') as f:
         cur.execute("INSERT INTO stg_power (year, biomass, coal, geothermal, hydro, natural_gas, oil_based, solar, wind, grand_total) VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s)", row)
 
 indicators = [
-    'EG.ELC.COAL.ZS',
-    'EG.ELC.HYRO.ZS',
-    'EG.ELC.NGAS.ZS',
-    'EG.ELC.NUCL.ZS',
-    'EG.ELC.PETR.ZS',
-    'EG.ELC.RNWX.ZS'
+    'EG.ELC.COAL.ZS', #coal
+    'EG.ELC.HYRO.ZS', #hydroelectric
+    'EG.ELC.NGAS.ZS', #natural gas
+    'EG.ELC.NUCL.ZS', #nuclear
+    'EG.ELC.PETR.ZS', #oil
+    'EG.ELC.RNEW.ZS'  #renewable sources
 ]
 
 worldbank_data = {}
 
 for indicator in indicators:
-    api_url = 'https://api.worldbank.org/v2/country/all/indicator/{}?format=json&per_page=128'.format(indicator)
-
-    try:
-        print(api_url)
+    page = 1
+    all_records = []
+    
+    while True:
+        api_url = f"https://api.worldbank.org/v2/country/all/indicator/{indicator}?format=json&per_page=1000&page={page}"
+        print(f"Fetching: {api_url}")
         response = requests.get(api_url)
-        if response.status_code == 200:
-            data_json = response.json()
-            worldbank_data[indicator] = data_json
-            print(f"Successfully fetched data for indicator: {indicator}")
-            print(worldbank_data[indicator])
-    except Exception:
-        raise Exception(f"Failed to fetch API data: {response.status_code}")
+
+        if response.status_code != 200:
+            print(f"Request failed with status {response.status_code}")
+            break
+
+        data_json = response.json()
+
+        if not data_json or len(data_json) < 2 or not data_json[1]:
+            break
+        
+        all_records.extend(data_json[1])
+
+        total_pages = data_json[0].get('pages', 1)
+        print(f"Page {page} of {total_pages} fetched.")
+
+        if page >= total_pages:
+            break
+
+        page += 1
+
+    worldbank_data[indicator] = all_records
+    print(f"Finished fetching {indicator}: {len(all_records)} records\n")
 
 
-for indicator, data_json in worldbank_data.items():
-    if data_json and len(data_json) > 1:  # make sure there are records
-        for record in data_json[1]:
-            cur.execute("""
-                INSERT INTO stg_world_energy (
-                    country_name,
-                    country_code,
-                    indicator_name,
-                    indicator_code,
-                    data_year,
-                    coal_value,
-                    hydro_value,
-                    natural_gas_value,
-                    nuclear_value, 
-                    oil_value,
-                    renewable_value
-                ) VALUES (%s, %s, %s, %s, %s,
-                          %s, %s, %s, %s, %s, %s)
-                """,
-                (
-                    record['country']['value'],
-                    record['country']['id'],
-                    record['indicator']['value'],
-                    record['indicator']['id'],
-                    int(record['date']),
-                    record['value'] if indicator=='EG.ELC.COAL.ZS' else None,
-                    record['value'] if indicator=='EG.ELC.HYRO.ZS' else None,
-                    record['value'] if indicator=='EG.ELC.NGAS.ZS' else None,
-                    record['value'] if indicator=='EG.ELC.NUCL.ZS' else None,
-                    record['value'] if indicator=='EG.ELC.PETR.ZS' else None,
-                    record['value'] if indicator=='EG.ELC.RNWX.ZS' else None,
-                )
+
+for indicator, records in worldbank_data.items():
+    for record in records:   # <-- iterate directly
+        cur.execute("""
+            INSERT INTO stg_world_energy (
+                country_name,
+                country_code,
+                indicator_name,
+                indicator_code,
+                data_year,
+                coal_value,
+                hydro_value,
+                natural_gas_value,
+                nuclear_value, 
+                oil_value,
+                renewable_value
+            ) VALUES (%s, %s, %s, %s, %s,
+                      %s, %s, %s, %s, %s, %s)
+            """,
+            (
+                record['country']['value'],
+                record['country']['id'],
+                record['indicator']['value'],
+                record['indicator']['id'],
+                int(record['date']),
+                record['value'] if indicator=='EG.ELC.COAL.ZS' else None,
+                record['value'] if indicator=='EG.ELC.HYRO.ZS' else None,
+                record['value'] if indicator=='EG.ELC.NGAS.ZS' else None,
+                record['value'] if indicator=='EG.ELC.NUCL.ZS' else None,
+                record['value'] if indicator=='EG.ELC.PETR.ZS' else None,
+                record['value'] if indicator=='EG.ELC.RNEW.ZS' else None,
             )
+        )
+
 
         
 
@@ -164,6 +182,22 @@ SET coal_value = coal_value / 100,
     oil_value = oil_value / 100,
     renewable_value = renewable_value / 100;
             """)
+
+cur.execute("""
+CREATE TABLE tr_world_energy AS 
+SELECT 
+    country_code,
+    country_name,
+    data_year,
+    MAX(coal_value) FILTER (WHERE indicator_code = 'EG.ELC.COAL.ZS') AS coal_value,
+    MAX(hydro_value) FILTER (WHERE indicator_code = 'EG.ELC.HYD.ZS') AS hydro_value,
+    MAX(natural_gas_value) FILTER (WHERE indicator_code = 'EG.ELC.NGAS.ZS') AS natural_gas_value,
+    MAX(nuclear_value) FILTER (WHERE indicator_code = 'EG.ELC.NUCL.ZS') AS nuclear_value,
+    MAX(oil_value) FILTER (WHERE indicator_code = 'EG.ELC.OIL.ZS') AS oil_value,
+    MAX(renewable_value) FILTER (WHERE indicator_code = 'EG.ELC.RNWL.ZS')
+FROM stg_world_energy
+GROUP BY country_code, country_name, data_year;
+""")
 conn.close()
 cur.close()
 
