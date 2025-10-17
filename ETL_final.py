@@ -24,7 +24,7 @@ conn.autocommit = True
 cur = conn.cursor()
 
 drop_tables = """
-DROP TABLE IF EXISTS stg_temperature, stg_power, stg_world_energy, tr_world_energy;
+DROP TABLE IF EXISTS stg_temperature, stg_power, stg_world_energy, tr_world_energy, dim_date, dim_geo, fact_energy, fact_weather;
 """
 
 cur.execute(drop_tables)
@@ -183,21 +183,105 @@ SET coal_value = coal_value / 100,
     renewable_value = renewable_value / 100;
             """)
 
+
 cur.execute("""
+DROP TABLE IF EXISTS tr_world_energy;
 CREATE TABLE tr_world_energy AS 
 SELECT 
     country_code,
     country_name,
     data_year,
     MAX(coal_value) FILTER (WHERE indicator_code = 'EG.ELC.COAL.ZS') AS coal_value,
-    MAX(hydro_value) FILTER (WHERE indicator_code = 'EG.ELC.HYD.ZS') AS hydro_value,
+    MAX(hydro_value) FILTER (WHERE indicator_code = 'EG.ELC.HYRO.ZS') AS hydro_value,
     MAX(natural_gas_value) FILTER (WHERE indicator_code = 'EG.ELC.NGAS.ZS') AS natural_gas_value,
     MAX(nuclear_value) FILTER (WHERE indicator_code = 'EG.ELC.NUCL.ZS') AS nuclear_value,
-    MAX(oil_value) FILTER (WHERE indicator_code = 'EG.ELC.OIL.ZS') AS oil_value,
-    MAX(renewable_value) FILTER (WHERE indicator_code = 'EG.ELC.RNWL.ZS')
+    MAX(oil_value) FILTER (WHERE indicator_code = 'EG.ELC.PETR.ZS') AS oil_value,
+    MAX(renewable_value) FILTER (WHERE indicator_code = 'EG.ELC.RNEW.ZS') AS renewable_value
 FROM stg_world_energy
 GROUP BY country_code, country_name, data_year;
 """)
+
+
+# -- LOAD -- 
+with open('data_warehouse_postgres.sql', 'r') as file:
+    schema_sql = file.read()
+    cur.execute(schema_sql)
+
+cur.execute("""
+INSERT INTO dim_date (year)
+SELECT DISTINCT year
+FROM stg_power
+ON CONFLICT DO NOTHING;
+
+INSERT INTO dim_date (year)
+SELECT DISTINCT data_year
+FROM stg_world_energy
+ON CONFLICT DO NOTHING;
+
+INSERT INTO dim_date (year)
+SELECT DISTINCT year
+FROM stg_temperature
+ON CONFLICT DO NOTHING;
+
+-- From World Bank data
+INSERT INTO dim_geo (country_code, country_name)
+SELECT DISTINCT country_code, country_name
+FROM stg_world_energy
+ON CONFLICT DO NOTHING;
+
+-- Add Philippines manually if not in stg_world_energy
+INSERT INTO dim_geo (country_code, country_name)
+VALUES ('PH', 'Philippines')
+ON CONFLICT DO NOTHING;
+            
+INSERT INTO fact_energy (
+    date_key, geo_key,
+    biomass, coal, geothermal, hydro,
+    natural_gas, oil, solar, wind, grand_total
+)
+SELECT
+    d.date_key,
+    g.geo_key,
+    s.biomass,
+    s.coal,
+    s.geothermal,
+    s.hydro,
+    s.natural_gas,
+    s.oil_based,
+    s.solar,
+    s.wind,
+    s.grand_total
+FROM stg_power s
+JOIN dim_date d ON d.year = s.year
+JOIN dim_geo g ON g.country_code = 'PH';
+
+INSERT INTO fact_energy (
+    date_key, geo_key,
+    coal, hydro, natural_gas, oil, nuclear, renewable
+)
+SELECT
+    d.date_key,
+    g.geo_key,
+    s.coal_value,
+    s.hydro_value,
+    s.natural_gas_value,
+    s.oil_value,
+    s.nuclear_value,
+    s.renewable_value
+FROM tr_world_energy s
+JOIN dim_date d ON d.year = s.data_year
+JOIN dim_geo g ON g.country_code = s.country_code;
+
+INSERT INTO fact_weather (date_key, avg_mean_temp_deg_c)
+SELECT
+    d.date_key,
+    s.avg_mean_temp_deg_c
+FROM stg_temperature s
+JOIN dim_date d ON d.year = s.year;
+
+
+            """)
+
 conn.close()
 cur.close()
 
