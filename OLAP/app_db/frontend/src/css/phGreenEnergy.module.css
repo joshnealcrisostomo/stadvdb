@@ -1,7 +1,15 @@
 @import url('https://fonts.googleapis.com/css?family=Poppins:300,400,500,600&display=swap');
 
+/* --- Root variables for easy color changes --- */
+:root {
+    --slider-track-color: #ccc;
+    --slider-fill-color: #5A6ACF;
+    --slider-thumb-color: #5A6ACF;
+    --slider-thumb-border: #3c4a9c;
+}
+
 .container {
-    height: 100%;
+    min-height: 100vh;
     display: flex;
     flex-direction: column;
     font-family: 'Poppins', sans-serif;
@@ -75,45 +83,98 @@
     margin: 0 5px;
 }
 
+/* --- NEW SLIDER STYLES --- */
 .sliderContainer {
     position: relative;
-    display: grid;
-    grid-template-columns: 1fr;
-    grid-template-rows: 1fr;
     height: 30px;
-    padding: 0 5px;
+    display: flex;
+    align-items: center;
+    padding: 0 8px; /* Add padding equal to half the thumb width */
 }
 
+/* Base track for the slider */
+.sliderContainer::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 8px; /* Match horizontal padding */
+    right: 8px; /* Match horizontal padding */
+    height: 5px;
+    transform: translateY(-50%);
+    background-color: var(--slider-track-color);
+    border-radius: 3px;
+    z-index: 1;
+}
+
+/* The colored "fill" between the two thumbs */
+.sliderFill {
+    position: absolute;
+    top: 50%;
+    height: 5px;
+    transform: translateY(-50%);
+    background-color: var(--slider-fill-color);
+    border-radius: 3px;
+    z-index: 2; /* Sits above the base track */
+}
+
+/* General styles for both range inputs */
 .yearSlider {
-    grid-column: 1 / 1;
-    grid-row: 1 / 1;
+    position: absolute;
+    top: 0;
+    left: 0;
     width: 100%;
+    height: 100%;
     -webkit-appearance: none;
-    background: transparent;
+    background: transparent; /* Makes the slider background invisible */
+    pointer-events: none; /* The input element itself is not clickable */
+    z-index: 3; /* Sliders are on top of tracks */
+    margin: 0;
+}
+
+/* Makes the track for both sliders transparent */
+.yearSlider::-webkit-slider-runnable-track {
+    -webkit-appearance: none;
+    background: none;
     pointer-events: none;
 }
 
-.yearSlider::-webkit-slider-runnable-track {
-    width: 100%;
-    height: 5px;
-    background: #ccc;
-    border-radius: 3px;
-    cursor: pointer;
-}
-
+/* Styles for the slider thumbs */
 .yearSlider::-webkit-slider-thumb {
     -webkit-appearance: none;
-    border: 1px solid #5A6ACF;
+    border: 1px solid var(--slider-thumb-border);
     height: 16px;
     width: 16px;
     border-radius: 50%;
-    background: #5A6ACF;
+    background: var(--slider-thumb-color);
     cursor: grab;
-    margin-top: -6px;
+    pointer-events: all; /* Thumbs are clickable */
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.4);
+    position: relative;
+    z-index: 4; /* Thumbs are above everything */
+}
+
+.yearSlider:active::-webkit-slider-thumb {
+    cursor: grabbing;
+}
+
+/* Styles for Firefox */
+.yearSlider::-moz-range-track {
+    background: none;
+    border: 0;
+}
+
+.yearSlider::-moz-range-thumb {
+    border: 1px solid var(--slider-thumb-border);
+    height: 16px;
+    width: 16px;
+    border-radius: 50%;
+    background: var(--slider-thumb-color);
+    cursor: grab;
     pointer-events: all;
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.4);
-    transition: background 0.2s ease;
 }
+/* --- END OF NEW SLIDER STYLES --- */
+
 
 .sourceFilter {
     flex-grow: 1;
@@ -160,7 +221,13 @@
     padding: 20px;
     background-color: transparent;
     border-radius: 8px;
-    min-height: 400px;
+    min-height: 650px; 
+}
+
+.chartContainer {
+    position: relative;
+    height: 600px; 
+    width: 100%;
 }
 
 .filteredSourcesDisplay {
