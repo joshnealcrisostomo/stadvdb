@@ -1,4 +1,3 @@
-// phGreenEnergy.jsx
 import React, { useState, useEffect, useMemo, useRef } from 'react'; // NEW: Import useRef
 import { Line } from 'react-chartjs-2';
 import {
@@ -66,7 +65,7 @@ const PhGreenEnergy = () => {
     const [chartData, setChartData] = useState(null);
     const [isLoading, setIsLoading] = useState(false);
     const [error, setError] = useState(null);
-    // NEW: Create a ref for the slider's fill element
+
     const sliderFillRef = useRef(null);
 
     const activeRenewableSources = useMemo(() => 
@@ -264,7 +263,6 @@ const PhGreenEnergy = () => {
                         <div className={styles.yearControlGroup}>
                             <label className={styles.filterLabel}>Select Year Range:</label>
                             <div className={styles.sliderAndDisplay}>
-                                {/* UPDATED: JSX for the new slider design */}
                                 <div className={styles.sliderContainer}>
                                     <div ref={sliderFillRef} className={styles.sliderFill}></div>
                                     <input type="range" min={MIN_YEAR} max={MAX_YEAR} value={startYear} step="1" onChange={(e) => handleYearChange(e, 'start')} className={styles.yearSlider} aria-label="Start Year Slider" />

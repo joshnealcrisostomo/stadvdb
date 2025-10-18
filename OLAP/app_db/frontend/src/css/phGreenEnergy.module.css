@@ -1,6 +1,5 @@
 @import url('https://fonts.googleapis.com/css?family=Poppins:300,400,500,600&display=swap');
 
-/* --- Root variables for easy color changes --- */
 :root {
     --slider-track-color: #ccc;
     --slider-fill-color: #5A6ACF;
@@ -83,22 +82,20 @@
     margin: 0 5px;
 }
 
-/* --- NEW SLIDER STYLES --- */
 .sliderContainer {
     position: relative;
     height: 30px;
     display: flex;
     align-items: center;
-    padding: 0 8px; /* Add padding equal to half the thumb width */
+    padding: 0 8px; 
 }
 
-/* Base track for the slider */
 .sliderContainer::before {
     content: '';
     position: absolute;
     top: 50%;
-    left: 8px; /* Match horizontal padding */
-    right: 8px; /* Match horizontal padding */
+    left: 8px;
+    right: 8px;
     height: 5px;
     transform: translateY(-50%);
     background-color: var(--slider-track-color);
@@ -106,7 +103,6 @@
     z-index: 1;
 }
 
-/* The colored "fill" between the two thumbs */
 .sliderFill {
     position: absolute;
     top: 50%;
@@ -114,10 +110,9 @@
     transform: translateY(-50%);
     background-color: var(--slider-fill-color);
     border-radius: 3px;
-    z-index: 2; /* Sits above the base track */
+    z-index: 2;
 }
 
-/* General styles for both range inputs */
 .yearSlider {
     position: absolute;
     top: 0;
@@ -125,20 +120,18 @@
     width: 100%;
     height: 100%;
     -webkit-appearance: none;
-    background: transparent; /* Makes the slider background invisible */
-    pointer-events: none; /* The input element itself is not clickable */
-    z-index: 3; /* Sliders are on top of tracks */
+    background: transparent;
+    pointer-events: none;
+    z-index: 3; 
     margin: 0;
 }
 
-/* Makes the track for both sliders transparent */
 .yearSlider::-webkit-slider-runnable-track {
     -webkit-appearance: none;
     background: none;
     pointer-events: none;
 }
 
-/* Styles for the slider thumbs */
 .yearSlider::-webkit-slider-thumb {
     -webkit-appearance: none;
     border: 1px solid var(--slider-thumb-border);
@@ -147,17 +140,16 @@
     border-radius: 50%;
     background: var(--slider-thumb-color);
     cursor: grab;
-    pointer-events: all; /* Thumbs are clickable */
+    pointer-events: all;
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.4);
     position: relative;
-    z-index: 4; /* Thumbs are above everything */
-}
+    z-index: 4; 
+}    
 
 .yearSlider:active::-webkit-slider-thumb {
     cursor: grabbing;
 }
 
-/* Styles for Firefox */
 .yearSlider::-moz-range-track {
     background: none;
     border: 0;
@@ -173,8 +165,6 @@
     pointer-events: all;
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.4);
 }
-/* --- END OF NEW SLIDER STYLES --- */
-
 
 .sourceFilter {
     flex-grow: 1;

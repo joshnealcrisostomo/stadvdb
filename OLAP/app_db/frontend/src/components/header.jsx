@@ -24,10 +24,6 @@ const Header = () => {
             </div>
 
             <div className={styles.rightPanel}>
-                <div className={styles.searchBar}>
-                    <input type="text" placeholder="Search" className={styles.searchInput} />
-                    <FaSearch className={styles.searchIcon} />
-                </div>
             </div>
         </header>
     );
