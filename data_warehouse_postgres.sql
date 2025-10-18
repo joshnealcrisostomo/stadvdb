@@ -1,4 +1,5 @@
 -- Star Schema for Data Warehouse
+DROP TABLE IF EXISTS dim_date, dim_geo, fact_weather, fact_energy;
 
 -- DIMENSION TABLES
 
@@ -10,8 +11,7 @@ CREATE TABLE dim_date (
 CREATE TABLE dim_geo (
     geo_key SERIAL PRIMARY KEY,
     country_code VARCHAR(3) NOT NULL,
-    country_name VARCHAR(100) NOT NULL,
-    region_grp VARCHAR(50)
+    country_name VARCHAR(100) NOT NULL
 );
 
 -- FACT TABLES
@@ -42,3 +42,21 @@ CREATE TABLE fact_energy (
 
     grand_total    NUMERIC(18,2)    -- applies to PH rows only
 );
+
+
+
+-- dim_date
+ALTER TABLE dim_date
+ADD CONSTRAINT unique_dim_date UNIQUE(year);
+
+-- dim_geo
+ALTER TABLE dim_geo
+ADD CONSTRAINT unique_dim_geo UNIQUE(country_code);
+
+-- fact_weather
+ALTER TABLE fact_weather
+ADD CONSTRAINT unique_fact_weather UNIQUE(date_key);
+
+-- fact_energy
+ALTER TABLE fact_energy
+ADD CONSTRAINT unique_fact_energy UNIQUE(date_key, geo_key);
