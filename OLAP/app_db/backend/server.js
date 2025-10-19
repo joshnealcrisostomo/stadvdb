@@ -1,22 +1,20 @@
-// server.js
 import express from "express";
-import pkg from "pg";
+import pg from "pg";
 import cors from "cors";
 import dotenv from "dotenv";
 
 dotenv.config();
-const { Pool } = pkg;
+const { Pool } = pg;
 const app = express();
 
 app.use(cors());
 app.use(express.json());
 
-// PostgreSQL connection pool
 const pool = new Pool({
     user: process.env.DB_USER,
     host: process.env.DB_HOST,
     database: process.env.DB_NAME,
-    password: process.env.DB_PASSWORD,
+    password: process.env.DB_PASS,
     port: process.env.DB_PORT,
 });
 
@@ -30,6 +28,21 @@ app.get("/api/users", async (req, res) => {
         res.status(500).json({ error: "Database error" });
     }
 });
+
+(async () => {
+    let client;
+    try {
+        client = await pool.connect();
+        console.log("✅ Database connected successfully!");
+    } catch (err) {
+        console.error("❌ Failed to connect to the database:", err);
+    } finally {
+        // IMPORTANT: release the client back to the pool
+        if (client) {
+            client.release();
+        }
+    }
+})();
 
 // New API endpoint for Green Energy Generation vs. Weather
 app.get("/api/green-energy-vs-weather", async (req, res) => {
