@@ -13,128 +13,95 @@ app.use(express.json());
 const pool = new Pool({
     user: process.env.DB_USER,
     host: process.env.DB_HOST,
-    database: process.env.DB_NAME,
+    database: process.env.DB_WAREHOUSE,
     password: process.env.DB_PASS,
-    port: process.env.DB_PORT,
+    port: process.env.DB_PORT || 5432,
 });
 
-// Example route: fetch all users (kept for context)
-app.get("/api/users", async (req, res) => {
+// --- NEW API ENDPOINT FOR DYNAMIC FILTERS ---
+app.get("/api/filters", async (req, res) => {
     try {
-        const result = await pool.query("SELECT * FROM users");
-        res.json(result.rows);
+        // Query for min/max years that have renewable data
+        const yearQuery = `
+            SELECT
+                MIN(d.year) AS min_year,
+                MAX(d.year) AS max_year
+            FROM fact_energy f
+            JOIN dim_date d ON f.date_key = d.date_key
+            WHERE f.renewable_pct IS NOT NULL;
+        `;
+
+        // Query for distinct countries that have renewable data
+        const countryQuery = `
+            SELECT DISTINCT g.country_name
+            FROM fact_energy f
+            JOIN dim_geo g ON f.geo_key = g.geo_key
+            WHERE g.country_name IS NOT NULL AND f.renewable_pct IS NOT NULL
+            ORDER BY g.country_name ASC;
+        `;
+
+        // Execute both queries concurrently for efficiency
+        const [yearResult, countryResult] = await Promise.all([
+            pool.query(yearQuery),
+            pool.query(countryQuery)
+        ]);
+
+        const minYear = yearResult.rows[0].min_year;
+        const maxYear = yearResult.rows[0].max_year;
+        const countries = countryResult.rows.map(row => row.country_name);
+
+        res.json({ minYear, maxYear, countries });
+
     } catch (err) {
-        console.error(err);
-        res.status(500).json({ error: "Database error" });
+        console.error("Database Query Error:", err);
+        res.status(500).json({ error: "Failed to fetch filter data" });
     }
 });
 
-(async () => {
-    let client;
-    try {
-        client = await pool.connect();
-        console.log("✅ Database connected successfully!");
-    } catch (err) {
-        console.error("❌ Failed to connect to the database:", err);
-    } finally {
-        // IMPORTANT: release the client back to the pool
-        if (client) {
-            client.release();
-        }
-    }
-})();
 
-// New API endpoint for Green Energy Generation vs. Weather
-app.get("/api/green-energy-vs-weather", async (req, res) => {
-    const { startYear, endYear, sources } = req.query;
+// --- API ENDPOINT FOR ENERGY MIX COMPARISON ---
+app.get("/api/energy-mix-comparison", async (req, res) => {
+    // ... (This endpoint remains the same as before)
+    const { startYear, endYear, countries } = req.query;
 
-    if (!startYear || !endYear) {
-        return res.status(400).json({ error: "startYear and endYear are required" });
+    if (!startYear || !endYear || !countries) {
+        return res.status(400).json({ error: "startYear, endYear, and countries are required query parameters." });
     }
 
-    // Safely parse and validate years
-    const startY = parseInt(startYear);
-    const endY = parseInt(endYear);
+    const startY = parseInt(startYear, 10);
+    const endY = parseInt(endYear, 10);
+    const countryList = Array.isArray(countries) ? countries : countries.split(',').filter(c => c);
 
-    if (isNaN(startY) || isNaN(endY)) {
-        return res.status(400).json({ error: "Invalid year values" });
+    if (isNaN(startY) || isNaN(endY) || countryList.length === 0) {
+        return res.status(400).json({ error: "Invalid year or country values provided." });
     }
 
-    // Split sources string into an array and filter out non-green/non-renewable sources
-    const greenSources = Array.isArray(sources) 
-        ? sources 
-        : (typeof sources === 'string' ? sources.split(',') : []);
-
-    // Green/Renewable energy sources from the original list: Hydro, Solar, Wind, Biomass, Geothermal
-    const renewableSources = ['Hydro', 'Solar', 'Wind', 'Biomass', 'Geothermal'];
-    const filteredSources = greenSources.filter(source => renewableSources.includes(source));
-
-    // Base query to fetch temperature data (all years in range)
-    let queryText = `
-        SELECT 
-            wd.year,
-            wd.avg_temp_c,
-            eg.source,
-            eg.generation_gwh
-        FROM 
-            weather_data wd
-        LEFT JOIN 
-            energy_generation eg ON wd.year = eg.year
-        WHERE 
-            wd.year >= $1 AND wd.year <= $2
+    const queryText = `
+        SELECT
+            d.year,
+            g.country_name,
+            f.renewable_pct AS renewable_percentage
+        FROM fact_energy f
+        JOIN dim_date d ON f.date_key = d.date_key
+        JOIN dim_geo g ON f.geo_key = g.geo_key
+        WHERE d.year >= $1 AND d.year <= $2 AND g.country_name = ANY($3::text[]) AND f.renewable IS NOT NULL
+        ORDER BY g.country_name, d.year;
     `;
-    const queryParams = [startY, endY];
-    
-    // Add filtering for selected energy sources
-    if (filteredSources.length > 0) {
-        // Build a list of placeholders ($3, $4, ...) for the IN clause
-        const sourcePlaceholders = filteredSources.map((_, i) => `$${i + 3}`).join(', ');
-        
-        queryText += ` AND eg.source IN (${sourcePlaceholders})`;
-        queryParams.push(...filteredSources);
-    } else {
-        // If no sources are selected, we still want the weather data for the year range, 
-        // but we filter out the generation data to keep the response clean.
-        queryText += ` AND eg.source IS NULL`;
-    }
-
-    queryText += `
-        ORDER BY 
-            wd.year, eg.source;
-    `;
+    const queryParams = [startY, endY, countryList];
 
     try {
         const result = await pool.query(queryText, queryParams);
-        
-        // --- Data Transformation for Frontend (Chart.js) ---
-        const transformedData = {
-            years: [],
-            temperature: [],
-            energy: {}
-        };
-        
-        const yearSet = new Set();
-
+        const transformedData = {};
         result.rows.forEach(row => {
-            const year = row.year;
-            
-            if (!yearSet.has(year)) {
-                yearSet.add(year);
-                transformedData.years.push(year);
-                transformedData.temperature.push(row.avg_temp_c);
+            const { country_name, year, renewable_percentage } = row;
+            if (!transformedData[country_name]) {
+                transformedData[country_name] = [];
             }
-
-            if (row.source && row.generation_gwh !== null) {
-                if (!transformedData.energy[row.source]) {
-                    transformedData.energy[row.source] = [];
-                }
-                transformedData.energy[row.source].push({
-                    x: year, // Use year for the x-axis
-                    y: parseFloat(row.generation_gwh) // Generation value for the y-axis
-                });
-            }
+            transformedData[country_name].push({
+                x: year,
+                y: parseFloat(renewable_percentage)
+            });
         });
-
         res.json(transformedData);
     } catch (err) {
         console.error("Database Query Error:", err);
@@ -142,5 +109,83 @@ app.get("/api/green-energy-vs-weather", async (req, res) => {
     }
 });
 
+// --- NEW: API ENDPOINT FOR GREEN ENERGY VS WEATHER ---
+app.get('/api/green-energy-vs-weather', async (req, res) => {
+    const { startYear, endYear } = req.query;
+
+    if (!startYear || !endYear) {
+        return res.status(400).json({ error: 'startYear and endYear are required.' });
+    }
+    
+    const query = `
+        SELECT
+            d.year,
+            w.avg_mean_temp_deg_c,
+            f.hydro_gwh,
+            f.solar_gwh,
+            f.wind_gwh,
+            f.biomass_gwh,
+            f.geothermal_gwh
+        FROM fact_energy f
+        JOIN dim_date d ON f.date_key = d.date_key
+        JOIN fact_weather w ON f.date_key = w.date_key
+        JOIN dim_geo g ON f.geo_key = g.geo_key
+        WHERE
+            f.geo_key = 43 -- Filter for the Philippines
+            AND d.year >= $1
+            AND d.year <= $2
+        ORDER BY d.year ASC;
+    `;
+
+    try {
+        const result = await pool.query(query, [startYear, endYear]);
+        
+        const responseData = {
+            years: [],
+            temperature: [],
+            energy: { 'Hydro': [], 'Solar': [], 'Wind': [], 'Biomass': [], 'Geothermal': [] },
+        };
+
+        // --- NEW: Calculate total GWh per year ---
+        const yearlyTotals = [];
+
+        result.rows.forEach(row => {
+            responseData.years.push(row.year);
+            responseData.temperature.push(parseFloat(row.avg_mean_temp_deg_c));
+
+            // Map energy sources
+            if (row.hydro_gwh > 0) responseData.energy['Hydro'].push({ x: row.year, y: parseFloat(row.hydro_gwh) });
+            if (row.solar_gwh > 0) responseData.energy['Solar'].push({ x: row.year, y: parseFloat(row.solar_gwh) });
+            if (row.wind_gwh > 0) responseData.energy['Wind'].push({ x: row.year, y: parseFloat(row.wind_gwh) });
+            if (row.biomass_gwh > 0) responseData.energy['Biomass'].push({ x: row.year, y: parseFloat(row.biomass_gwh) });
+            if (row.geothermal_gwh > 0) responseData.energy['Geothermal'].push({ x: row.year, y: parseFloat(row.geothermal_gwh) });
+            
+            // Sum all GWh for the current year
+            const totalGwh = 
+                (parseFloat(row.hydro_gwh) || 0) +
+                (parseFloat(row.solar_gwh) || 0) +
+                (parseFloat(row.wind_gwh) || 0) +
+                (parseFloat(row.biomass_gwh) || 0) +
+                (parseFloat(row.geothermal_gwh) || 0);
+
+            yearlyTotals.push({ year: row.year, totalGwh });
+        });
+        
+        // Sort by total GWh to find highest and lowest
+        yearlyTotals.sort((a, b) => a.totalGwh - b.totalGwh);
+
+        // Add the sorted data to the response object
+        responseData.bottomYears = yearlyTotals.slice(0, 5);
+        responseData.topYears = yearlyTotals.slice(-5).reverse(); // slice gets last 5, reverse makes it descending
+
+        res.json(responseData);
+
+    } catch (err) {
+        console.error("Database Query Error for green-energy-vs-weather:", err);
+        res.status(500).json({ error: "Failed to fetch energy vs weather data" });
+    }
+});
+
+
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => console.log(`Server running on port ${PORT}`));
+app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
