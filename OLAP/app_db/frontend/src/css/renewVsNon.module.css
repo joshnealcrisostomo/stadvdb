@@ -1,0 +1,230 @@
+@import url('https://fonts.googleapis.com/css?family=Poppins:300,400,500,600&display=swap');
+
+:root {
+    --slider-track-color: #ccc;
+    --slider-fill-color: #5A6ACF;
+    --slider-thumb-color: #5A6ACF;
+    --slider-thumb-border: #3c4a9c;
+}
+
+.container {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    font-family: 'Poppins', sans-serif;
+    background-color: #fafafa;
+    padding: 40px;
+}
+
+.pageTitle h1 {
+    font-size: 24px;
+    font-weight: 700;
+    color: #333;
+    margin-bottom: 30px;
+    margin-top: 0;
+}
+
+.separator {
+    width: 100%;
+    height: 1px;
+    background-color: #e0e0e0;
+}
+
+.content {
+    display: flex;
+    flex-direction: column; 
+}
+
+.filterTab {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 40px; 
+    padding: 20px 0;
+    border-bottom: 1px solid #e0e0e0;
+    align-items: center;
+}
+
+.filterLabel {
+    font-weight: 600;
+    color: #555;
+    margin-right: 15px; 
+    white-space: nowrap;
+}
+
+.yearFilter {
+    display: flex;
+    align-items: center;
+    min-width: 400px;
+}
+
+.yearControlGroup {
+    display: flex;
+    align-items: center;
+    width: 100%;
+}
+
+.sliderAndDisplay {
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1;
+}
+
+.yearDisplay {
+    font-size: 24px;
+    font-weight: 700;
+    color: #333;
+    text-align: center;
+}
+
+.yearDisplay span {
+    font-weight: 300;
+    color: #888;
+    margin: 0 5px;
+}
+
+.sliderContainer {
+    position: relative;
+    height: 30px;
+    display: flex;
+    align-items: center;
+    padding: 0 8px; 
+}
+
+.sliderContainer::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 8px;
+    right: 8px;
+    height: 5px;
+    transform: translateY(-50%);
+    background-color: var(--slider-track-color);
+    border-radius: 3px;
+    z-index: 1;
+}
+
+.sliderFill {
+    position: absolute;
+    top: 50%;
+    height: 5px;
+    transform: translateY(-50%);
+    background-color: var(--slider-fill-color);
+    border-radius: 3px;
+    z-index: 2;
+}
+
+.yearSlider {
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 100%;
+    height: 100%;
+    -webkit-appearance: none;
+    background: transparent;
+    pointer-events: none;
+    z-index: 3; 
+    margin: 0;
+}
+
+.yearSlider::-webkit-slider-runnable-track {
+    -webkit-appearance: none;
+    background: none;
+    pointer-events: none;
+}
+
+.yearSlider::-webkit-slider-thumb {
+    -webkit-appearance: none;
+    border: 1px solid var(--slider-thumb-border);
+    height: 16px;
+    width: 16px;
+    border-radius: 50%;
+    background: var(--slider-thumb-color);
+    cursor: grab;
+    pointer-events: all;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.4);
+    position: relative;
+    z-index: 4; 
+}    
+
+.yearSlider:active::-webkit-slider-thumb {
+    cursor: grabbing;
+}
+
+.yearSlider::-moz-range-track {
+    background: none;
+    border: 0;
+}
+
+.yearSlider::-moz-range-thumb {
+    border: 1px solid var(--slider-thumb-border);
+    height: 16px;
+    width: 16px;
+    border-radius: 50%;
+    background: var(--slider-thumb-color);
+    cursor: grab;
+    pointer-events: all;
+    box-shadow: 0 0 5px rgba(0, 0, 0, 0.4);
+}
+
+.sourceFilter {
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+}
+
+.sourceFilter .filterLabel {
+    margin-right: 15px; 
+    margin-bottom: 0;
+}
+
+.sourceButtons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.sourceButton {
+    padding: 8px 15px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    background-color: #f0f0f0;
+    color: #333;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 14px;
+    font-weight: 500;
+    user-select: none;
+}
+
+.sourceButton.active {
+    background-color: #5A6ACF;
+    color: white;
+    border-color: #5A6ACF;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+}
+
+.sourceButton:hover {
+    opacity: 0.5;
+}
+
+.visualizationArea {
+    padding: 20px;
+    background-color: transparent;
+    border-radius: 8px;
+    min-height: 650px; 
+}
+
+.chartContainer {
+    position: relative;
+    height: 600px; 
+    width: 100%;
+}
+
+.filteredSourcesDisplay {
+    text-align: center;
+    margin-top: 10px;
+    font-size: 14px;
+    color: #6b7280;
+    padding: 0 20px;
+    line-height: 1.5;
+}
