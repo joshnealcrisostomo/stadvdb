@@ -6,7 +6,7 @@ USE data_warehouse;
 
 CREATE TABLE DIM_DATE (
     dateKey INT PRIMARY KEY AUTO_INCREMENT,
-    calendarYear INT NOT NULL
+    year INT NOT NULL
 );
 
 CREATE TABLE DIM_GEO (
@@ -16,39 +16,32 @@ CREATE TABLE DIM_GEO (
     regionGrp VARCHAR(50)
 );
 
-CREATE TABLE DIM_FUEL_SOURCE (
-    fuelKey INT PRIMARY KEY AUTO_INCREMENT,
-    fuelName VARCHAR(50) NOT NULL,
-    isRenewable CHAR(1) CHECK (isRenewable IN ('Y','N')),
-    energyCateg VARCHAR(20)
-);
-
-CREATE TABLE DIM_TEMP (
-    tempKey INT PRIMARY KEY AUTO_INCREMENT,
-    year INT NOT NULL,
-    avgMeanTempDegC DECIMAL(4,2)
-);
-
 -- FACT TABLES
 
-CREATE TABLE RENEWABLE_OUTPUT (
-    dateKey INT NOT NULL,
-    geoKey INT NOT NULL,
-    tempKey INT NOT NULL,
-    renewOutPct DECIMAL(18,15),
-    PRIMARY KEY (dateKey, geoKey, tempKey),
-    FOREIGN KEY (dateKey) REFERENCES DIM_DATE(dateKey),
-    FOREIGN KEY (geoKey) REFERENCES DIM_GEO(geoKey),
-    FOREIGN KEY (tempKey) REFERENCES DIM_TEMP(tempKey)
+CREATE TABLE FACT_WEATHER (
+    weatherId
+    dateKey INT NOT NULL NOT NULL REFERENCES dim_date(date_key),
+    avg_mean_temp_deg_c  NUMERIC(4,2)
+
 );
 
-CREATE TABLE FUEL_GENERATION (
-    dateKey INT NOT NULL,
-    fuelKey INT NOT NULL,
-    tempKey INT NOT NULL,
-    powGenGWH INT,
-    PRIMARY KEY (dateKey, fuelKey, tempKey),
-    FOREIGN KEY (dateKey) REFERENCES DIM_DATE(dateKey),
-    FOREIGN KEY (fuelKey) REFERENCES DIM_FUEL_SOURCE(fuelKey),
-    FOREIGN KEY (tempKey) REFERENCES DIM_TEMP(tempKey)
+CREATE TABLE FACT_ENERGY (
+    energyId INT PRIMARY KEY AUTO_INCREMENT,
+    dateKey INT NOT NULL REFERENCES dim_date(date_key),
+    geoKey INT NOT NULL REFERENCES dim_country(country_key),
+
+    coal           NUMERIC(18,2),
+    hydro          NUMERIC(18,2),
+    natural_gas    NUMERIC(18,2),
+    oil            NUMERIC(18,2),
+    nuclear        NUMERIC(18,2),
+
+    renewable      NUMERIC(18,2),   -- only for WB % data
+
+    biomass        NUMERIC(18,2),
+    geothermal     NUMERIC(18,2),
+    solar          NUMERIC(18,2),
+    wind           NUMERIC(18,2),
+
+    grand_total    NUMERIC(18,2)    -- applies to PH rows only
 );
