@@ -5,6 +5,8 @@ import {
 } from 'chart.js';
 import styles from '../css/energyMix.module.css';
 
+const API_BASE_URL = '/api';
+
 ChartJS.register(CategoryScale, LinearScale, PointElement, LineElement, Title, Tooltip, Legend);
 
 const CHART_COLORS = [
@@ -35,7 +37,7 @@ const EnergyMix = () => {
     useEffect(() => {
         const fetchFilterData = async () => {
             try {
-                const response = await fetch('http://localhost:5000/api/filters');
+                const response = await fetch(`${API_BASE_URL}/filters`);
                 if (!response.ok) throw new Error('Failed to load filter data');
                 const data = await response.json();
                 setFilterOptions({ countries: data.countries, minYear: data.minYear, maxYear: data.maxYear });
@@ -74,7 +76,7 @@ const EnergyMix = () => {
                 sources: activeSources.join(',')
             });
             try {
-                const response = await fetch(`http://localhost:5000/api/energy-mix-comparison?${params}`);
+                const response = await fetch(`${API_BASE_URL}/energy-mix-comparison?${params}`);
                 if (!response.ok) throw new Error('Network response was not ok');
                 const data = await response.json();
                 const datasets = Object.keys(data).map((key, index) => ({
