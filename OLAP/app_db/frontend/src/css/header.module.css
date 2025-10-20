@@ -1,6 +1,5 @@
 @import url('https://fonts.googleapis.com/css?family=Poppins:300,400,500,600&display=swap');
 
-/* Main Header Container */
 .headerContainer {
     display: flex;
     align-items: center;
@@ -11,7 +10,6 @@
     color: #333;
 }
 
-/* --- LEFT PANEL (Logo/Brand) --- */
 .leftPanel {
     background-color: #F1F2F7;
     width: 250px;

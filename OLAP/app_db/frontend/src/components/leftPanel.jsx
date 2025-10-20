@@ -21,7 +21,7 @@ const LeftPanel = () => {
                 className={getMenuItemClass('/')}
                 onClick={() => handleMenuClick('/')}
             >
-                <span>All Reports</span>
+                <span>Home</span>
             </div>
 
             <div className={styles.separator}></div>

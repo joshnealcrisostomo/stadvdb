@@ -31,7 +31,7 @@ const Dashboard = () => {
                         >
                             <h3 className={styles.sectionTitle}>Energy Mix Comparison of Countries</h3>
                             <div className={styles.chartPlaceholder}>
-                                [Bar Chart Visualization]
+                                
                             </div>
                         </div>
 
@@ -41,7 +41,7 @@ const Dashboard = () => {
                         >
                             <h3 className={styles.sectionTitle}>Philippines' Green Energy Generation (in GWh) & Average Mean Surface Temperature</h3>     
                             <div className={styles.chartPlaceholder}>
-                                [Scatter or Line plot]
+                                
                             </div>
                         </div>
                     </div>
@@ -52,10 +52,10 @@ const Dashboard = () => {
                             onClick={() => handleCardClick('/phTotalEnergy')}
                         >
                             <h3 className={styles.sectionTitle}>Philippines’ Total Energy Generation and Mix Composition</h3>
-                            <p className={styles.subText}>Lorem ipsum dolor sit amet, consectetur</p>
+                            <p className={styles.subText}></p>
                             
                             <div className={styles.chartPlaceholder}>
-                                [Stacked Bar Chart]
+                                
                             </div>
                         </div>
 
@@ -64,10 +64,10 @@ const Dashboard = () => {
                             onClick={() => handleCardClick('/renewVsNon')}
                         >
                             <h3 className={styles.sectionTitle}>Renewable vs Non-Renewable Energy Generation in the Philippines</h3>
-                            <p className={styles.subText}>Adipiscing elit, sed do eiusmod tempor</p>
+                            <p className={styles.subText}></p>
                             
                             <div className={styles.chartPlaceholder}>
-                                [Stacked Line Chart]
+                                
                             </div>
                         </div>
 
@@ -77,7 +77,7 @@ const Dashboard = () => {
                         >
                             <h3 className={styles.sectionTitle}>Non-Renewable Energy Sources Generation between different countries</h3>
                             <div className={styles.chartPlaceholder}>
-                                [Stacked Area Chart/Clustered Bar Chart]
+                                
                             </div>
                         </div>
                     </div>
