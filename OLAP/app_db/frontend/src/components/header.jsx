@@ -15,7 +15,7 @@ const Header = () => {
                 onClick ={handleLogoClick}
             >
                 <div className={styles.brand}>
-                    <span className={styles.brandIcon}>🌍</span>
+                    <span className={styles.brandIcon}></span>
                 </div>
             </div>
 
