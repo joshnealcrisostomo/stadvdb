@@ -71,16 +71,18 @@
 }
 
 .yearDisplay {
+    margin-top: 10px;
     font-size: 24px;
     font-weight: 700;
-    color: #333;
+    color: #5A6ACF;
     text-align: center;
 }
 
 .yearDisplay span {
-    font-weight: 300;
-    color: #888;
+    font-weight: 700;
+    color: #5A6ACF;
     margin: 0 5px;
+    font-size: 24px;
 }
 
 .sliderContainer {

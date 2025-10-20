@@ -210,7 +210,10 @@ const EnergyMix = () => {
                 </div>
 
                 <div className={styles.visualizationArea}>
-                    <div className={styles.yearDisplay}>{startYear} <span>&mdash;</span> {endYear}</div>
+                    <div className={styles.yearDisplay}>
+                        <span>Energy Mix Comparison of Countries in %</span>
+                        ({startYear} <span>&mdash;</span> {endYear})
+                    </div>
                     
                     {selectedCountries.length > 0 && (
                         <div className={styles.sharedLegend}>
