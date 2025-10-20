@@ -268,7 +268,7 @@ const PhGreenEnergy = () => {
                         <>
                             <div className={styles.yearFilter}>
                                 <div className={styles.yearControlGroup}>
-                                    <label className={styles.filterLabel}>Select Year Range:</label>
+                                    <label className={styles.filterLabel}>Year Range: {`${startYear} - ${endYear}`}</label>
                                     <div className={styles.sliderAndDisplay}>
                                         <div className={styles.sliderContainer}>
                                             <div ref={sliderFillRef} className={styles.sliderFill}></div>
@@ -289,8 +289,6 @@ const PhGreenEnergy = () => {
                                     ))}
                                 </div>
                             </div>
-
-                            <p>For more insights scroll below.</p>
                         </>
                     )}
                 </div>
@@ -327,21 +325,26 @@ const PhGreenEnergy = () => {
                     <div className={styles.statsColumn}>
                         <h4>Highest Generation Years</h4>
                         <ol>
-                            {summaryStats.topYears.map(item => (
-                                <li key={item.year}>
-                                    <strong>{item.year}:</strong> {Math.round(item.totalGwh).toLocaleString()} GWh
-                                </li>
-                            ))}
+                            {summaryStats.topYears
+                                .slice(0, 5) // Explicitly take the top 5
+                                .map(item => (
+                                    <li key={item.year}>
+                                        <strong>{item.year}:</strong> {Math.round(item.totalGwh).toLocaleString()} GWh
+                                    </li>
+                                ))}
                         </ol>
                     </div>
                     <div className={styles.statsColumn}>
                         <h4>Lowest Generation Years</h4>
                         <ol>
-                            {summaryStats.bottomYears.map(item => (
-                                <li key={item.year}>
-                                    <strong>{item.year}:</strong> {Math.round(item.totalGwh).toLocaleString()} GWh
-                                </li>
-                            ))}
+                            {summaryStats.bottomYears
+                                .filter(item => item.totalGwh > 0) // 1. Filter out the 0s
+                                .slice(0, 5) // 2. THEN, take the first 5 from that non-zero list
+                                .map(item => (
+                                    <li key={item.year}>
+                                        <strong>{item.year}:</strong> {Math.round(item.totalGwh).toLocaleString()} GWh
+                                    </li>
+                                ))}
                         </ol>
                     </div>
                 </div>

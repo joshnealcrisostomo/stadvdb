@@ -63,7 +63,7 @@ const Dashboard = () => {
                             className={styles.cardTwo}
                             onClick={() => handleCardClick('/renewVsNon')}
                         >
-                            <h3 className={styles.sectionTitle}>Trends in Renewable vs Non-Renewable Energy Sources in the Philippines</h3>
+                            <h3 className={styles.sectionTitle}>Renewable vs Non-Renewable Energy Generation in the Philippines</h3>
                             <p className={styles.subText}>Adipiscing elit, sed do eiusmod tempor</p>
                             
                             <div className={styles.chartPlaceholder}>

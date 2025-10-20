@@ -44,11 +44,6 @@
     align-items: center;
 }
 
-.filterTab p {
-    display: flex;
-    opacity: 0.5;
-    font-size: 14px;
-}
 
 .filterLabel {
     font-weight: 600;

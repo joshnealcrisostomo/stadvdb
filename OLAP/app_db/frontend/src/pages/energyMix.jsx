@@ -184,7 +184,7 @@ const EnergyMix = () => {
             <div className={styles.content}>
                 <div className={styles.filterTab}>
                     <div className={styles.yearFilter}>
-                        <label className={styles.filterLabel}>Select Year Range:</label>
+                        <label className={styles.filterLabel}>Year Range: {`${startYear} - ${endYear}`}</label>
                         <div className={styles.sliderAndDisplay}>
                             <div className={styles.sliderContainer}>
                                 <div ref={sliderFillRef} className={styles.sliderFill}></div>
@@ -245,6 +245,21 @@ const EnergyMix = () => {
                             <p className={styles.filteredSourcesDisplay}>Select one or more countries and energy sources to visualize their data.</p>
                         )
                     }
+                </div>
+
+                <div className={styles.descriptionArea}>
+                    <h3>Possible Insights to Gain</h3>
+                    <p>
+                        This report allows you to become an energy detective by visually comparing how different countries have powered themselves over the last three decades. 
+                        By selecting various nations and energy sources, like coal, hydro, or other renewables, you can instantly see the story of their energy journey on the line graphs.
+                        This helps uncover important trends, such as whether a country is becoming more or less dependent on fossil fuels over time. 
+                        For example, you can track the rise of coal in one nation while observing another's growing reliance on hydropower.
+                    </p>
+                
+                    <p>
+                        The most powerful insight comes from comparing these journeys side-by-side, allowing you to see which countries are making faster progress in shifting to cleaner 
+                        energy and to understand the unique energy priorities and challenges each nation has faced through the years.
+                    </p>
                 </div>
             </div>
             

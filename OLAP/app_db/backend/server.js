@@ -29,17 +29,15 @@ const sourceToColumnMap = {
 
 app.get("/api/filters", async (req, res) => {
     try {
-        // Query for min/max years that have renewable data
         const yearQuery = `
             SELECT
                 MIN(d.year) AS min_year,
                 MAX(d.year) AS max_year
             FROM fact_energy f
             JOIN dim_date d ON f.date_key = d.date_key
-            WHERE f.renewable_pct IS NOT NULL;
+            WHERE f.geo_key = 43; 
         `;
 
-        // Query for distinct countries that have renewable data
         const countryQuery = `
             SELECT DISTINCT g.country_name
             FROM fact_energy f
@@ -48,13 +46,12 @@ app.get("/api/filters", async (req, res) => {
             ORDER BY g.country_name ASC;
         `;
 
-        // Execute both queries concurrently for efficiency
         const [yearResult, countryResult] = await Promise.all([
             pool.query(yearQuery),
             pool.query(countryQuery)
         ]);
 
-        const minYear = yearResult.rows[0].min_year;
+        const minYear = 1990; // Set start year to 1990 for PH endpoints
         const maxYear = yearResult.rows[0].max_year;
         const countries = countryResult.rows.map(row => row.country_name);
 
@@ -65,6 +62,86 @@ app.get("/api/filters", async (req, res) => {
         res.status(500).json({ error: "Failed to fetch filter data" });
     }
 });
+
+app.get('/api/ph-total-energy', async (req, res) => {
+    const { startYear, endYear, aggregation } = req.query;
+
+    if (!startYear || !endYear || !aggregation) {
+        return res.status(400).json({ error: 'startYear, endYear, and aggregation are required.' });
+    }
+
+    let query;
+    let queryParams;
+
+    if (aggregation === 'all-time') {
+        queryParams = [];
+        query = `
+            SELECT
+                'All-Time Total' AS period,
+                SUM(f.coal_gwh) AS coal,
+                SUM(f.oil_gwh) AS oil,
+                SUM(f.natural_gas_gwh) AS natural_gas,
+                SUM(f.hydro_gwh) AS hydro,
+                SUM(f.solar_gwh) AS solar,
+                SUM(f.wind_gwh) AS wind,
+                SUM(f.geothermal_gwh) AS geothermal,
+                SUM(f.biomass_gwh) AS biomass
+            FROM fact_energy f
+            JOIN dim_date d ON f.date_key = d.date_key
+            WHERE
+                f.geo_key = 43; -- === CHANGE HERE: Removed all year constraints ===
+        `;
+    } else {
+        let groupByClause;
+        let selectClause;
+        queryParams = [startYear, endYear];
+
+        switch (aggregation) {
+            case '5-year':
+                groupByClause = 'FLOOR(d.year / 5) * 5';
+                selectClause = `CONCAT(FLOOR(d.year / 5) * 5, ' - ', FLOOR(d.year / 5) * 5 + 4) AS period`;
+                break;
+            case 'decade':
+                groupByClause = 'FLOOR(d.year / 10) * 10';
+                selectClause = `CONCAT(FLOOR(d.year / 10) * 10, ' - ', FLOOR(d.year / 10) * 10 + 9) AS period`;
+                break;
+            default: // 'year'
+                groupByClause = 'd.year';
+                selectClause = 'd.year::TEXT AS period';
+                break;
+        }
+
+        query = `
+            SELECT
+                ${selectClause},
+                SUM(f.coal_gwh) AS coal,
+                SUM(f.oil_gwh) AS oil,
+                SUM(f.natural_gas_gwh) AS natural_gas,
+                SUM(f.hydro_gwh) AS hydro,
+                SUM(f.solar_gwh) AS solar,
+                SUM(f.wind_gwh) AS wind,
+                SUM(f.geothermal_gwh) AS geothermal,
+                SUM(f.biomass_gwh) AS biomass
+            FROM fact_energy f
+            JOIN dim_date d ON f.date_key = d.date_key
+            WHERE
+                f.geo_key = 43 -- Philippines
+                AND d.year >= $1
+                AND d.year <= $2
+            GROUP BY ${groupByClause}
+            ORDER BY ${groupByClause} ASC;
+        `;
+    }
+
+    try {
+        const result = await pool.query(query, queryParams);
+        res.json(result.rows);
+    } catch (err) {
+        console.error("Database Query Error for ph-total-energy:", err);
+        res.status(500).json({ error: "Failed to fetch total energy data" });
+    }
+});
+
 
 app.get("/api/energy-mix-comparison", async (req, res) => {
     const { startYear, endYear, countries, sources } = req.query;
@@ -82,7 +159,6 @@ app.get("/api/energy-mix-comparison", async (req, res) => {
         return res.status(400).json({ error: "Invalid year, country, or source values provided." });
     }
 
-    // This transforms columns into rows for easier filtering
     const unpivotClauses = sourceList
         .map(source => {
             const columnName = sourceToColumnMap[source];
@@ -162,7 +238,7 @@ app.get('/api/green-energy-vs-weather', async (req, res) => {
         JOIN fact_weather w ON f.date_key = w.date_key
         JOIN dim_geo g ON f.geo_key = g.geo_key
         WHERE
-            f.geo_key = 43 -- Filter for the Philippines
+            f.geo_key = 43
             AND d.year >= $1
             AND d.year <= $2
         ORDER BY d.year ASC;
@@ -183,14 +259,12 @@ app.get('/api/green-energy-vs-weather', async (req, res) => {
             responseData.years.push(row.year);
             responseData.temperature.push(parseFloat(row.avg_mean_temp_deg_c));
 
-            // Map energy sources
             if (row.hydro_gwh > 0) responseData.energy['Hydro'].push({ x: row.year, y: parseFloat(row.hydro_gwh) });
             if (row.solar_gwh > 0) responseData.energy['Solar'].push({ x: row.year, y: parseFloat(row.solar_gwh) });
             if (row.wind_gwh > 0) responseData.energy['Wind'].push({ x: row.year, y: parseFloat(row.wind_gwh) });
             if (row.biomass_gwh > 0) responseData.energy['Biomass'].push({ x: row.year, y: parseFloat(row.biomass_gwh) });
             if (row.geothermal_gwh > 0) responseData.energy['Geothermal'].push({ x: row.year, y: parseFloat(row.geothermal_gwh) });
             
-            // Sum all GWh for the current year
             const totalGwh = 
                 (parseFloat(row.hydro_gwh) || 0) +
                 (parseFloat(row.solar_gwh) || 0) +
@@ -201,10 +275,8 @@ app.get('/api/green-energy-vs-weather', async (req, res) => {
             yearlyTotals.push({ year: row.year, totalGwh });
         });
         
-        // Sort by total GWh to find highest and lowest
         yearlyTotals.sort((a, b) => a.totalGwh - b.totalGwh);
 
-        // Add the sorted data to the response object
         responseData.bottomYears = yearlyTotals.slice(0, 5);
         responseData.topYears = yearlyTotals.slice(-5).reverse();
 
@@ -213,6 +285,61 @@ app.get('/api/green-energy-vs-weather', async (req, res) => {
     } catch (err) {
         console.error("Database Query Error for green-energy-vs-weather:", err);
         res.status(500).json({ error: "Failed to fetch energy vs weather data" });
+    }
+});
+
+app.get('/api/ph-renewable-vs-non', async (req, res) => {
+    const { startYear, endYear, aggregation } = req.query;
+
+    if (!startYear || !endYear || !aggregation) {
+        return res.status(400).json({ error: 'startYear, endYear, and aggregation are required.' });
+    }
+
+    let query;
+    let queryParams = [startYear, endYear];
+    let groupByClause = 'd.year';
+    let selectClause = 'd.year::TEXT AS period';
+
+    switch (aggregation) {
+        case '5-year':
+            groupByClause = 'FLOOR(d.year / 5) * 5';
+            selectClause = `CONCAT(FLOOR(d.year / 5) * 5, ' - ', FLOOR(d.year / 5) * 5 + 4) AS period`;
+            break;
+        case 'decade':
+            groupByClause = 'FLOOR(d.year / 10) * 10';
+            selectClause = `CONCAT(FLOOR(d.year / 10) * 10, ' - ', FLOOR(d.year / 10) * 10 + 9) AS period`;
+            break;
+        case 'all-time':
+            groupByClause = "'All-Time Total'";
+            selectClause = "'All-Time Total' AS period";
+            queryParams = [];
+            break;
+        default: // 'year'
+            break;
+    }
+
+    const yearFilter = (aggregation !== 'all-time') ? 'AND d.year >= $1 AND d.year <= $2' : '';
+
+    query = `
+        SELECT
+            ${selectClause},
+            SUM(f.hydro_gwh + f.solar_gwh + f.wind_gwh + f.geothermal_gwh + f.biomass_gwh) AS renewable_total,
+            SUM(f.coal_gwh + f.oil_gwh + f.natural_gas_gwh) AS non_renewable_total
+        FROM fact_energy f
+        JOIN dim_date d ON f.date_key = d.date_key
+        WHERE
+            f.geo_key = 43 -- Philippines
+            ${yearFilter}
+        GROUP BY ${groupByClause}
+        ORDER BY ${groupByClause} ASC;
+    `;
+    
+    try {
+        const result = await pool.query(query, queryParams);
+        res.json(result.rows);
+    } catch (err) {
+        console.error("Database Query Error for ph-renewable-vs-non:", err);
+        res.status(500).json({ error: "Failed to fetch renewable vs non-renewable data" });
     }
 });
 
