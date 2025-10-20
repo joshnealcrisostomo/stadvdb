@@ -210,7 +210,7 @@ const PhGreenEnergy = () => {
                 type: 'linear',
                 display: true,
                 position: 'left',
-                title: { display: true, text: 'Energy Generation (GWh)', color: '#007bff' },
+                title: { display: true, text: 'Energy Generation (GWh)', color: '#6b00a9ff' },
                 beginAtZero: true,
                 ticks: {
                     stepSize: 1000
@@ -220,7 +220,7 @@ const PhGreenEnergy = () => {
                 type: 'linear',
                 display: true,
                 position: 'right',
-                title: { display: true, text: 'Avg. Temperature (°C)', color: '#dc3545' },
+                title: { display: true, text: 'Avg. Temperature (°C)', color: 'rgba(108, 117, 125, 1)' },
                 grid: { drawOnChartArea: false },
                 suggestedMin: 24,
                 suggestedMax: 30,
@@ -272,7 +272,7 @@ const PhGreenEnergy = () => {
     return (
         <div className={styles.container}>
             <div className={styles.pageTitle}>
-                <h1>Philippines' Green Energy Generation vs. Weather</h1>
+                <h1>Philippines' Green Energy Generation (in GWh) & Average Mean Surface Temperature</h1>
             </div>
             <div className={styles.separator}></div>
             <div className={styles.content}>

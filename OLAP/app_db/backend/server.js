@@ -18,6 +18,15 @@ const pool = new Pool({
     port: process.env.DB_PORT || 5432,
 });
 
+const sourceToColumnMap = {
+    'Coal': 'coal_pct',
+    'Hydro': 'hydro_pct',
+    'Natural Gas': 'gas_pct',
+    'Oil': 'oil_pct',
+    'Nuclear': 'nuclear_pct',
+    'Renewable': 'renewable_pct'
+};
+
 // --- NEW API ENDPOINT FOR DYNAMIC FILTERS ---
 app.get("/api/filters", async (req, res) => {
     try {
@@ -61,45 +70,77 @@ app.get("/api/filters", async (req, res) => {
 
 // --- API ENDPOINT FOR ENERGY MIX COMPARISON ---
 app.get("/api/energy-mix-comparison", async (req, res) => {
-    // ... (This endpoint remains the same as before)
-    const { startYear, endYear, countries } = req.query;
+    // 1. Get all required parameters from the query string
+    const { startYear, endYear, countries, sources } = req.query;
 
-    if (!startYear || !endYear || !countries) {
-        return res.status(400).json({ error: "startYear, endYear, and countries are required query parameters." });
+    // 2. Validate that all parameters exist
+    if (!startYear || !endYear || !countries || !sources) {
+        return res.status(400).json({ error: "startYear, endYear, countries, and sources are required query parameters." });
     }
 
     const startY = parseInt(startYear, 10);
     const endY = parseInt(endYear, 10);
-    const countryList = Array.isArray(countries) ? countries : countries.split(',').filter(c => c);
+    const countryList = countries.split(',').filter(c => c);
+    const sourceList = sources.split(',').filter(s => s);
 
-    if (isNaN(startY) || isNaN(endY) || countryList.length === 0) {
-        return res.status(400).json({ error: "Invalid year or country values provided." });
+    if (isNaN(startY) || isNaN(endY) || countryList.length === 0 || sourceList.length === 0) {
+        return res.status(400).json({ error: "Invalid year, country, or source values provided." });
     }
 
+    // 3. Dynamically build a subquery to unpivot the data
+    // This transforms columns into rows for easier filtering
+    const unpivotClauses = sourceList
+        .map(source => {
+            const columnName = sourceToColumnMap[source];
+            if (columnName) {
+                return `
+                    SELECT geo_key, date_key, '${source}' AS source_name, ${columnName} AS percentage
+                    FROM fact_energy
+                    WHERE ${columnName} IS NOT NULL
+                `;
+            }
+            return null;
+        })
+        .filter(Boolean); // Filter out any nulls from invalid sources
+
+    if (unpivotClauses.length === 0) {
+        return res.json({}); // No valid sources, return empty object
+    }
+    
+    const unpivotedDataSubquery = unpivotClauses.join(' UNION ALL ');
+
+    // 4. Construct the final query using the unpivoted data
     const queryText = `
         SELECT
             d.year,
             g.country_name,
-            f.renewable_pct AS renewable_percentage
-        FROM fact_energy f
-        JOIN dim_date d ON f.date_key = d.date_key
-        JOIN dim_geo g ON f.geo_key = g.geo_key
-        WHERE d.year >= $1 AND d.year <= $2 AND g.country_name = ANY($3::text[]) AND f.renewable IS NOT NULL
-        ORDER BY g.country_name, d.year;
+            u.source_name,
+            u.percentage
+        FROM (${unpivotedDataSubquery}) AS u
+        JOIN dim_date d ON u.date_key = d.date_key
+        JOIN dim_geo g ON u.geo_key = g.geo_key
+        WHERE d.year >= $1 AND d.year <= $2 AND g.country_name = ANY($3::text[])
+        ORDER BY g.country_name, u.source_name, d.year;
     `;
+
     const queryParams = [startY, endY, countryList];
 
     try {
         const result = await pool.query(queryText, queryParams);
+
+        // 5. Transform the data into the format expected by the chart
         const transformedData = {};
         result.rows.forEach(row => {
-            const { country_name, year, renewable_percentage } = row;
-            if (!transformedData[country_name]) {
-                transformedData[country_name] = [];
+            const { country_name, year, source_name, percentage } = row;
+            // Create a unique key for each line on the chart
+            const key = `${country_name} - ${source_name}`;
+            
+            if (!transformedData[key]) {
+                transformedData[key] = [];
             }
-            transformedData[country_name].push({
+            transformedData[key].push({
                 x: year,
-                y: parseFloat(renewable_percentage)
+                y: parseFloat(percentage)
             });
         });
         res.json(transformedData);

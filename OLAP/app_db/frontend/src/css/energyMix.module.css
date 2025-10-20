@@ -168,6 +168,47 @@
     box-shadow: 0 0 5px rgba(0, 0, 0, 0.4);
 }
 
+.sourceFilter {
+    flex-grow: 1;
+    display: flex;
+    align-items: center;
+}
+
+.sourceFilter .filterLabel {
+    margin-right: 15px; 
+    margin-bottom: 0;
+}
+
+.sourceButtons {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+.sourceButton {
+    padding: 8px 15px;
+    border: 1px solid #ccc;
+    border-radius: 10px;
+    background-color: #f0f0f0;
+    color: #333;
+    cursor: pointer;
+    transition: all 0.2s ease;
+    font-size: 14px;
+    font-weight: 500;
+    user-select: none;
+}
+
+.sourceButton.active {
+    background-color: #5A6ACF;
+    color: white;
+    border-color: #5A6ACF;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.4);
+}
+
+.sourceButton:hover {
+    opacity: 0.5;
+}
+
 .countryButton {
     padding: 8px 15px;
     border: 1px solid #ccc;
@@ -244,7 +285,9 @@
 
 .modalActions {
     margin-top: 20px;
-    text-align: right;
+    display: flex;         
+    justify-content: flex-end; 
+    gap: 10px;              
 }
 
 .closeButton {
@@ -275,6 +318,31 @@
     color: #6b7280;
     padding: 0 20px;
     line-height: 1.5;
+}
+
+.deselectButton {
+    padding: 8px 15px;
+    background-color: #f0f0f0;
+    color: #333;
+    border: 1px solid #ccc;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
+    transition: background-color 0.2s ease;
+}
+
+.deselectButton:hover {
+    background-color: #e0e0e0;
+}
+
+.closeButton {
+    padding: 8px 15px;
+    background-color: #5A6ACF;
+    color: white;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    font-weight: 500;
 }
 
 @keyframes fadeIn {

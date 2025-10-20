@@ -39,7 +39,7 @@ const Dashboard = () => {
                             className={styles.rightCard}
                             onClick={() => handleCardClick('/phGreenEnergy')}
                         >
-                            <h3 className={styles.sectionTitle}>Philippine Green Energy Generation vs. Weather</h3>     
+                            <h3 className={styles.sectionTitle}>Philippines' Green Energy Generation (in GWh) & Average Mean Surface Temperature</h3>     
                             <div className={styles.chartPlaceholder}>
                                 [Scatter or Line plot]
                             </div>
