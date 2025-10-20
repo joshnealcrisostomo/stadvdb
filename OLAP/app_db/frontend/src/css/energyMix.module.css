@@ -83,13 +83,12 @@
     margin: 0 5px;
 }
 
-/* --- NEW SLIDER STYLES --- */
 .sliderContainer {
     position: relative;
     height: 30px;
     display: flex;
     align-items: center;
-    padding: 0 8px; /* Add padding equal to half the thumb width */
+    padding: 0 8px; 
 }
 
 .sliderContainer::before {
@@ -313,7 +312,7 @@
 
 .filteredSourcesDisplay {
     text-align: center;
-    margin-top: 10px;
+    margin-top: 50px;
     font-size: 14px;
     color: #6b7280;
     padding: 0 20px;
@@ -343,6 +342,60 @@
     border-radius: 8px;
     cursor: pointer;
     font-weight: 500;
+}
+
+.chartGrid {
+    display: grid;
+    grid-template-columns: 1fr 1fr; 
+    gap: 40px 30px;
+    margin-top: 20px;
+}
+
+.chartContainer {
+    display: flex;
+    flex-direction: column;
+}
+
+.chartTitle {
+    font-size: 18px;
+    font-weight: 600;
+    text-align: center;
+    margin-bottom: 15px;
+    color: #333;
+}
+
+.chartWrapper {
+    position: relative;
+    height: 350px; 
+}
+
+.sharedLegend {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 20px;
+    margin-top: 15px;
+    margin-bottom: 20px;
+}
+
+.legendItem {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 14px;
+    font-weight: 500;
+}
+
+.legendColorBox {
+    width: 15px;
+    height: 15px;
+    border-radius: 100px;
+    display: inline-block;
+}
+
+.legendLabel {
+    color: #4A4A4A;
 }
 
 @keyframes fadeIn {

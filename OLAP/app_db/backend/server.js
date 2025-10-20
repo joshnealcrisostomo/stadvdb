@@ -21,13 +21,12 @@ const pool = new Pool({
 const sourceToColumnMap = {
     'Coal': 'coal_pct',
     'Hydro': 'hydro_pct',
-    'Natural Gas': 'gas_pct',
+    'Natural Gas': 'natural_gas_pct',
     'Oil': 'oil_pct',
     'Nuclear': 'nuclear_pct',
     'Renewable': 'renewable_pct'
 };
 
-// --- NEW API ENDPOINT FOR DYNAMIC FILTERS ---
 app.get("/api/filters", async (req, res) => {
     try {
         // Query for min/max years that have renewable data
@@ -67,13 +66,9 @@ app.get("/api/filters", async (req, res) => {
     }
 });
 
-
-// --- API ENDPOINT FOR ENERGY MIX COMPARISON ---
 app.get("/api/energy-mix-comparison", async (req, res) => {
-    // 1. Get all required parameters from the query string
     const { startYear, endYear, countries, sources } = req.query;
 
-    // 2. Validate that all parameters exist
     if (!startYear || !endYear || !countries || !sources) {
         return res.status(400).json({ error: "startYear, endYear, countries, and sources are required query parameters." });
     }
@@ -87,7 +82,6 @@ app.get("/api/energy-mix-comparison", async (req, res) => {
         return res.status(400).json({ error: "Invalid year, country, or source values provided." });
     }
 
-    // 3. Dynamically build a subquery to unpivot the data
     // This transforms columns into rows for easier filtering
     const unpivotClauses = sourceList
         .map(source => {
@@ -101,15 +95,14 @@ app.get("/api/energy-mix-comparison", async (req, res) => {
             }
             return null;
         })
-        .filter(Boolean); // Filter out any nulls from invalid sources
+        .filter(Boolean);
 
     if (unpivotClauses.length === 0) {
-        return res.json({}); // No valid sources, return empty object
+        return res.json({});
     }
     
     const unpivotedDataSubquery = unpivotClauses.join(' UNION ALL ');
 
-    // 4. Construct the final query using the unpivoted data
     const queryText = `
         SELECT
             d.year,
@@ -128,11 +121,9 @@ app.get("/api/energy-mix-comparison", async (req, res) => {
     try {
         const result = await pool.query(queryText, queryParams);
 
-        // 5. Transform the data into the format expected by the chart
         const transformedData = {};
         result.rows.forEach(row => {
             const { country_name, year, source_name, percentage } = row;
-            // Create a unique key for each line on the chart
             const key = `${country_name} - ${source_name}`;
             
             if (!transformedData[key]) {
@@ -150,7 +141,6 @@ app.get("/api/energy-mix-comparison", async (req, res) => {
     }
 });
 
-// --- NEW: API ENDPOINT FOR GREEN ENERGY VS WEATHER ---
 app.get('/api/green-energy-vs-weather', async (req, res) => {
     const { startYear, endYear } = req.query;
 
@@ -187,7 +177,6 @@ app.get('/api/green-energy-vs-weather', async (req, res) => {
             energy: { 'Hydro': [], 'Solar': [], 'Wind': [], 'Biomass': [], 'Geothermal': [] },
         };
 
-        // --- NEW: Calculate total GWh per year ---
         const yearlyTotals = [];
 
         result.rows.forEach(row => {
@@ -217,7 +206,7 @@ app.get('/api/green-energy-vs-weather', async (req, res) => {
 
         // Add the sorted data to the response object
         responseData.bottomYears = yearlyTotals.slice(0, 5);
-        responseData.topYears = yearlyTotals.slice(-5).reverse(); // slice gets last 5, reverse makes it descending
+        responseData.topYears = yearlyTotals.slice(-5).reverse();
 
         res.json(responseData);
 
