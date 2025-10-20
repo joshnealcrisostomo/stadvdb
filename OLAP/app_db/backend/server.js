@@ -343,6 +343,75 @@ app.get('/api/ph-renewable-vs-non', async (req, res) => {
     }
 });
 
+app.get('/api/non-renewable-generation', async (req, res) => {
+    const { startYear, endYear, countries } = req.query;
+
+    if (!startYear || !endYear || !countries) {
+        return res.status(400).json({ error: "startYear, endYear, and countries are required." });
+    }
+
+    const countryList = countries.split(',').filter(c => c);
+    if (countryList.length === 0) {
+        return res.status(400).json({ error: "At least one country is required." });
+    }
+
+    const query = `
+        SELECT
+            d.year,
+            g.country_name,
+            SUM(f.coal_pct) AS coal,
+            SUM(f.oil_pct) AS oil,
+            SUM(f.natural_gas_pct) AS natural_gas,
+            SUM(f.nuclear_pct) AS nuclear
+        FROM fact_energy f
+        JOIN dim_date d ON f.date_key = d.date_key
+        JOIN dim_geo g ON f.geo_key = g.geo_key
+        WHERE
+            d.year >= $1 AND d.year <= $2
+            AND g.country_name = ANY($3::text[])
+        GROUP BY g.country_name, d.year
+        ORDER BY g.country_name, d.year;
+    `;
+
+    try {
+        const result = await pool.query(query, [startYear, endYear, countryList]);
+
+        const transformedData = {};
+        const sourceMap = {
+            'coal': 'Coal',
+            'oil': 'Oil',
+            'natural_gas': 'Natural Gas',
+            'nuclear': 'Nuclear'
+        };
+
+        result.rows.forEach(row => {
+            const { year, country_name } = row;
+
+            for (const sourceKey in sourceMap) {
+                const sourceName = sourceMap[sourceKey];
+                const key = `${country_name} - ${sourceName}`;
+                const decimalValue = row[sourceKey];
+
+                if (!transformedData[key]) {
+                    transformedData[key] = [];
+                }
+
+                if (decimalValue !== null && decimalValue !== undefined) {
+                    transformedData[key].push({
+                        x: year,
+                        y: parseFloat(decimalValue) * 100
+                    });
+                }
+            }
+        });
+        
+        res.json(transformedData);
+
+    } catch (err) {
+        console.error("Database Query Error for non-renewable-generation:", err);
+        res.status(500).json({ error: "Failed to fetch non-renewable generation data" });
+    }
+});
 
 const PORT = process.env.PORT || 5001;
 app.listen(PORT, () => console.log(`🚀 Server running on port ${PORT}`));
