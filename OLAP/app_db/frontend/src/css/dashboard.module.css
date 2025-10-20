@@ -1,24 +1,28 @@
-@import url('https://fonts.googleapis.com/css?family=Poppins:300,400,500,600&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Hubot+Sans:ital,wdth,wght@0,115,700;1,125,900&display=swap');
 
 .container {
-    height: 100%;
+    height: 100vh;
     display: flex;
     flex-direction: column;
     font-family: 'Poppins', sans-serif;
     background-color: #fafafa;
     padding: 40px;
+    padding-top: 0px;
 }
 
 .pageTitle h1 {
     font-size: 24px;
     font-weight: 700;
     color: #333;
-    margin-bottom: 30px;
     margin-top: 0;
 }
 
-h3 {
-    font-weight: 400;
+.sectionTitle {
+    font-family: 'Hubot Sans', sans-serif;
+    color: #ffffff; 
+    font-size: 26px;
+    text-shadow: 2px 2px 4px rgba(0, 0, 0, 0.7);
+    z-index: 1;
 }
 
 p {
@@ -26,7 +30,7 @@ p {
 }
 
 .chartPlaceholder {
-    font-weight: 100;
+    display: none;
 }
 
 .content {
@@ -53,13 +57,38 @@ p {
 .cardTwo,
 .cardThree {
     flex: 1; 
-    background-color: #fff;
     border-radius: 12px;
     box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
     padding: 20px;
     min-height: 350px;
     transition: box-shadow 0.4s ease-in-out, transform 0.2s ease-out, border-color 0.2s ease-out;
     border: 1px solid transparent;
+    background-size: cover;
+    background-position: center;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    text-align: center;
+}
+
+.leftCard {
+    background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('../assets/1.png');
+}
+
+.rightCard {
+    background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('../assets/4.png');
+}
+
+.cardOne {
+    background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('../assets/5.png');
+}
+
+.cardTwo {
+    background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('../assets/2.png');
+}
+
+.cardThree {
+    background-image: linear-gradient(rgba(0,0,0,0.3), rgba(0,0,0,0.3)), url('../assets/3.png');
 }
 
 .leftCard:hover,
@@ -68,7 +97,7 @@ p {
 .cardTwo:hover,
 .cardThree:hover {
     box-shadow: 0 12px 30px rgba(0, 0, 0, 0.15); 
-    transform: translateY(-5px); 
+    transform: translateY(-5px) scale(1.02);
     border-color: #5A6ACF;
     cursor: pointer; 
 }

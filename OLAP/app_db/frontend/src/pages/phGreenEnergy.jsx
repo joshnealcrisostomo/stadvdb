@@ -12,7 +12,6 @@ import {
 } from 'chart.js';
 import styles from '../css/phGreenEnergy.module.css';
 
-// Register Chart.js components
 ChartJS.register(
     CategoryScale,
     LinearScale,
@@ -23,12 +22,10 @@ ChartJS.register(
     Legend
 );
 
-// Constants for API and sources
-const API_BASE_URL = 'http://localhost:5000/api';
+const API_BASE_URL = '/api';
 const ENERGY_SOURCES = ['Hydro', 'Solar', 'Wind', 'Biomass', 'Geothermal'];
 const RENEWABLE_SOURCES = ['Hydro', 'Solar', 'Wind', 'Biomass', 'Geothermal'];
 
-// --- Color mapping for the chart ---
 const SOURCE_COLORS = {
     'Hydro': 'rgba(0, 123, 255, 0.8)',
     'Solar': 'rgba(255, 193, 7, 0.8)',
@@ -39,24 +36,21 @@ const SOURCE_COLORS = {
 };
 
 const PhGreenEnergy = () => {
-    // --- Component State ---
     const [dbYearBounds, setDbYearBounds] = useState({ min: 0, max: 0 });
     const [yearRange, setYearRange] = useState([0, 0]);
     const [startYear, endYear] = yearRange;
     const [activeSources, setActiveSources] = useState(RENEWABLE_SOURCES);
     const [chartData, setChartData] = useState(null);
-    const [isLoading, setIsLoading] = useState(true); // Start in loading state
+    const [isLoading, setIsLoading] = useState(true);
     const [error, setError] = useState(null);
     const [summaryStats, setSummaryStats] = useState({ topYears: [], bottomYears: [] });
     const sliderFillRef = useRef(null);
 
-    // Filter active sources to only include renewable ones for API calls
     const activeRenewableSources = useMemo(() =>
         activeSources.filter(source => RENEWABLE_SOURCES.includes(source)),
         [activeSources]
     );
 
-    // Effect to fetch dynamic year range on component mount ---
     useEffect(() => {
         const fetchFilters = async () => {
             try {
@@ -66,17 +60,15 @@ const PhGreenEnergy = () => {
                 }
                 const data = await response.json();
                 setDbYearBounds({ min: data.minYear, max: data.maxYear });
-                setYearRange([data.minYear, data.maxYear]); // Initialize slider to full range
+                setYearRange([data.minYear, data.maxYear]);
             } catch (e) {
                 console.error("Fetch error for filters:", e);
                 setError("Failed to load initial filter data. Please refresh the page.");
             }
         };
         fetchFilters();
-    }, []); // Empty dependency array means this runs only once on mount
+    }, []);
 
-
-    // --- Effect to fetch chart data when filters change ---
     useEffect(() => {
         if (!startYear || !endYear) {
             return;
@@ -95,7 +87,6 @@ const PhGreenEnergy = () => {
                 const data = await response.json();
                 setChartData(data);
 
-                // --- NEW: Set the summary stats from the API response ---
                 setSummaryStats({
                     topYears: data.topYears || [],
                     bottomYears: data.bottomYears || []
@@ -112,7 +103,6 @@ const PhGreenEnergy = () => {
         fetchData();
     }, [startYear, endYear, activeRenewableSources]);
 
-    // --- Effect to update the visual style of the slider fill ---
     useEffect(() => {
         if (sliderFillRef.current && dbYearBounds.max > dbYearBounds.min) {
             const range = dbYearBounds.max - dbYearBounds.min;
@@ -123,8 +113,6 @@ const PhGreenEnergy = () => {
         }
     }, [startYear, endYear, dbYearBounds]);
 
-
-    // --- Memoized chart data transformation ---
     const chartConfig = useMemo(() => {
         if (!chartData || !chartData.years || chartData.years.length === 0) {
             return { datasets: [], labels: [] };
@@ -147,7 +135,7 @@ const PhGreenEnergy = () => {
         const energyDatasets = activeSources
             .filter(source => energy[source] && energy[source].length > 0)
             .map(source => ({
-                type: 'line', // Changed to line for better trend visibility
+                type: 'line',
                 label: `${source} Gen. (GWh)`,
                 data: energy[source],
                 borderColor: SOURCE_COLORS[source],
@@ -155,7 +143,7 @@ const PhGreenEnergy = () => {
                 yAxisID: 'y_gen',
                 pointRadius: 4,
                 showLine: true,
-                tension: 0.1, // A slight tension for the line
+                tension: 0.1,
                 fill: false,
             }));
 
@@ -165,8 +153,6 @@ const PhGreenEnergy = () => {
         };
     }, [chartData, activeSources]);
 
-
-    // --- Chart.js Options ---
     const chartOptions = {
         responsive: true,
         maintainAspectRatio: false,
@@ -202,15 +188,18 @@ const PhGreenEnergy = () => {
                 min: startYear,
                 max: endYear,
                 ticks: {
-                    stepSize: Math.ceil((endYear - startYear) / 100),
-                    callback: (value) => Number.isInteger(value) ? value : null,
+                    callback: function(value) {
+                        return value.toString();
+                    },
+                    maxTicksLimit: 100,
+                    precision: 0 
                 }
             },
             y_gen: {
                 type: 'linear',
                 display: true,
                 position: 'left',
-                title: { display: true, text: 'Energy Generation (GWh)', color: '#007bff' },
+                title: { display: true, text: 'Energy Generation (GWh)', color: '#6b00a9ff' },
                 beginAtZero: true,
                 ticks: {
                     stepSize: 1000
@@ -220,7 +209,7 @@ const PhGreenEnergy = () => {
                 type: 'linear',
                 display: true,
                 position: 'right',
-                title: { display: true, text: 'Avg. Temperature (°C)', color: '#dc3545' },
+                title: { display: true, text: 'Avg. Temperature (°C)', color: 'rgba(108, 117, 125, 1)' },
                 grid: { drawOnChartArea: false },
                 suggestedMin: 24,
                 suggestedMax: 30,
@@ -233,7 +222,6 @@ const PhGreenEnergy = () => {
         }
     };
 
-    // --- UI Event Handlers ---
     const handleYearChange = (e, type) => {
         const value = Number(e.target.value);
         if (type === 'start') {
@@ -249,7 +237,6 @@ const PhGreenEnergy = () => {
         );
     };
 
-    // --- Conditional Rendering Logic ---
     let visualizationContent;
     if (dbYearBounds.min === 0) {
         visualizationContent = <p>Loading filters...</p>;
@@ -272,7 +259,7 @@ const PhGreenEnergy = () => {
     return (
         <div className={styles.container}>
             <div className={styles.pageTitle}>
-                <h1>Philippines' Green Energy Generation vs. Weather</h1>
+                <h1>Philippines' Green Energy Generation (in GWh) & Average Mean Surface Temperature</h1>
             </div>
             <div className={styles.separator}></div>
             <div className={styles.content}>
@@ -281,7 +268,7 @@ const PhGreenEnergy = () => {
                         <>
                             <div className={styles.yearFilter}>
                                 <div className={styles.yearControlGroup}>
-                                    <label className={styles.filterLabel}>Select Year Range:</label>
+                                    <label className={styles.filterLabel}>Year Range: {`${startYear} - ${endYear}`}</label>
                                     <div className={styles.sliderAndDisplay}>
                                         <div className={styles.sliderContainer}>
                                             <div ref={sliderFillRef} className={styles.sliderFill}></div>
@@ -302,8 +289,6 @@ const PhGreenEnergy = () => {
                                     ))}
                                 </div>
                             </div>
-
-                            <p>For more insights scroll below.</p>
                         </>
                     )}
                 </div>
@@ -340,21 +325,26 @@ const PhGreenEnergy = () => {
                     <div className={styles.statsColumn}>
                         <h4>Highest Generation Years</h4>
                         <ol>
-                            {summaryStats.topYears.map(item => (
-                                <li key={item.year}>
-                                    <strong>{item.year}:</strong> {Math.round(item.totalGwh).toLocaleString()} GWh
-                                </li>
-                            ))}
+                            {summaryStats.topYears
+                                .slice(0, 5) // Explicitly take the top 5
+                                .map(item => (
+                                    <li key={item.year}>
+                                        <strong>{item.year}:</strong> {Math.round(item.totalGwh).toLocaleString()} GWh
+                                    </li>
+                                ))}
                         </ol>
                     </div>
                     <div className={styles.statsColumn}>
                         <h4>Lowest Generation Years</h4>
                         <ol>
-                            {summaryStats.bottomYears.map(item => (
-                                <li key={item.year}>
-                                    <strong>{item.year}:</strong> {Math.round(item.totalGwh).toLocaleString()} GWh
-                                </li>
-                            ))}
+                            {summaryStats.bottomYears
+                                .filter(item => item.totalGwh > 0) // 1. Filter out the 0s
+                                .slice(0, 5) // 2. THEN, take the first 5 from that non-zero list
+                                .map(item => (
+                                    <li key={item.year}>
+                                        <strong>{item.year}:</strong> {Math.round(item.totalGwh).toLocaleString()} GWh
+                                    </li>
+                                ))}
                         </ol>
                     </div>
                 </div>
