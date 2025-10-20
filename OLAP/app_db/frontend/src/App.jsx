@@ -2,6 +2,7 @@ import React, { lazy, Suspense } from 'react';
 import { Routes, Route } from 'react-router-dom';
 import Layout from './components/layout.jsx';
 import LoadingSpinner from './components/loadingSpinner.jsx';
+import ScrollToTop from './components/scrollToTop.jsx';
 
 const Dashboard = lazy(() => import('./pages/dashboard.jsx'));
 const EnergyMix = lazy(() => import('./pages/energyMix.jsx'));
@@ -13,6 +14,7 @@ const NonRenewable = lazy(() => import('./pages/nonRenew.jsx'));
 function App() {
   return (
     <Layout>
+      <ScrollToTop />
       <Suspense fallback={<LoadingSpinner />}>
         <Routes>
           <Route path="/" element={<Dashboard />} />
