@@ -17,12 +17,6 @@ const Dashboard = () => {
 
     return (
             <div className={styles.container}>
-                <div className={styles.pageTitle}>
-                    <h1>Dashboard</h1>
-                </div>
-
-                <div className={styles.separator}></div>
-
                 <div className={styles.content}>
                     <div className={styles.upperHalf}>
                         <div 

@@ -1,12 +1,13 @@
 @import url('https://fonts.googleapis.com/css2?family=Hubot+Sans:ital,wdth,wght@0,115,700;1,125,900&display=swap');
 
 .container {
-    height: 100%;
+    height: 100vh;
     display: flex;
     flex-direction: column;
     font-family: 'Poppins', sans-serif;
     background-color: #fafafa;
     padding: 40px;
+    padding-top: 0px;
 }
 
 .pageTitle h1 {
@@ -29,7 +30,7 @@ p {
 }
 
 .chartPlaceholder {
-    display: none; /* Hide the placeholder as the background is now the focus */
+    display: none;
 }
 
 .content {
