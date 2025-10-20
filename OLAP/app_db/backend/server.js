@@ -89,7 +89,7 @@ app.get('/api/ph-total-energy', async (req, res) => {
             FROM fact_energy f
             JOIN dim_date d ON f.date_key = d.date_key
             WHERE
-                f.geo_key = 43; -- === CHANGE HERE: Removed all year constraints ===
+                f.geo_key = 43; 
         `;
     } else {
         let groupByClause;
