@@ -5,7 +5,6 @@ import io
 import requests
 from dotenv import load_dotenv
 
-# --- Load environment variables ---
 load_dotenv()
 
 DB_HOST = os.getenv("DB_HOST", "localhost")
@@ -14,7 +13,6 @@ DB_PASS = os.getenv("DB_PASS", "your_password")
 DB_STAGING = os.getenv("DB_STAGING", "staging_db")
 DB_WAREHOUSE = os.getenv("DB_WAREHOUSE", "data_warehouse")
 
-# --- Connect to staging DB ---
 conn_stg = psycopg2.connect(
     host=DB_HOST,
     database=DB_STAGING,
@@ -24,7 +22,6 @@ conn_stg = psycopg2.connect(
 conn_stg.autocommit = True
 cur_stg = conn_stg.cursor()
 
-# --- Connect to warehouse DB ---
 conn_dw = psycopg2.connect(
     host=DB_HOST,
     database=DB_WAREHOUSE,
@@ -34,19 +31,11 @@ conn_dw = psycopg2.connect(
 conn_dw.autocommit = True
 cur_dw = conn_dw.cursor()
 
-print("🚀 Starting ETL process...")
-
-# -------------------
-# --- TRUNCATE STAGING TABLES ---
-# -------------------
 cur_stg.execute("TRUNCATE TABLE stg_temperature, stg_power, stg_world_energy;")
-print("✅ Staging tables truncated.")
+print("Staging tables truncated")
 
+print("Extracting data from sources")
 
-# -------------------
-# --- EXTRACTION ---
-# -------------------
-print("📥 Extracting data from sources...")
 # Load temperature CSV
 with open('observed_timeseries_clean.csv', 'r') as f:
     reader = csv.reader(f)
@@ -111,12 +100,11 @@ for indicator, records in worldbank_data.items():
             r['value'] if indicator=='EG.ELC.PETR.ZS' else None,
             r['value'] if indicator=='EG.ELC.RNEW.ZS' else None
         ))
-print("✅ Extraction complete.")
+print("Extraction complete")
 
-# -------------------
-# --- TRANSFORMATION ---
-# -------------------
-print("⚙️ Transforming data in staging area...")
+
+print("Transforming data in staging area")
+
 # Convert % values
 cur_stg.execute("""
 UPDATE stg_world_energy
@@ -127,6 +115,7 @@ SET coal_value = coal_value / 100,
     oil_value = oil_value / 100,
     renewable_value = renewable_value / 100;
 """)
+
 # Aggregate world energy
 cur_stg.execute("""
 DROP TABLE IF EXISTS tr_world_energy;
@@ -141,12 +130,11 @@ SELECT country_code, country_name, data_year,
 FROM stg_world_energy
 GROUP BY country_code, country_name, data_year;
 """)
-print("✅ Transformation complete.")
 
-# -------------------
-# --- LOAD TO WAREHOUSE ---
-# -------------------
-print("🚚 Loading data into data warehouse...")
+print("Transformation complete")
+
+print("Loading data into data warehouse")
+
 # --- DIMENSIONS ---
 cur_stg.execute("SELECT DISTINCT year FROM stg_power")
 years_power = cur_stg.fetchall()
@@ -187,6 +175,7 @@ for row in cur_stg.fetchall():
         date_key, geo_key, to_pg(biomass), to_pg(coal), to_pg(geothermal),
         to_pg(hydro), to_pg(ngas), to_pg(oil), to_pg(solar), to_pg(wind), to_pg(total)
     ))
+    
 cur_dw.executemany(
     """
     INSERT INTO fact_energy (
@@ -222,6 +211,7 @@ for row in rows:
         date_key, geo_key, to_pg(coal), to_pg(hydro), to_pg(ngas),
         to_pg(oil), to_pg(nuclear), to_pg(renewable)
     ))
+    
 cur_dw.executemany(
     """
     INSERT INTO fact_energy (
@@ -238,30 +228,25 @@ cur_dw.executemany(
     """,
     output_rows
 )
-print("✅ Data loading complete.")
+print("Data loading complete")
 
-# =========================================================
 # --- REFRESH MATERIALIZED VIEW (Optimization) ---
-# =========================================================
-print("🔄 Refreshing materialized views...")
+print("Refreshing materialized views.")
+
 try:
     # Use CONCURRENTLY to prevent locking the view during refresh
     cur_dw.execute("REFRESH MATERIALIZED VIEW CONCURRENTLY mv_distinct_countries;")
-    print("✅ Materialized views refreshed concurrently.")
+    print("Materialized views refreshed concurrently")
 except psycopg2.Error as e:
     # Fallback for setups that might not support CONCURRENTLY without a unique index on the view
     print(f"Concurrent refresh failed: {e}. Attempting standard refresh...")
-    conn_dw.rollback() # Required to recover from a failed transaction
+    conn_dw.rollback()
     cur_dw.execute("REFRESH MATERIALIZED VIEW mv_distinct_countries;")
-    print("✅ Materialized view refreshed with standard method.")
+    print("Materialized view refreshed with standard method")
 
-
-# -------------------
-# --- CLOSE CONNECTIONS ---
-# -------------------
 cur_stg.close()
 conn_stg.close()
 cur_dw.close()
 conn_dw.close()
 
-print("\n🎉 ETL process finished successfully! 🎉")
+print("\nETL process finished")
