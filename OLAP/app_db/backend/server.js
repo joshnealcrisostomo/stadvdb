@@ -45,11 +45,18 @@ app.get("/api/filters", async (req, res) => {
             pool.query(countryQuery)
         ]);
 
-        const minYear = 1990;
-        const maxYear = yearResult.rows[0].max_year;
+        const phMinYear = 1990;
+        const phMaxYear = yearResult.rows[0].max_year;
+        const globalMinYear = 1960;
+
         const countries = countryResult.rows.map(row => row.country_name);
 
-        res.json({ minYear, maxYear, countries });
+        res.json({
+            minYear: phMinYear,
+            maxYear: phMaxYear,
+            globalMinYear: globalMinYear,
+            countries
+        });
 
     } catch (err) {
         console.error("Database Query Error in /api/filters:", err);
@@ -93,14 +100,12 @@ app.get("/api/energy-mix-comparison", async (req, res) => {
             dim_date d ON f.date_key = d.date_key
         JOIN
             dim_geo g ON f.geo_key = g.geo_key
-        -- Unpivot source names using a VALUES list for a single scan
         CROSS JOIN
             (VALUES ${sourceList.map(s => `('${s}')`).join(',')}) AS s(source_name)
         WHERE
             d.year >= $1 AND d.year <= $2
             AND g.country_name = ANY($3::text[])
-            -- Filter out rows where the selected percentage column is NULL
-            AND CASE s.source_name ${caseClauses} END IS NOT NULL
+            -- MODIFICATION: Removed the "IS NOT NULL" filter to allow nulls
         ORDER BY
             g.country_name, s.source_name, d.year;
     `;
@@ -118,9 +123,11 @@ app.get("/api/energy-mix-comparison", async (req, res) => {
             if (!transformedData[key]) {
                 transformedData[key] = [];
             }
+            
+            // MODIFICATION: Check for null and pass it, otherwise parse float
             transformedData[key].push({
                 x: year,
-                y: parseFloat(percentage)
+                y: percentage === null ? null : parseFloat(percentage)
             });
         });
         res.json(transformedData);
@@ -166,14 +173,23 @@ app.get('/api/green-energy-vs-weather', async (req, res) => {
             energy: { 'Hydro': [], 'Solar': [], 'Wind': [], 'Biomass': [], 'Geothermal': [] },
         };
         const yearlyTotals = [];
+
+        // Helper function to parse nulls correctly
+        const parseOrNull = (val) => (val === null || val === undefined) ? null : parseFloat(val);
+
         result.rows.forEach(row => {
             responseData.years.push(row.year);
-            responseData.temperature.push(parseFloat(row.avg_mean_temp_deg_c));
-            if (row.hydro_gwh > 0) responseData.energy['Hydro'].push({ x: row.year, y: parseFloat(row.hydro_gwh) });
-            if (row.solar_gwh > 0) responseData.energy['Solar'].push({ x: row.year, y: parseFloat(row.solar_gwh) });
-            if (row.wind_gwh > 0) responseData.energy['Wind'].push({ x: row.year, y: parseFloat(row.wind_gwh) });
-            if (row.biomass_gwh > 0) responseData.energy['Biomass'].push({ x: row.year, y: parseFloat(row.biomass_gwh) });
-            if (row.geothermal_gwh > 0) responseData.energy['Geothermal'].push({ x: row.year, y: parseFloat(row.geothermal_gwh) });
+            // MODIFICATION: Handle null temperature
+            responseData.temperature.push(parseOrNull(row.avg_mean_temp_deg_c));
+            
+            // MODIFICATION: Always push data, passing null if value is null
+            responseData.energy['Hydro'].push({ x: row.year, y: parseOrNull(row.hydro_gwh) });
+            responseData.energy['Solar'].push({ x: row.year, y: parseOrNull(row.solar_gwh) });
+            responseData.energy['Wind'].push({ x: row.year, y: parseOrNull(row.wind_gwh) });
+            responseData.energy['Biomass'].push({ x: row.year, y: parseOrNull(row.biomass_gwh) });
+            responseData.energy['Geothermal'].push({ x: row.year, y: parseOrNull(row.geothermal_gwh) });
+
+            // This part for totals is fine, || 0 is correct for a SUM
             const totalGwh = 
                 (parseFloat(row.hydro_gwh) || 0) +
                 (parseFloat(row.solar_gwh) || 0) +
@@ -194,6 +210,7 @@ app.get('/api/green-energy-vs-weather', async (req, res) => {
 });
 
 app.get('/api/ph-total-energy', async (req, res) => {
+    // ... (This endpoint uses SUM(), which already handles nulls correctly. No changes needed.)
     const { startYear, endYear, aggregation } = req.query;
     if (!startYear || !endYear || !aggregation) {
         return res.status(400).json({ error: 'startYear, endYear, and aggregation are required.' });
@@ -240,6 +257,7 @@ app.get('/api/ph-total-energy', async (req, res) => {
 });
 
 app.get('/api/ph-renewable-vs-non', async (req, res) => {
+    // ... (This endpoint also uses SUM(). No changes needed.)
     const { startYear, endYear, aggregation } = req.query;
     if (!startYear || !endYear || !aggregation) {
         return res.status(400).json({ error: 'startYear, endYear, and aggregation are required.' });
@@ -311,9 +329,12 @@ app.get('/api/non-renewable-generation', async (req, res) => {
                 if (!transformedData[key]) {
                     transformedData[key] = [];
                 }
-                if (decimalValue !== null && decimalValue !== undefined) {
-                    transformedData[key].push({ x: year, y: parseFloat(decimalValue) * 100 });
-                }
+
+                // MODIFICATION: Always push, but check for null/undefined before parsing
+                transformedData[key].push({
+                    x: year,
+                    y: (decimalValue !== null && decimalValue !== undefined) ? parseFloat(decimalValue) * 100 : null
+                });
             }
         });
         res.json(transformedData);

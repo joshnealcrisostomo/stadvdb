@@ -109,6 +109,7 @@ const EnergyMix = () => {
                         borderColor: countryColorMap[country],
                         backgroundColor: `${countryColorMap[country]}80`,
                         fill: false, tension: 0.1, borderWidth: 2,
+                        spanGaps: false // MODIFICATION: Explicitly tell Chart.js to break lines on null
                     });
                 }
                 setFacetedChartData(processedData);
@@ -150,7 +151,15 @@ const EnergyMix = () => {
                 },
                 title: { display: false },
                 tooltip: {
-                    callbacks: { label: (context) => `${context.dataset.label}: ${(context.parsed.y * 100).toFixed(2)}%` }
+                    callbacks: { 
+                        // MODIFICATION: Check for null and show "No Data"
+                        label: (context) => {
+                            if (context.parsed.y === null) {
+                                return `${context.dataset.label}: No Data`;
+                            }
+                            return `${context.dataset.label}: ${(context.parsed.y * 100).toFixed(2)}%`;
+                        }
+                    }
                 }
             },
             scales: {
@@ -213,6 +222,11 @@ const EnergyMix = () => {
                     <div className={styles.yearDisplay}>
                         <span>Energy Mix Comparison of Countries in %</span>
                         ({startYear} <span>&mdash;</span> {endYear})
+                        {Object.keys(facetedChartData).length > 0 && !isChartLoading && (
+                        <p className={styles.disclaimerText}>
+                            Note: Gaps in the line charts indicate that data was not recorded or reported for those specific years.
+                        </p>
+                    )}
                     </div>
                     
                     {selectedCountries.length > 0 && (
@@ -267,7 +281,7 @@ const EnergyMix = () => {
                 <div className={styles.modalOverlay} onClick={() => setShowCountryPopup(false)}>
                     <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
                         <h2>Select Countries</h2>
-                        <p className={styles.modalSubtitle}>{selectedCountries.length} / {MAX_COUNTRIES_SELECTED} selected</p>
+                        <p className={styles.modalSubtitle}>{selectedCountries.length} / {MAX_COUNTRIES_SELECTED}</p>
                         <div className={styles.countryList}>
                             {countries.map((country) => {
                                 const isChecked = selectedCountries.includes(country);

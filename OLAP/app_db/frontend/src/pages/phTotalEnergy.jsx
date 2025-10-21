@@ -69,8 +69,8 @@ const processDataForChart = (apiData) => {
 };
 
 const PhTotalEnergy = () => {
-    const [dbYearBounds, setDbYearBounds] = useState({ min: 1990, max: 2020 });
-    const [yearRange, setYearRange] = useState([1990, 2020]);
+    const [dbYearBounds, setDbYearBounds] = useState({ min: 1990, max: 2024 });
+    const [yearRange, setYearRange] = useState([]);
     const [startYear, endYear] = yearRange;
     const sliderFillRef = useRef(null);
     const [isLoading, setIsLoading] = useState(true);
@@ -246,6 +246,10 @@ const PhTotalEnergy = () => {
                     ) : (
                         <p>No data available for the selected period.</p>
                     )}
+
+                    <p className={styles.disclaimerText}>
+                        Note: Gaps in the line charts indicate that data was not recorded or reported for those specific years.
+                    </p>
                 </div>
 
                 <div className={styles.descriptionArea}>
