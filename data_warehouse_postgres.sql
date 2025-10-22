@@ -1,4 +1,3 @@
--- Star Schema for Data Warehouse
 DROP TABLE IF EXISTS dim_date, dim_geo, fact_weather, fact_energy;
 
 -- DIMENSION TABLES
@@ -33,14 +32,14 @@ CREATE TABLE fact_energy (
     oil            NUMERIC(18,2),
     nuclear        NUMERIC(18,2),
 
-    renewable      NUMERIC(18,2),   -- only for WB % data
+    renewable      NUMERIC(18,2),   
 
     biomass        NUMERIC(18,2),
     geothermal     NUMERIC(18,2),
     solar          NUMERIC(18,2),
     wind           NUMERIC(18,2),
 
-    grand_total    NUMERIC(18,2)    -- applies to PH rows only
+    grand_total    NUMERIC(18,2)    
 );
 
 

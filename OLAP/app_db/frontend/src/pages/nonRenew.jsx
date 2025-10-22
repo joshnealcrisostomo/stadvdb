@@ -99,36 +99,30 @@ const NonRenew = () => {
                 const response = await fetch(`${API_BASE_URL}/non-renewable-generation?${params}`);
                 if (!response.ok) throw new Error('Failed to fetch chart data');
                 const apiData = await response.json();
-
-                // --- CHANGE 1: START - Replace entire data processing logic ---
-                // The new logic iterates through the transformed API data object.
+                
                 const processedData = {};
                 for (const key in apiData) {
                     const [country, source] = key.split(' - ');
 
-                    // Only process data for sources that are currently active
                     if (!activeSources.includes(source)) {
                         continue;
                     }
 
-                    // If this is the first time we see this source, initialize its object
                     if (!processedData[source]) {
                         processedData[source] = { datasets: [] };
                     }
                     
-                    // Push the dataset for the specific country and source
                     processedData[source].datasets.push({
                         label: country,
-                        data: apiData[key], // The data is already in the correct {x, y} format
+                        data: apiData[key], 
                         borderColor: countryColorMap[country],
                         backgroundColor: `${countryColorMap[country]}80`,
                         fill: false,
                         tension: 0.1,
                         borderWidth: 2,
+                        spanGaps: false // MODIFICATION: Tell Chart.js to break lines on null
                     });
                 }
-                // --- CHANGE 1: END ---
-
                 setFacetedChartData(processedData);
 
             } catch (error) {
@@ -166,6 +160,7 @@ const NonRenew = () => {
         setActiveSources(prev => prev.includes(source) ? prev.filter(s => s !== source) : [...prev, source]);
     };
 
+    // MODIFICATION: Updated tooltip callback to handle null
     const generateChartOptions = () => ({
         responsive: true,
         maintainAspectRatio: false,
@@ -174,9 +169,12 @@ const NonRenew = () => {
             title: { display: false },
             tooltip: {
                 callbacks: {
-                    // --- CHANGE 2: Remove "* 100" from tooltip callback ---
-                    // The API now sends percentages directly, so no multiplication is needed.
-                    label: (context) => `${context.dataset.label}: ${context.parsed.y.toFixed(2)}%`
+                    label: (context) => {
+                        if (context.parsed.y === null) {
+                            return `${context.dataset.label}: No Data`;
+                        }
+                        return `${context.dataset.label}: ${context.parsed.y.toFixed(2)}%`;
+                    }
                 }
             }
         },
@@ -193,7 +191,6 @@ const NonRenew = () => {
             },
             y: {
                 title: { display: true, text: 'Generation Share' },
-                // --- CHANGE 3: Remove "* 100" from y-axis ticks callback ---
                 ticks: { callback: (value) => `${value.toFixed(0)}%` },
                 beginAtZero: true
             }
@@ -241,10 +238,16 @@ const NonRenew = () => {
                     <div className={styles.yearDisplay}>
                         <span>Non-Renewable Generation Comparison in %</span>
                         ({startYear} <span>&mdash;</span> {endYear})
+                        {Object.keys(facetedChartData).length > 0 && !isChartLoading && (
+                            <p className={styles.disclaimerText}>
+                                Note: Gaps in the line charts indicate that data was not recorded or reported for those specific years.
+                            </p>
+                        )}
                     </div>
 
                     {selectedCountries.length > 0 && (
                         <div className={styles.sharedLegend}>
+                            {/* ... (Legend content is unchanged) ... */}
                             {selectedCountries.map(country => (
                                 <div key={country} className={styles.legendItem}>
                                     <span className={styles.legendColorBox} style={{ backgroundColor: countryColorMap[country] }}></span>
@@ -257,6 +260,7 @@ const NonRenew = () => {
                     {isChartLoading ? (<p style={{ textAlign: 'center' }}>Loading chart data...</p>)
                         : Object.keys(facetedChartData).length > 0 ? (
                             <div className={styles.chartGrid}>
+                                {/* ... (Chart grid mapping is unchanged) ... */}
                                 {activeSources.map(source => facetedChartData[source] && (
                                     <div key={source} className={styles.chartContainer}>
                                         <h3 className={styles.chartTitle}>{source}</h3>
@@ -276,6 +280,7 @@ const NonRenew = () => {
                 </div>
 
                 <div className={styles.descriptionArea}>
+                    {/* ... (Description content is unchanged) ... */}
                     <h3>Possible Insights to Gain</h3>
                     <p>
                         This report puts a spotlight on the fossil fuel chapter of a country's energy story. By separating sources like <b>coal</b>, <b>oil</b>, and <b>natural gas</b>, it allows you to follow the individual journey of each one. 
@@ -283,28 +288,29 @@ const NonRenew = () => {
                         The purpose is to move beyond the simple "renewable vs. non-renewable" debate and understand the specific choices and dependencies a country has when it comes to traditional power generation.
                     </p>
                 
-<p>
-                    By using this view, you can uncover several key insights:
-                    <ul>
-                        <li>
-                            <b>Identify the dominant fossil fuel</b> for any selected country and see how its reliance has changed over time.
-                        </li>
-                        <li>
-                            <b>Pinpoint strategic shifts</b> by observing the exact years when a country began phasing out one source (like oil) in favor of another (like coal or natural gas).
-                        </li>
-                        <li>
-                            <b>Compare different national paths</b> by selecting multiple countries to see who is doubling down on certain fossil fuels versus who is reducing their reliance.
-                        </li>
-                        <li>
-                            <b>Understand economic and environmental context</b> by seeing a more detailed story of a country's energy choices and its resulting carbon emissions over the decades.
-                        </li>
-                    </ul>
-                </p>
+                    <p>
+                        By using this view, you can uncover several key insights:
+                        <ul>
+                            <li>
+                                <b>Identify the dominant fossil fuel</b> for any selected country and see how its reliance has changed over time.
+                            </li>
+                            <li>
+                                <b>Pinpoint strategic shifts</b> by observing the exact years when a country began phasing out one source (like oil) in favor of another (like coal or natural gas).
+                            </li>
+                            <li>
+                                <b>Compare different national paths</b> by selecting multiple countries to see who is doubling down on certain fossil fuels versus who is reducing their reliance.
+                            </li>
+                            <li>
+                                <b>Understand economic and environmental context</b> by seeing a more detailed story of a country's energy choices and its resulting carbon emissions over the decades.
+                            </li>
+                        </ul>
+                    </p>
                 </div>             
             </div>
 
             {showCountryPopup && (
                 <div className={styles.modalOverlay} onClick={() => setShowCountryPopup(false)}>
+                    {/* ... (Modal content is unchanged) ... */}
                     <div className={styles.modalContent} onClick={(e) => e.stopPropagation()}>
                         <h2>Select Countries</h2>
                         <p className={styles.modalSubtitle}>{selectedCountries.length} / {MAX_COUNTRIES_SELECTED} selected</p>
