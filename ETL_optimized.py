@@ -48,14 +48,31 @@ print("✅ Staging tables truncated.")
 # -------------------
 print("📥 Extracting data from sources...")
 # Load temperature CSV
-with open('observed_timeseries_clean.csv', 'r') as f:
-    reader = csv.reader(f)
-    next(reader)
-    for row in reader:
+
+api_url = "https://cckpapi.worldbank.org/api/v1/cru-x0.5_timeseries_tas_timeseries_annual_1901-2024_mean_historical_cru_ts4.09_mean/PHL?_format=json"
+print(f"Fetching Temperature Timeseries from World Bank API...")
+
+response = requests.get(api_url)
+
+if response.status_code != 200:
+    print(f"Request failed with status {response.status_code}")
+            
+temperature_data = response.json()
+temperature_data = temperature_data.get("data", {}).get("PHL", {})
+
+print(f"Finished fetching Temperature Timeseries Data...")
+
+if not temperature_data:
+        print("No temperature records found for PHL.")
+else:
+    for year_month, value in temperature_data.items():
+        # Extract just the year (e.g., from "1901-07" → 1901)
+        year = int(year_month.split("-")[0])
+
         cur_stg.execute("""
             INSERT INTO stg_temperature (year, avg_mean_temp_deg_c)
             VALUES (%s, %s);
-        """, row)
+        """, (year, value))
 
 # Load power CSV
 with open('power_generation_clean.csv', 'r') as f:
