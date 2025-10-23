@@ -68,10 +68,10 @@ with open('power_generation_clean.csv', 'r') as f:
     reader = csv.reader(f)
     next(reader)
     for row in reader:
-        cur_stg.execute("""
-            INSERT INTO stg_power (year, biomass, coal, geothermal, hydro, natural_gas, oil_based, solar, wind, grand_total)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
-        """, row)
+        cur_stg.copy_expert("""
+        COPY stg_power (year, biomass, coal, geothermal, hydro, natural_gas, oil_based, solar, wind, grand_total)
+        FROM STDIN WITH CSV;
+        """, f)
 
 # Fetch World Bank API → staging
 indicators = [
@@ -216,14 +216,21 @@ cur_dw.executemany(
 
 # --- fact_energy from tr_world_energy (World Bank) ---
 cur_stg.execute("SELECT * FROM tr_world_energy")
+
+# Fetch all years and keys once
+cur_dw.execute("SELECT year, date_key FROM dim_date;")
+date_map = dict(cur_dw.fetchall())
+
+# Fetch all country codes and keys once
+cur_dw.execute("SELECT country_code, geo_key FROM dim_geo;")
+geo_map = dict(cur_dw.fetchall())
+
 rows = cur_stg.fetchall()
 output_rows = []
 for row in rows:
     country_code, country_name, data_year, coal, hydro, ngas, nuclear, oil, renewable = row
-    cur_dw.execute("SELECT date_key FROM dim_date WHERE year=%s", (data_year,))
-    date_key = cur_dw.fetchone()[0]
-    cur_dw.execute("SELECT geo_key FROM dim_geo WHERE country_code=%s", (country_code,))
-    geo_key = cur_dw.fetchone()[0]
+    date_key = date_map.get(data_year)
+    geo_key = geo_map.get(country_code)
     output_rows.append((
         date_key, geo_key, to_pg(coal), to_pg(hydro), to_pg(ngas),
         to_pg(oil), to_pg(nuclear), to_pg(renewable)
