@@ -37,24 +37,41 @@ print("Staging tables truncated")
 print("Extracting data from sources")
 
 # Load temperature CSV
-with open('observed_timeseries_clean.csv', 'r') as f:
-    reader = csv.reader(f)
-    next(reader)
-    for row in reader:
+
+api_url = "https://cckpapi.worldbank.org/api/v1/cru-x0.5_timeseries_tas_timeseries_annual_1901-2024_mean_historical_cru_ts4.09_mean/PHL?_format=json"
+print(f"Fetching Temperature Timeseries from World Bank API...")
+
+response = requests.get(api_url)
+
+if response.status_code != 200:
+    print(f"Request failed with status {response.status_code}")
+            
+temperature_data = response.json()
+temperature_data = temperature_data.get("data", {}).get("PHL", {})
+
+print(f"Finished fetching Temperature Timeseries Data...")
+
+if not temperature_data:
+        print("No temperature records found for PHL.")
+else:
+    for year_month, value in temperature_data.items():
+        # Extract just the year (e.g., from "1901-07" → 1901)
+        year = int(year_month.split("-")[0])
+
         cur_stg.execute("""
             INSERT INTO stg_temperature (year, avg_mean_temp_deg_c)
             VALUES (%s, %s);
-        """, row)
+        """, (year, value))
 
 # Load power CSV
 with open('power_generation_clean.csv', 'r') as f:
     reader = csv.reader(f)
     next(reader)
     for row in reader:
-        cur_stg.execute("""
-            INSERT INTO stg_power (year, biomass, coal, geothermal, hydro, natural_gas, oil_based, solar, wind, grand_total)
-            VALUES (%s, %s, %s, %s, %s, %s, %s, %s, %s, %s);
-        """, row)
+        cur_stg.copy_expert("""
+        COPY stg_power (year, biomass, coal, geothermal, hydro, natural_gas, oil_based, solar, wind, grand_total)
+        FROM STDIN WITH CSV;
+        """, f)
 
 # Fetch World Bank API → staging
 indicators = [
@@ -199,14 +216,21 @@ cur_dw.executemany(
 
 # --- fact_energy from tr_world_energy (World Bank) ---
 cur_stg.execute("SELECT * FROM tr_world_energy")
+
+# Fetch all years and keys once
+cur_dw.execute("SELECT year, date_key FROM dim_date;")
+date_map = dict(cur_dw.fetchall())
+
+# Fetch all country codes and keys once
+cur_dw.execute("SELECT country_code, geo_key FROM dim_geo;")
+geo_map = dict(cur_dw.fetchall())
+
 rows = cur_stg.fetchall()
 output_rows = []
 for row in rows:
     country_code, country_name, data_year, coal, hydro, ngas, nuclear, oil, renewable = row
-    cur_dw.execute("SELECT date_key FROM dim_date WHERE year=%s", (data_year,))
-    date_key = cur_dw.fetchone()[0]
-    cur_dw.execute("SELECT geo_key FROM dim_geo WHERE country_code=%s", (country_code,))
-    geo_key = cur_dw.fetchone()[0]
+    date_key = date_map.get(data_year)
+    geo_key = geo_map.get(country_code)
     output_rows.append((
         date_key, geo_key, to_pg(coal), to_pg(hydro), to_pg(ngas),
         to_pg(oil), to_pg(nuclear), to_pg(renewable)
