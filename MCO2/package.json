@@ -4,7 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "dev": "concurrently \"npm run dev --prefix frontend\" \"node backend/server.js\""
+    "dev": "concurrently \"npm run dev --prefix frontend\" \"node backend/server.js\"",
+    "clean": "rm -rf node_modules package-lock.json frontend/node_modules frontend/package-lock.json backend/node_modules backend/package-lock.json",
+    "install-all": "npm install && npm install --prefix frontend && npm install --prefix backend",
+    "reinstall": "npm run clean && npm run install-all"
   },
   "keywords": [],
   "author": "",
