@@ -1,0 +1,49 @@
+version: '3.8'
+
+services:
+  # Frontend Service
+  frontend:
+    build:
+      context: ./frontend  # Path to frontend's Dockerfile
+    ports:
+      - "5173:5173"  # Map host port 5173 to container port 5173
+    volumes:
+      - ./frontend/src:/app/src # Sync src folder for hot-reloading
+
+  # Backend Service
+  backend:
+    build:
+      context: ./backend  # Path to backend's Dockerfile
+    ports:
+      - "3000:3000"  # Assuming your server.js runs on 3000
+    volumes:
+      - ./backend:/app # Sync entire backend folder
+      - /app/node_modules # Don't sync node_modules
+    environment:
+      # Environment variables for your backend to connect to the DB
+      DB_HOST: db
+      DB_USER: postgres
+      DB_PASSWORD: mysecretpassword
+      DB_NAME: mco2_db
+      DB_PORT: 5432
+    depends_on:
+      - db  # Tells backend to wait for the 'db' service to be ready
+
+  # Database Service
+  db:
+    image: postgres:14-alpine # Use a Postgres image
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: mysecretpassword
+      POSTGRES_DB: mco2_db
+    volumes:
+      # This line runs your schema.sql on startup
+      - ./backend/database/schema.sql:/docker-entrypoint-initdb.d/init.sql
+      # This line persists your database data
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432" # Expose DB port to your host for debugging
+
+volumes:
+  # Defines the persistent volume for the database
+  postgres_data:
