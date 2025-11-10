@@ -1,0 +1,22 @@
+id,name,logo,sdk
+base,Base,https://assets.tcgdex.net/en/base/base1/logo,<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+misc,Miscellaneous,,<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+gym,Gym,https://assets.tcgdex.net/en/gym/gym1/logo,<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+neo,Neo,https://assets.tcgdex.net/en/neo/neo1/logo,<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+lc,Legendary Collection,https://assets.tcgdex.net/en/lc/lc/logo,<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+ecard,E-Card,https://assets.tcgdex.net/en/ecard/ecard1/logo,<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+ex,EX,https://assets.tcgdex.net/en/ex/ex1/logo,<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+pop,POP,https://assets.tcgdex.net/en/pop/pop1/logo,<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+tk,Trainer kits,,<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+dp,Diamond & Pearl,https://assets.tcgdex.net/en/dp/dp1/logo,<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+pl,Platinum,https://assets.tcgdex.net/en/pl/pl1/logo,<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+hgss,HeartGold & SoulSilver,https://assets.tcgdex.net/en/hgss/hgss1/logo,<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+col,Call of Legends,https://assets.tcgdex.net/en/col/col1/logo,<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+bw,Black & White,https://assets.tcgdex.net/en/bw/bw1/logo,<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+mc,McDonald's Collection,,<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+xy,XY,https://assets.tcgdex.net/en/xy/xy1/logo,<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+sm,Sun & Moon,https://assets.tcgdex.net/en/sm/sm1/logo,<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+swsh,Sword & Shield,https://assets.tcgdex.net/en/swsh/swsh1/logo,<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+sv,Scarlet & Violet,https://assets.tcgdex.net/en/sv/sv01/logo,<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+tcgp,Pokémon TCG Pocket,https://assets.tcgdex.net/en/tcgp/A1/logo,<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+me,Mega Evolution,https://assets.tcgdex.net/en/me/me01/logo,<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>

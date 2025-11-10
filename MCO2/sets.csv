@@ -1,0 +1,196 @@
+id,name,logo,symbol,cardCount,sdk
+base1,Base Set,https://assets.tcgdex.net/en/base/base1/logo,,"SetCardCountResume(total=102, official=102)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+base2,Jungle,https://assets.tcgdex.net/en/base/base2/logo,https://assets.tcgdex.net/univ/base/base2/symbol,"SetCardCountResume(total=64, official=64)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+basep,Wizards Black Star Promos,https://assets.tcgdex.net/en/base/basep/logo,https://assets.tcgdex.net/univ/base/basep/symbol,"SetCardCountResume(total=53, official=53)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+wp,W Promotional,,,"SetCardCountResume(total=7, official=7)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+base3,Fossil,https://assets.tcgdex.net/en/base/base3/logo,https://assets.tcgdex.net/univ/base/base3/symbol,"SetCardCountResume(total=62, official=62)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+jumbo,Jumbo cards,,,"SetCardCountResume(total=160, official=160)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+base4,Base Set 2,https://assets.tcgdex.net/en/base/base4/logo,https://assets.tcgdex.net/univ/base/base4/symbol,"SetCardCountResume(total=130, official=130)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+base5,Team Rocket,https://assets.tcgdex.net/en/base/base5/logo,https://assets.tcgdex.net/univ/base/base5/symbol,"SetCardCountResume(total=83, official=82)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+gym1,Gym Heroes,https://assets.tcgdex.net/en/gym/gym1/logo,https://assets.tcgdex.net/univ/gym/gym1/symbol,"SetCardCountResume(total=132, official=132)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+gym2,Gym Challenge,https://assets.tcgdex.net/en/gym/gym2/logo,https://assets.tcgdex.net/univ/gym/gym2/symbol,"SetCardCountResume(total=132, official=132)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+neo1,Neo Genesis,https://assets.tcgdex.net/en/neo/neo1/logo,https://assets.tcgdex.net/univ/neo/neo1/symbol,"SetCardCountResume(total=111, official=111)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+neo2,Neo Discovery,https://assets.tcgdex.net/en/neo/neo2/logo,https://assets.tcgdex.net/univ/neo/neo2/symbol,"SetCardCountResume(total=75, official=75)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+si1,Southern Islands,https://assets.tcgdex.net/en/neo/si1/logo,https://assets.tcgdex.net/univ/neo/si1/symbol,"SetCardCountResume(total=18, official=18)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+neo3,Neo Revelation,https://assets.tcgdex.net/en/neo/neo3/logo,https://assets.tcgdex.net/univ/neo/neo3/symbol,"SetCardCountResume(total=66, official=64)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+neo4,Neo Destiny,https://assets.tcgdex.net/en/neo/neo4/logo,https://assets.tcgdex.net/univ/neo/neo4/symbol,"SetCardCountResume(total=113, official=105)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+lc,Legendary Collection,https://assets.tcgdex.net/en/lc/lc/logo,https://assets.tcgdex.net/univ/lc/lc/symbol,"SetCardCountResume(total=110, official=110)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+sp,Sample,,https://assets.tcgdex.net/univ/ecard/sp/symbol,"SetCardCountResume(total=10, official=10)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+ecard1,Expedition Base Set,https://assets.tcgdex.net/en/ecard/ecard1/logo,https://assets.tcgdex.net/univ/ecard/ecard1/symbol,"SetCardCountResume(total=165, official=165)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+bog,Best of game,,https://assets.tcgdex.net/univ/ecard/bog/symbol,"SetCardCountResume(total=9, official=9)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+ecard2,Aquapolis,https://assets.tcgdex.net/en/ecard/ecard2/logo,https://assets.tcgdex.net/univ/ecard/ecard2/symbol,"SetCardCountResume(total=186, official=147)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+ecard3,Skyridge,https://assets.tcgdex.net/en/ecard/ecard3/logo,https://assets.tcgdex.net/univ/ecard/ecard3/symbol,"SetCardCountResume(total=182, official=144)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+ex1,Ruby & Sapphire,https://assets.tcgdex.net/en/ex/ex1/logo,https://assets.tcgdex.net/univ/ex/ex1/symbol,"SetCardCountResume(total=109, official=109)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+ex2,Sandstorm,https://assets.tcgdex.net/en/ex/ex2/logo,https://assets.tcgdex.net/univ/ex/ex2/symbol,"SetCardCountResume(total=100, official=100)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+np,Nintendo Black Star Promos,https://assets.tcgdex.net/en/pop/np/logo,https://assets.tcgdex.net/univ/pop/np/symbol,"SetCardCountResume(total=40, official=40)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+ex3,Dragon,https://assets.tcgdex.net/en/ex/ex3/logo,https://assets.tcgdex.net/univ/ex/ex3/symbol,"SetCardCountResume(total=100, official=97)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+ex4,Team Magma vs Team Aqua,https://assets.tcgdex.net/en/ex/ex4/logo,https://assets.tcgdex.net/univ/ex/ex4/symbol,"SetCardCountResume(total=97, official=95)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+ex5,Hidden Legends,https://assets.tcgdex.net/en/ex/ex5/logo,https://assets.tcgdex.net/univ/ex/ex5/symbol,"SetCardCountResume(total=102, official=101)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+ex5.5,Poké Card Creator Pack,,,"SetCardCountResume(total=5, official=5)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+tk-ex-latio,EX trainer Kit (Latios),,https://assets.tcgdex.net/univ/tk/tk-ex-latio/symbol,"SetCardCountResume(total=10, official=10)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+tk-ex-latia,EX trainer Kit (Latias),,https://assets.tcgdex.net/univ/tk/tk-ex-latia/symbol,"SetCardCountResume(total=10, official=10)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+ex6,FireRed & LeafGreen,https://assets.tcgdex.net/en/ex/ex6/logo,https://assets.tcgdex.net/univ/ex/ex6/symbol,"SetCardCountResume(total=116, official=112)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+pop1,POP Series 1,https://assets.tcgdex.net/en/pop/pop1/logo,https://assets.tcgdex.net/univ/pop/pop1/symbol,"SetCardCountResume(total=17, official=17)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+ex7,Team Rocket Returns,https://assets.tcgdex.net/en/ex/ex7/logo,https://assets.tcgdex.net/univ/ex/ex7/symbol,"SetCardCountResume(total=111, official=109)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+ex8,Deoxys,https://assets.tcgdex.net/en/ex/ex8/logo,https://assets.tcgdex.net/univ/ex/ex8/symbol,"SetCardCountResume(total=108, official=107)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+ex9,Emerald,https://assets.tcgdex.net/en/ex/ex9/logo,https://assets.tcgdex.net/univ/ex/ex9/symbol,"SetCardCountResume(total=107, official=106)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+pop2,POP Series 2,https://assets.tcgdex.net/en/pop/pop2/logo,https://assets.tcgdex.net/univ/pop/pop2/symbol,"SetCardCountResume(total=17, official=17)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+exu,Unseen Forces Unown Collection,,,"SetCardCountResume(total=28, official=28)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+ex10,Unseen Forces,https://assets.tcgdex.net/en/ex/ex10/logo,https://assets.tcgdex.net/univ/ex/ex10/symbol,"SetCardCountResume(total=117, official=115)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+ex11,Delta Species,https://assets.tcgdex.net/en/ex/ex11/logo,https://assets.tcgdex.net/univ/ex/ex11/symbol,"SetCardCountResume(total=114, official=113)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+ex12,Legend Maker,https://assets.tcgdex.net/en/ex/ex12/logo,https://assets.tcgdex.net/univ/ex/ex12/symbol,"SetCardCountResume(total=93, official=92)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+tk-ex-p,EX trainer Kit 2 (Plusle),,https://assets.tcgdex.net/univ/tk/tk-ex-p/symbol,"SetCardCountResume(total=12, official=12)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+tk-ex-m,EX trainer Kit 2 (Minun),,,"SetCardCountResume(total=12, official=12)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+pop3,POP Series 3,https://assets.tcgdex.net/en/pop/pop3/logo,https://assets.tcgdex.net/univ/pop/pop3/symbol,"SetCardCountResume(total=17, official=17)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+ex13,Holon Phantoms,https://assets.tcgdex.net/en/ex/ex13/logo,https://assets.tcgdex.net/univ/ex/ex13/symbol,"SetCardCountResume(total=111, official=110)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+pop4,POP Series 4,https://assets.tcgdex.net/en/pop/pop4/logo,https://assets.tcgdex.net/univ/pop/pop4/symbol,"SetCardCountResume(total=17, official=17)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+ex14,Crystal Guardians,https://assets.tcgdex.net/en/ex/ex14/logo,https://assets.tcgdex.net/univ/ex/ex14/symbol,"SetCardCountResume(total=100, official=100)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+ex15,Dragon Frontiers,https://assets.tcgdex.net/en/ex/ex15/logo,https://assets.tcgdex.net/univ/ex/ex15/symbol,"SetCardCountResume(total=101, official=101)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+ex16,Power Keepers,https://assets.tcgdex.net/en/ex/ex16/logo,https://assets.tcgdex.net/univ/ex/ex16/symbol,"SetCardCountResume(total=108, official=108)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+pop5,POP Series 5,https://assets.tcgdex.net/en/pop/pop5/logo,https://assets.tcgdex.net/univ/pop/pop5/symbol,"SetCardCountResume(total=17, official=17)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+dp1,Diamond & Pearl,https://assets.tcgdex.net/en/dp/dp1/logo,https://assets.tcgdex.net/univ/dp/dp1/symbol,"SetCardCountResume(total=130, official=130)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+dpp,DP Black Star Promos,https://assets.tcgdex.net/en/dp/dpp/logo,https://assets.tcgdex.net/univ/dp/dpp/symbol,"SetCardCountResume(total=56, official=56)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+dp2,Mysterious Treasures,https://assets.tcgdex.net/en/dp/dp2/logo,https://assets.tcgdex.net/univ/dp/dp2/symbol,"SetCardCountResume(total=124, official=122)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+pop6,POP Series 6,https://assets.tcgdex.net/en/pop/pop6/logo,https://assets.tcgdex.net/univ/pop/pop6/symbol,"SetCardCountResume(total=17, official=17)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+tk-dp-l,DP trainer Kit (Lucario),,https://assets.tcgdex.net/univ/tk/tk-dp-l/symbol,"SetCardCountResume(total=11, official=11)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+tk-dp-m,DP trainer Kit (Manaphy),,https://assets.tcgdex.net/univ/tk/tk-dp-m/symbol,"SetCardCountResume(total=12, official=12)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+dp3,Secret Wonders,https://assets.tcgdex.net/en/dp/dp3/logo,https://assets.tcgdex.net/univ/dp/dp3/symbol,"SetCardCountResume(total=132, official=132)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+dp4,Great Encounters,https://assets.tcgdex.net/en/dp/dp4/logo,https://assets.tcgdex.net/univ/dp/dp4/symbol,"SetCardCountResume(total=106, official=106)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+pop7,POP Series 7,https://assets.tcgdex.net/en/pop/pop7/logo,https://assets.tcgdex.net/univ/pop/pop7/symbol,"SetCardCountResume(total=17, official=17)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+dp5,Majestic Dawn,https://assets.tcgdex.net/en/dp/dp5/logo,https://assets.tcgdex.net/univ/dp/dp5/symbol,"SetCardCountResume(total=100, official=100)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+dp6,Legends Awakened,https://assets.tcgdex.net/en/dp/dp6/logo,https://assets.tcgdex.net/univ/dp/dp6/symbol,"SetCardCountResume(total=146, official=146)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+pop8,POP Series 8,https://assets.tcgdex.net/en/pop/pop8/logo,https://assets.tcgdex.net/univ/pop/pop8/symbol,"SetCardCountResume(total=17, official=17)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+dp7,Stormfront,https://assets.tcgdex.net/en/dp/dp7/logo,https://assets.tcgdex.net/univ/dp/dp7/symbol,"SetCardCountResume(total=106, official=100)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+pl1,Platinum,https://assets.tcgdex.net/en/pl/pl1/logo,https://assets.tcgdex.net/univ/pl/pl1/symbol,"SetCardCountResume(total=133, official=127)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+pop9,POP Series 9,https://assets.tcgdex.net/en/pop/pop9/logo,https://assets.tcgdex.net/univ/pop/pop9/symbol,"SetCardCountResume(total=17, official=17)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+pl2,Rising Rivals,https://assets.tcgdex.net/en/pl/pl2/logo,https://assets.tcgdex.net/univ/pl/pl2/symbol,"SetCardCountResume(total=120, official=111)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+pl3,Supreme Victors,https://assets.tcgdex.net/en/pl/pl3/logo,https://assets.tcgdex.net/univ/pl/pl3/symbol,"SetCardCountResume(total=153, official=147)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+pl4,Arceus,https://assets.tcgdex.net/en/pl/pl4/logo,https://assets.tcgdex.net/univ/pl/pl4/symbol,"SetCardCountResume(total=111, official=99)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+ru1,Pokémon Rumble,https://assets.tcgdex.net/en/pl/ru1/logo,https://assets.tcgdex.net/univ/pl/ru1/symbol,"SetCardCountResume(total=16, official=16)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+hgss1,HeartGold SoulSilver,https://assets.tcgdex.net/en/hgss/hgss1/logo,https://assets.tcgdex.net/univ/hgss/hgss1/symbol,"SetCardCountResume(total=124, official=123)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+hgssp,HGSS Black Star Promos,https://assets.tcgdex.net/en/hgss/hgssp/logo,https://assets.tcgdex.net/univ/hgss/hgssp/symbol,"SetCardCountResume(total=25, official=25)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+tk-hs-g,HS trainer Kit (Gyarados),,https://assets.tcgdex.net/univ/tk/tk-hs-g/symbol,"SetCardCountResume(total=30, official=30)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+tk-hs-r,HS trainer Kit (Raichu),,https://assets.tcgdex.net/univ/tk/tk-hs-r/symbol,"SetCardCountResume(total=30, official=30)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+hgss2,Unleashed,https://assets.tcgdex.net/en/hgss/hgss2/logo,https://assets.tcgdex.net/univ/hgss/hgss2/symbol,"SetCardCountResume(total=96, official=95)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+hgss3,Undaunted,https://assets.tcgdex.net/en/hgss/hgss3/logo,https://assets.tcgdex.net/univ/hgss/hgss3/symbol,"SetCardCountResume(total=91, official=90)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+hgss4,Triumphant,https://assets.tcgdex.net/en/hgss/hgss4/logo,https://assets.tcgdex.net/univ/hgss/hgss4/symbol,"SetCardCountResume(total=103, official=102)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+col1,Call of Legends,https://assets.tcgdex.net/en/col/col1/logo,https://assets.tcgdex.net/univ/col/col1/symbol,"SetCardCountResume(total=106, official=95)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+bw1,Black & White,https://assets.tcgdex.net/en/bw/bw1/logo,https://assets.tcgdex.net/univ/bw/bw1/symbol,"SetCardCountResume(total=115, official=114)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+bwp,BW Black Star Promos,https://assets.tcgdex.net/en/bw/bwp/logo,https://assets.tcgdex.net/univ/bw/bwp/symbol,"SetCardCountResume(total=101, official=101)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+2011bw,Macdonald's Collection 2011,,,"SetCardCountResume(total=12, official=12)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+bw2,Emerging Powers,https://assets.tcgdex.net/en/bw/bw2/logo,https://assets.tcgdex.net/univ/bw/bw2/symbol,"SetCardCountResume(total=98, official=98)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+tk-bw-z,BW trainer Kit (Zoroark),,,"SetCardCountResume(total=30, official=30)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+tk-bw-e,BW trainer Kit (Excadrill),,,"SetCardCountResume(total=30, official=30)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+bw3,Noble Victories,https://assets.tcgdex.net/en/bw/bw3/logo,https://assets.tcgdex.net/univ/bw/bw3/symbol,"SetCardCountResume(total=102, official=101)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+bw4,Next Destinies,https://assets.tcgdex.net/en/bw/bw4/logo,https://assets.tcgdex.net/univ/bw/bw4/symbol,"SetCardCountResume(total=103, official=99)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+bw5,Dark Explorers,https://assets.tcgdex.net/en/bw/bw5/logo,https://assets.tcgdex.net/univ/bw/bw5/symbol,"SetCardCountResume(total=111, official=108)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+2012bw,Macdonald's Collection 2012,,,"SetCardCountResume(total=12, official=12)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+bw6,Dragons Exalted,https://assets.tcgdex.net/en/bw/bw6/logo,https://assets.tcgdex.net/univ/bw/bw6/symbol,"SetCardCountResume(total=128, official=124)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+dv1,Dragon Vault,https://assets.tcgdex.net/en/bw/dv1/logo,https://assets.tcgdex.net/univ/bw/dv1/symbol,"SetCardCountResume(total=21, official=20)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+bw7,Boundaries Crossed,https://assets.tcgdex.net/en/bw/bw7/logo,https://assets.tcgdex.net/univ/bw/bw7/symbol,"SetCardCountResume(total=153, official=149)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+bw8,Plasma Storm,https://assets.tcgdex.net/en/bw/bw8/logo,https://assets.tcgdex.net/univ/bw/bw8/symbol,"SetCardCountResume(total=138, official=135)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+bw9,Plasma Freeze,https://assets.tcgdex.net/en/bw/bw9/logo,https://assets.tcgdex.net/univ/bw/bw9/symbol,"SetCardCountResume(total=122, official=116)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+bw10,Plasma Blast,https://assets.tcgdex.net/en/bw/bw10/logo,https://assets.tcgdex.net/univ/bw/bw10/symbol,"SetCardCountResume(total=105, official=101)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+xyp,XY Black Star Promos,https://assets.tcgdex.net/en/xy/xyp/logo,https://assets.tcgdex.net/univ/xy/xyp/symbol,"SetCardCountResume(total=216, official=211)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+rc,Radiant Collection,,,"SetCardCountResume(total=25, official=25)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+bw11,Legendary Treasures,https://assets.tcgdex.net/en/bw/bw11/logo,https://assets.tcgdex.net/univ/bw/bw11/symbol,"SetCardCountResume(total=140, official=113)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+xy0,Kalos Starter Set,https://assets.tcgdex.net/en/xy/xy0/logo,https://assets.tcgdex.net/univ/xy/xy0/symbol,"SetCardCountResume(total=39, official=39)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+xy1,XY,https://assets.tcgdex.net/en/xy/xy1/logo,https://assets.tcgdex.net/univ/xy/xy1/symbol,"SetCardCountResume(total=146, official=146)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+xya,Yello A Alternate,,,"SetCardCountResume(total=6, official=6)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+tk-xy-sy,XY trainer Kit (Sylveon),,https://assets.tcgdex.net/univ/tk/tk-xy-sy/symbol,"SetCardCountResume(total=30, official=30)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+tk-xy-n,XY trainer Kit (Noivern),,https://assets.tcgdex.net/univ/tk/tk-xy-n/symbol,"SetCardCountResume(total=30, official=30)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+xy2,Flashfire,https://assets.tcgdex.net/en/xy/xy2/logo,https://assets.tcgdex.net/univ/xy/xy2/symbol,"SetCardCountResume(total=110, official=106)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+2014xy,Macdonald's Collection 2014,,,"SetCardCountResume(total=12, official=12)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+xy3,Furious Fists,https://assets.tcgdex.net/en/xy/xy3/logo,https://assets.tcgdex.net/univ/xy/xy3/symbol,"SetCardCountResume(total=114, official=111)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+tk-xy-b,XY trainer Kit (Bisharp),,https://assets.tcgdex.net/univ/tk/tk-xy-b/symbol,"SetCardCountResume(total=30, official=30)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+tk-xy-w,XY trainer Kit (Wigglytuff),,https://assets.tcgdex.net/univ/tk/tk-xy-w/symbol,"SetCardCountResume(total=30, official=30)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+xy4,Phantom Forces,https://assets.tcgdex.net/en/xy/xy4/logo,https://assets.tcgdex.net/univ/xy/xy4/symbol,"SetCardCountResume(total=124, official=119)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+xy5,Primal Clash,https://assets.tcgdex.net/en/xy/xy5/logo,https://assets.tcgdex.net/univ/xy/xy5/symbol,"SetCardCountResume(total=164, official=160)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+dc1,Double Crisis,https://assets.tcgdex.net/en/xy/dc1/logo,https://assets.tcgdex.net/univ/xy/dc1/symbol,"SetCardCountResume(total=34, official=34)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+tk-xy-latia,XY trainer Kit (Latias),,https://assets.tcgdex.net/univ/tk/tk-xy-latia/symbol,"SetCardCountResume(total=30, official=30)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+tk-xy-latio,XY trainer Kit (Latios),,https://assets.tcgdex.net/univ/tk/tk-xy-latio/symbol,"SetCardCountResume(total=30, official=30)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+xy6,Roaring Skies,https://assets.tcgdex.net/en/xy/xy6/logo,https://assets.tcgdex.net/univ/xy/xy6/symbol,"SetCardCountResume(total=112, official=108)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+xy7,Ancient Origins,https://assets.tcgdex.net/en/xy/xy7/logo,https://assets.tcgdex.net/univ/xy/xy7/symbol,"SetCardCountResume(total=101, official=98)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+xy8,BREAKthrough,https://assets.tcgdex.net/en/xy/xy8/logo,https://assets.tcgdex.net/univ/xy/xy8/symbol,"SetCardCountResume(total=165, official=162)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+2015xy,Macdonald's Collection 2015,,,"SetCardCountResume(total=12, official=12)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+xy9,BREAKpoint,https://assets.tcgdex.net/en/xy/xy9/logo,https://assets.tcgdex.net/univ/xy/xy9/symbol,"SetCardCountResume(total=126, official=122)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+g1,Generations,https://assets.tcgdex.net/en/xy/g1/logo,https://assets.tcgdex.net/univ/xy/g1/symbol,"SetCardCountResume(total=117, official=83)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+tk-xy-p,XY trainer Kit (Pikachu Libre),,https://assets.tcgdex.net/univ/tk/tk-xy-p/symbol,"SetCardCountResume(total=30, official=30)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+tk-xy-su,XY trainer Kit (Suicune),,https://assets.tcgdex.net/univ/tk/tk-xy-su/symbol,"SetCardCountResume(total=30, official=30)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+xy10,Fates Collide,https://assets.tcgdex.net/en/xy/xy10/logo,https://assets.tcgdex.net/univ/xy/xy10/symbol,"SetCardCountResume(total=129, official=124)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+xy11,Steam Siege,https://assets.tcgdex.net/en/xy/xy11/logo,https://assets.tcgdex.net/univ/xy/xy11/symbol,"SetCardCountResume(total=116, official=114)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+2016xy,Macdonald's Collection 2016,,,"SetCardCountResume(total=12, official=12)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+xy12,Evolutions,https://assets.tcgdex.net/en/xy/xy12/logo,https://assets.tcgdex.net/univ/xy/xy12/symbol,"SetCardCountResume(total=113, official=108)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+sm1,Sun & Moon,https://assets.tcgdex.net/en/sm/sm1/logo,https://assets.tcgdex.net/univ/sm/sm1/symbol,"SetCardCountResume(total=172, official=149)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+smp,SM Black Star Promos,https://assets.tcgdex.net/en/sm/smp/logo,https://assets.tcgdex.net/univ/sm/smp/symbol,"SetCardCountResume(total=244, official=236)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+tk-sm-l,SM trainer Kit (Lycanroc),,https://assets.tcgdex.net/univ/tk/tk-sm-l/symbol,"SetCardCountResume(total=30, official=30)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+tk-sm-r,SM trainer Kit (Alolan Raichu),,https://assets.tcgdex.net/univ/tk/tk-sm-r/symbol,"SetCardCountResume(total=30, official=30)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+sm2,Guardians Rising,https://assets.tcgdex.net/en/sm/sm2/logo,https://assets.tcgdex.net/univ/sm/sm2/symbol,"SetCardCountResume(total=169, official=145)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+2017sm,Macdonald's Collection 2017,,,"SetCardCountResume(total=12, official=12)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+sm3,Burning Shadows,https://assets.tcgdex.net/en/sm/sm3/logo,https://assets.tcgdex.net/univ/sm/sm3/symbol,"SetCardCountResume(total=169, official=147)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+sm3.5,Shining Legends,,,"SetCardCountResume(total=78, official=73)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+sm4,Crimson Invasion,https://assets.tcgdex.net/en/sm/sm4/logo,https://assets.tcgdex.net/univ/sm/sm4/symbol,"SetCardCountResume(total=125, official=111)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+sm5,Ultra Prism,https://assets.tcgdex.net/en/sm/sm5/logo,https://assets.tcgdex.net/univ/sm/sm5/symbol,"SetCardCountResume(total=173, official=156)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+sm6,Forbidden Light,https://assets.tcgdex.net/en/sm/sm6/logo,https://assets.tcgdex.net/univ/sm/sm6/symbol,"SetCardCountResume(total=146, official=131)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+sm7,Celestial Storm,https://assets.tcgdex.net/en/sm/sm7/logo,https://assets.tcgdex.net/univ/sm/sm7/symbol,"SetCardCountResume(total=183, official=168)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+sm7.5,Dragon Majesty,,,"SetCardCountResume(total=78, official=70)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+2018sm,Macdonald's Collection 2018,,,"SetCardCountResume(total=12, official=12)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+sm8,Lost Thunder,https://assets.tcgdex.net/en/sm/sm8/logo,https://assets.tcgdex.net/univ/sm/sm8/symbol,"SetCardCountResume(total=236, official=214)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+sm9,Team Up,https://assets.tcgdex.net/en/sm/sm9/logo,https://assets.tcgdex.net/univ/sm/sm9/symbol,"SetCardCountResume(total=196, official=181)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+det1,Detective Pikachu,https://assets.tcgdex.net/en/sm/det1/logo,https://assets.tcgdex.net/univ/sm/det1/symbol,"SetCardCountResume(total=18, official=18)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+sm10,Unbroken Bonds,https://assets.tcgdex.net/en/sm/sm10/logo,https://assets.tcgdex.net/univ/sm/sm10/symbol,"SetCardCountResume(total=234, official=214)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+sm11,Unified Minds,https://assets.tcgdex.net/en/sm/sm11/logo,https://assets.tcgdex.net/univ/sm/sm11/symbol,"SetCardCountResume(total=258, official=236)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+sm115,Hidden Fates,https://assets.tcgdex.net/en/sm/sm115/logo,https://assets.tcgdex.net/univ/sm/sm115/symbol,"SetCardCountResume(total=69, official=68)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+sma,Yellow A Alternate,,https://assets.tcgdex.net/univ/sm/sma/symbol,"SetCardCountResume(total=94, official=94)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+2019sm,Macdonald's Collection 2019,,,"SetCardCountResume(total=12, official=12)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+sm12,Cosmic Eclipse,https://assets.tcgdex.net/en/sm/sm12/logo,https://assets.tcgdex.net/univ/sm/sm12/symbol,"SetCardCountResume(total=271, official=236)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+swshp,SWSH Black Star Promos,https://assets.tcgdex.net/en/swsh/swshp/logo,https://assets.tcgdex.net/univ/swsh/swshp/symbol,"SetCardCountResume(total=287, official=107)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+swsh1,Sword & Shield,https://assets.tcgdex.net/en/swsh/swsh1/logo,https://assets.tcgdex.net/univ/swsh/swsh1/symbol,"SetCardCountResume(total=216, official=202)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+swsh2,Rebel Clash,https://assets.tcgdex.net/en/swsh/swsh2/logo,https://assets.tcgdex.net/univ/swsh/swsh2/symbol,"SetCardCountResume(total=209, official=192)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+swsh3,Darkness Ablaze,https://assets.tcgdex.net/en/swsh/swsh3/logo,https://assets.tcgdex.net/univ/swsh/swsh3/symbol,"SetCardCountResume(total=201, official=189)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+fut2020,Pokémon Futsal 2020,https://assets.tcgdex.net/en/swsh/fut2020/logo,https://assets.tcgdex.net/univ/swsh/fut2020/symbol,"SetCardCountResume(total=5, official=5)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+swsh3.5,Champion's Path,https://assets.tcgdex.net/en/swsh/swsh3.5/logo,https://assets.tcgdex.net/univ/swsh/swsh3.5/symbol,"SetCardCountResume(total=80, official=70)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+swsh4,Vivid Voltage,https://assets.tcgdex.net/en/swsh/swsh4/logo,https://assets.tcgdex.net/univ/swsh/swsh4/symbol,"SetCardCountResume(total=203, official=185)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+2021swsh,Macdonald's Collection 2021,,https://assets.tcgdex.net/univ/mc/2021swsh/symbol,"SetCardCountResume(total=25, official=25)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+swsh4.5,Shining Fates,https://assets.tcgdex.net/en/swsh/swsh4.5/logo,https://assets.tcgdex.net/univ/swsh/swsh4.5/symbol,"SetCardCountResume(total=195, official=72)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+swsh5,Battle Styles,https://assets.tcgdex.net/en/swsh/swsh5/logo,https://assets.tcgdex.net/univ/swsh/swsh5/symbol,"SetCardCountResume(total=183, official=163)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+swsh6,Chilling Reign,https://assets.tcgdex.net/en/swsh/swsh6/logo,https://assets.tcgdex.net/univ/swsh/swsh6/symbol,"SetCardCountResume(total=233, official=198)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+swsh7,Evolving Skies,https://assets.tcgdex.net/en/swsh/swsh7/logo,https://assets.tcgdex.net/univ/swsh/swsh7/symbol,"SetCardCountResume(total=237, official=203)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+cel25,Celebrations,https://assets.tcgdex.net/en/swsh/cel25/logo,https://assets.tcgdex.net/univ/swsh/cel25/symbol,"SetCardCountResume(total=51, official=25)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+swsh8,Fusion Strike,https://assets.tcgdex.net/en/swsh/swsh8/logo,https://assets.tcgdex.net/univ/swsh/swsh8/symbol,"SetCardCountResume(total=284, official=264)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+swsh9,Brilliant Stars,https://assets.tcgdex.net/en/swsh/swsh9/logo,https://assets.tcgdex.net/univ/swsh/swsh9/symbol,"SetCardCountResume(total=216, official=172)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+swsh10,Astral Radiance,https://assets.tcgdex.net/en/swsh/swsh10/logo,https://assets.tcgdex.net/univ/swsh/swsh10/symbol,"SetCardCountResume(total=246, official=189)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+swsh10.5,Pokémon GO,https://assets.tcgdex.net/en/swsh/swsh10.5/logo,https://assets.tcgdex.net/univ/swsh/swsh10.5/symbol,"SetCardCountResume(total=88, official=78)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+swsh11,Lost Origin,https://assets.tcgdex.net/en/swsh/swsh11/logo,https://assets.tcgdex.net/univ/swsh/swsh11/symbol,"SetCardCountResume(total=247, official=196)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+swsh12,Silver Tempest,https://assets.tcgdex.net/en/swsh/swsh12/logo,https://assets.tcgdex.net/univ/swsh/swsh12/symbol,"SetCardCountResume(total=245, official=195)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+swsh12.5,Crown Zenith,https://assets.tcgdex.net/en/swsh/swsh12.5/logo,https://assets.tcgdex.net/univ/swsh/swsh12.5/symbol,"SetCardCountResume(total=230, official=159)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+svp,SVP Black Star Promos,,,"SetCardCountResume(total=219, official=0)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+sv01,Scarlet & Violet,https://assets.tcgdex.net/en/sv/sv01/logo,https://assets.tcgdex.net/univ/sv/sv01/symbol,"SetCardCountResume(total=258, official=198)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+sv02,Paldea Evolved,https://assets.tcgdex.net/en/sv/sv02/logo,https://assets.tcgdex.net/univ/sv/sv02/symbol,"SetCardCountResume(total=279, official=193)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+sv03,Obsidian Flames,https://assets.tcgdex.net/en/sv/sv03/logo,https://assets.tcgdex.net/univ/sv/sv03/symbol,"SetCardCountResume(total=230, official=197)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+sv03.5,151,https://assets.tcgdex.net/en/sv/sv03.5/logo,https://assets.tcgdex.net/univ/sv/sv03.5/symbol,"SetCardCountResume(total=207, official=165)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+sv04,Paradox Rift,https://assets.tcgdex.net/en/sv/sv04/logo,https://assets.tcgdex.net/univ/sv/sv04/symbol,"SetCardCountResume(total=266, official=182)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+sv04.5,Paldean Fates,https://assets.tcgdex.net/en/sv/sv04.5/logo,https://assets.tcgdex.net/univ/sv/sv04.5/symbol,"SetCardCountResume(total=245, official=91)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+sv05,Temporal Forces,,https://assets.tcgdex.net/univ/sv/sv05/symbol,"SetCardCountResume(total=218, official=162)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+sv06,Twilight Masquerade,https://assets.tcgdex.net/en/sv/sv06/logo,https://assets.tcgdex.net/univ/sv/sv06/symbol,"SetCardCountResume(total=226, official=167)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+sv06.5,Shrouded Fable,https://assets.tcgdex.net/en/sv/sv06.5/logo,https://assets.tcgdex.net/univ/sv/sv06.5/symbol,"SetCardCountResume(total=99, official=64)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+sv07,Stellar Crown,https://assets.tcgdex.net/en/sv/sv07/logo,,"SetCardCountResume(total=175, official=142)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+A1,Genetic Apex,https://assets.tcgdex.net/en/tcgp/A1/logo,https://assets.tcgdex.net/univ/tcgp/A1/symbol,"SetCardCountResume(total=286, official=226)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+P-A,Promos-A,https://assets.tcgdex.net/en/tcgp/P-A/logo,,"SetCardCountResume(total=100, official=0)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+sv08,Surging Sparks,https://assets.tcgdex.net/en/sv/sv08/logo,,"SetCardCountResume(total=252, official=191)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+A1a,Mythical Island,https://assets.tcgdex.net/en/tcgp/A1a/logo,,"SetCardCountResume(total=86, official=68)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+sv08.5,Prismatic Evolutions,https://assets.tcgdex.net/en/sv/sv08.5/logo,,"SetCardCountResume(total=180, official=131)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+A2,Space-Time Smackdown,https://assets.tcgdex.net/en/tcgp/A2/logo,,"SetCardCountResume(total=207, official=140)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+A2a,Triumphant Light,https://assets.tcgdex.net/en/tcgp/A2a/logo,https://assets.tcgdex.net/univ/tcgp/A2a/symbol,"SetCardCountResume(total=96, official=75)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+A2b,Shining Revelry,https://assets.tcgdex.net/en/tcgp/A2b/logo,https://assets.tcgdex.net/univ/tcgp/A2b/symbol,"SetCardCountResume(total=111, official=72)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+sv09,Journey Together,https://assets.tcgdex.net/en/sv/sv09/logo,https://assets.tcgdex.net/univ/sv/sv09/symbol,"SetCardCountResume(total=190, official=159)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+A3,Celestial Guardians,https://assets.tcgdex.net/en/tcgp/A3/logo,,"SetCardCountResume(total=239, official=155)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+A3a,Extradimensional Crisis,,,"SetCardCountResume(total=103, official=69)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+sv10,Destined Rivals,https://assets.tcgdex.net/en/sv/sv10/logo,https://assets.tcgdex.net/univ/sv/sv10/symbol,"SetCardCountResume(total=244, official=182)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+A3b,Eevee Grove,,,"SetCardCountResume(total=107, official=69)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+sv10.5b,Black Bolt,https://assets.tcgdex.net/en/sv/sv10.5b/logo,https://assets.tcgdex.net/univ/sv/sv10.5b/symbol,"SetCardCountResume(total=172, official=86)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+sv10.5w,White Flare,https://assets.tcgdex.net/en/sv/sv10.5w/logo,https://assets.tcgdex.net/univ/sv/sv10.5w/symbol,"SetCardCountResume(total=173, official=86)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+A4,Wisdom of Sea and Sky,https://assets.tcgdex.net/en/tcgp/A4/logo,,"SetCardCountResume(total=241, official=161)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+A4a,Secluded Springs,https://assets.tcgdex.net/en/tcgp/A4a/logo,https://assets.tcgdex.net/univ/tcgp/A4a/symbol,"SetCardCountResume(total=105, official=71)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+me01,Mega Evolution,https://assets.tcgdex.net/en/me/me01/logo,https://assets.tcgdex.net/univ/me/me01/symbol,"SetCardCountResume(total=188, official=132)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
+B1,Mega Rising,https://assets.tcgdex.net/en/tcgp/B1/logo,https://assets.tcgdex.net/univ/tcgp/B1/symbol,"SetCardCountResume(total=331, official=226)",<tcgdexsdk.tcgdex.TCGdex object at 0x0000017B117AD160>
