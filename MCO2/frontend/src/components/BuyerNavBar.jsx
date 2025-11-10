@@ -51,6 +51,8 @@ const BuyerNavBar = () => {
                 <span>Cart</span>
             </div>
 
+            <div className="w-[80%] h-px bg-[#e0e0e0] my-[10px]"></div>
+
             <div 
                 className={`${baseStyles} hover:text-red-600 hover:bg-red-600/10 hover:rounded-[10px] hover:font-bold`}
                 onClick={handleLogout}

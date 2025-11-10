@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import brandIcon from '../assets/shop.png';
+import brandIcon from '../assets/game.png';
 
 const validCredentials = {
     'Buyer1': 'Buyer1_1234',
@@ -31,7 +31,12 @@ const Login = () => {
             localStorage.setItem('userRole', userRole);
             localStorage.setItem('username', username);
 
-            navigate('/shop');
+            if (userRole === 'seller') {
+                navigate('/statistics');
+            } else {
+                navigate('/shop');
+            }
+
         } else {
             setError('Invalid username or password.');
         }
@@ -40,15 +45,13 @@ const Login = () => {
     return (
         <div className="flex items-center justify-center min-h-screen w-full bg-[#fafafa] font-sans p-4">
             <div className="w-full max-w-md bg-white rounded-xl shadow-[0_4px_12px_rgba(0,0,0,0.05)] p-8">
-                
-                {/* Header with Icon */}
                 <div className="flex flex-col items-center mb-6">
                     <span 
                         className="w-[60px] h-[60px] bg-cover bg-center bg-no-repeat mb-4"
                         style={{ backgroundImage: `url(${brandIcon})` }} 
                     ></span>
                     <h2 className="text-3xl font-bold text-[#18299a]">
-                        SHOP-E
+                        Snorlax's Stash
                     </h2>
                     <p className="text-[#7D8198] mt-1">
                         Please sign in to continue
@@ -75,7 +78,7 @@ const Login = () => {
                             value={username}
                             onChange={(e) => setUsername(e.target.value)}
                             className="w-full px-4 py-3 border border-[#e0e0e0] rounded-[10px] focus:outline-none focus:ring-2 focus:ring-[#5A6ACF]/50"
-                            placeholder="e.g., Buyer1"
+                            placeholder="e.g., Buyer1 or Seller1"
                         />
                     </div>
 

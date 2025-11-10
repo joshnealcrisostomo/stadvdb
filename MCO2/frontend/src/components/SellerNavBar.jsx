@@ -45,11 +45,20 @@ const SellerNavBar = () => {
             </div>
 
             <div 
-                className={getMenuItemClass('/addItems')}
-                onClick={() => handleMenuClick('/addItems')}
+                className={getMenuItemClass('/removeItems')}
+                onClick={() => handleMenuClick('/removeItems')}
             >
-                <span>Add Items</span>
+                <span>Remove Items</span>
             </div>
+
+            <div 
+                className={getMenuItemClass('/inventory')}
+                onClick={() => handleMenuClick('/inventory')}
+            >
+                <span>Inventory</span>
+            </div>         
+
+            <div className="w-[80%] h-px bg-[#e0e0e0] my-[10px]"></div>
 
             <div 
                 className={`${baseStyles} hover:text-red-600 hover:bg-red-600/10 hover:rounded-[10px] hover:font-bold`}

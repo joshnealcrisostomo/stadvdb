@@ -5,6 +5,7 @@ import Layout from './components/Layout.jsx';
 // Import your pages
 const Homepage = lazy(() => import('./pages/Homepage.jsx'));
 const LoginPage = lazy(() => import('./pages/LoginPage.jsx'));
+const Statistics = lazy(() => import('./pages/Statistics.jsx'));
 
 const Loading = () => <div>Loading...</div>;
 
@@ -16,6 +17,7 @@ function App() {
         
         <Route element={<Layout />}>
           <Route path="/shop" element={<Homepage />} />
+          <Route path="/statistics" element={<Statistics />} />
         </Route>
         
       </Routes>
