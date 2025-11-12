@@ -1,11 +1,11 @@
 import React from 'react';
 
-const Cart = () => {
+const LikedItems = () => {
     return (
         <div className="h-screen flex flex-col font-sans bg-[#fafafa] p-10 pt-0">
-            cart
+            liked
         </div>
     );
 };
 
-export default Cart;
+export default LikedItems;
