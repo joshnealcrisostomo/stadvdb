@@ -1,11 +1,11 @@
 import React from 'react';
 
-const Inventory = () => {
+const RemoveItems = () => {
     return (
         <div className="h-screen flex flex-col font-sans bg-[#fafafa] p-10 pt-0">
-            upload/export inventory to csv
+            remove items
         </div>
     );
 };
 
-export default Inventory;
+export default RemoveItems;

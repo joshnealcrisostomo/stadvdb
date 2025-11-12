@@ -1,11 +1,11 @@
 import React from 'react';
 
-const Inventory = () => {
+const RestockItems = () => {
     return (
         <div className="h-screen flex flex-col font-sans bg-[#fafafa] p-10 pt-0">
-            upload/export inventory to csv
+            restock
         </div>
     );
 };
 
-export default Inventory;
+export default RestockItems;

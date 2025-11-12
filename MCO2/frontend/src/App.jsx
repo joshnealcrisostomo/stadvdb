@@ -8,6 +8,9 @@ const LoginPage = lazy(() => import('./pages/LoginPage.jsx'));
 const Statistics = lazy(() => import('./pages/Statistics.jsx'));
 const CartPage = lazy(() => import('./pages/CartPage.jsx'));
 const LikedItems = lazy(() => import('./pages/LikedItems.jsx'));
+const RestockItems = lazy(() => import('./pages/Restock.jsx'));
+const RemoveItems = lazy(() => import('./pages/RemoveItems.jsx'));
+const Inventory = lazy(() => import('./pages/Inventory.jsx'));
 
 const Loading = () => <div>Loading...</div>;
 
@@ -22,6 +25,9 @@ function App() {
           <Route path="/statistics" element={<Statistics />} />
           <Route path="/cart" element={<CartPage />} />
           <Route path="/likedItems" element={<LikedItems />} />
+          <Route path="/restockItems" element={<RestockItems />} />
+          <Route path="/removeItems" element={<RemoveItems />} />
+          <Route path="/inventory" element={<Inventory />} />
         </Route>
         
       </Routes>

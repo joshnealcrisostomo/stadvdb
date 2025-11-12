@@ -1,9 +1,12 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { useNavigate, useLocation } from 'react-router-dom';
+import ConfirmLogoutModal from './ConfirmLogoutModal';
 
 const BuyerNavBar = () => {
     const navigate = useNavigate();
     const location = useLocation();
+
+    const [isModalOpen, setIsModalOpen] = useState(false);
 
     const baseStyles = "flex items-center py-[10px] px-[40px] cursor-pointer transition-colors duration-100 ease-linear w-[90%] box-border text-[14px]";
 
@@ -11,11 +14,19 @@ const BuyerNavBar = () => {
         navigate(path);
     };
 
-    const handleLogout = () => {
+    const performLogout = () => {
         localStorage.removeItem('userRole');
         localStorage.removeItem('username');
-
         navigate('/'); 
+    };
+
+    const handleLogoutClick = () => {
+        setIsModalOpen(true);
+    };
+
+    const handleConfirmLogout = () => {
+        performLogout();
+        setIsModalOpen(false);
     };
 
     const getMenuItemClass = (path) => {
@@ -27,39 +38,47 @@ const BuyerNavBar = () => {
     };
 
     return (
-        <div className="w-[250px] bg-[#F1F2F7] text-[#7D8198] flex flex-col items-center pt-[55px] h-screen font-poppins">
-            <div 
-                className={getMenuItemClass('/shop')}
-                onClick={() => handleMenuClick('/shop')}
-            >
-                <span>Shop</span>
+        <>
+            <div className="w-[250px] bg-[#F1F2F7] text-[#7D8198] flex flex-col items-center pt-[55px] h-screen font-poppins">
+                <div 
+                    className={getMenuItemClass('/shop')}
+                    onClick={() => handleMenuClick('/shop')}
+                >
+                    <span>Shop</span>
+                </div>
+
+                <div className="w-[80%] h-px bg-[#e0e0e0] my-[10px]"></div>
+
+                <div 
+                    className={getMenuItemClass('/likedItems')}
+                    onClick={() => handleMenuClick('/likedItems')}
+                >
+                    <span>Liked Items</span>
+                </div>
+
+                <div 
+                    className={getMenuItemClass('/cart')}
+                    onClick={() => handleMenuClick('/cart')}
+                >
+                    <span>Cart</span>
+                </div>
+
+                <div className="w-[80%] h-px bg-[#e0e0e0] my-[10px]"></div>
+
+                <div 
+                    className={`${baseStyles} hover:text-red-600 hover:bg-red-600/10 hover:rounded-[10px] hover:font-bold`}
+                    onClick={handleLogoutClick}
+                >
+                    <span>Logout</span>
+                </div>
             </div>
 
-            <div className="w-[80%] h-px bg-[#e0e0e0] my-[10px]"></div>
-
-            <div 
-                className={getMenuItemClass('/likedItems')}
-                onClick={() => handleMenuClick('/likedItems')}
-            >
-                <span>Liked Items</span>
-            </div>
-
-            <div 
-                className={getMenuItemClass('/cart')}
-                onClick={() => handleMenuClick('/cart')}
-            >
-                <span>Cart</span>
-            </div>
-
-            <div className="w-[80%] h-px bg-[#e0e0e0] my-[10px]"></div>
-
-            <div 
-                className={`${baseStyles} hover:text-red-600 hover:bg-red-600/10 hover:rounded-[10px] hover:font-bold`}
-                onClick={handleLogout}
-            >
-                <span>Logout</span>
-            </div>
-        </div>
+            <ConfirmLogoutModal 
+                isOpen={isModalOpen}
+                onClose={() => setIsModalOpen(false)}
+                onConfirm={handleConfirmLogout}
+            />
+        </>
     );
 };
 
