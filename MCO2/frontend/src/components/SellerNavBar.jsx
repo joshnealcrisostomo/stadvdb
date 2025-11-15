@@ -53,7 +53,7 @@ const SellerNavBar = () => {
                     className={getMenuItemClass('/restockItems')}
                     onClick={() => handleMenuClick('/restockItems')}
                 >
-                    <span>Restock</span>
+                    <span>List New Card</span>
                 </div>
 
                 <div 
