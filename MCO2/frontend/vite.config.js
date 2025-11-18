@@ -5,18 +5,16 @@ import tailwindcss from '@tailwindcss/vite'
 // https://vitejs.dev/config/
 export default defineConfig({
   plugins: [react(), tailwindcss()],
-  
-  // --- ADD THIS BLOCK ---
   server: {
+    host: true, // Required for Docker to map the port to your machine
+    port: 5173, 
     proxy: {
-      // Any request starting with '/api'
       '/api': {
-        // Will be redirected to your backend server
-        target: 'http://localhost:5001',
-        changeOrigin: true, // Needed for virtual hosted sites
-        secure: false,      // If your backend is not HTTPS
+        // FIX: Use Docker service name 'backend' instead of 'localhost'
+        target: 'http://backend:5001', 
+        changeOrigin: true,
+        secure: false,
       },
     },
   },
-  // --- END OF BLOCK ---
 })

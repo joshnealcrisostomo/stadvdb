@@ -1,5 +1,7 @@
 # RUN THE WEB APP: docker-compose up --build
 
+# REMOVE DOCKER: docker-compose down
+
 services:
   # Frontend Service
   frontend:
