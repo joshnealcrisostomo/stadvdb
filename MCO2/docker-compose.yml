@@ -1,4 +1,4 @@
-version: '3.8'
+# RUN THE WEB APP: docker-compose up --build
 
 services:
   # Frontend Service
@@ -15,7 +15,7 @@ services:
     build:
       context: ./backend  # Path to backend's Dockerfile
     ports:
-      - "3000:3000"  # Assuming your server.js runs on 3000
+      - "5001:5001"  # Assuming your server.js runs on 3000
     volumes:
       - ./backend:/app # Sync entire backend folder
       - /app/node_modules # Don't sync node_modules
