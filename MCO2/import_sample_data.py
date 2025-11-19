@@ -109,7 +109,7 @@ def populate_cards_and_sets(conn):
             if not db_set_id:
                 continue
 
-            # Check if cards exist for this set
+            # Check if cards exist for this set to avoid duplicates
             cur.execute("SELECT COUNT(*) FROM Card WHERE set_id = %s", (db_set_id,))
             if cur.fetchone()[0] > 0:
                 print(f"Skipping {filename}: Cards already exist for Set ID {db_set_id}.")
@@ -150,10 +150,10 @@ def populate_cards_and_sets(conn):
     cur.close()
     print(f"Cards processing complete. Total new cards: {total_cards}")
 
-def populate_inventory(conn):
-    """Reads mock_products.csv and fills Product & Inventory tables"""
+def populate_products(conn):
+    """Reads mock_products.csv and ONLY fills the Product table"""
     cur = conn.cursor()
-    print(f"\n--- Processing Products & Inventory from {PRODUCTS_FILE} ---")
+    print(f"\n--- Processing Products from {PRODUCTS_FILE} ---")
     
     try:
         with open(PRODUCTS_FILE, 'r', encoding='utf-8') as f:
@@ -173,23 +173,7 @@ def populate_inventory(conn):
                         """,
                         (row['card_id'], row['condition'], row['price'])
                     )
-                    product_id = cur.fetchone()[0]
-
-                    # 2. Generate Random Inventory Data
-                    # 10% chance of being out of stock, otherwise 1-50 items
-                    quantity = 0 if random.random() < 0.1 else random.randint(1, 50)
-                    last_updated = datetime.now(timezone.utc)
-
-                    # 3. Insert Inventory (Upsert: Update qty if exists)
-                    cur.execute(
-                        """
-                        INSERT INTO Inventory (product_id, quantity, last_updated)
-                        VALUES (%s, %s, %s)
-                        ON CONFLICT (product_id) 
-                        DO UPDATE SET quantity = EXCLUDED.quantity, last_updated = EXCLUDED.last_updated;
-                        """,
-                        (product_id, quantity, last_updated)
-                    )
+                    # We don't need the product_id anymore since we aren't inserting inventory
                     count += 1
                     
                 except Exception as inner_e:
@@ -199,12 +183,12 @@ def populate_inventory(conn):
 
         conn.commit()
         cur.close()
-        print(f"Success! Processed {count} inventory items.")
+        print(f"Success! Processed {count} products. (Inventory table left empty as requested).")
 
     except FileNotFoundError:
-        print(f"Warning: {PRODUCTS_FILE} not found. Skipping inventory population.")
+        print(f"Warning: {PRODUCTS_FILE} not found. Skipping product population.")
     except Exception as e:
-        print(f"Error processing inventory: {e}")
+        print(f"Error processing products: {e}")
         conn.rollback()
 
 if __name__ == "__main__":
@@ -213,7 +197,7 @@ if __name__ == "__main__":
         # 1. Populate Sets and Cards
         populate_cards_and_sets(conn)
         
-        # 2. Populate Products and Inventory
-        populate_inventory(conn)
+        # 2. Populate Products Only
+        populate_products(conn)
         
         conn.close()

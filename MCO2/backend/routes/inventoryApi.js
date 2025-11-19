@@ -85,4 +85,17 @@ router.post('/upload', async (req, res) => {
     }
 });
 
+// 3. DELETE Inventory (Truncate Table)
+router.delete('/', async (req, res) => {
+    try {
+        // Using TRUNCATE is faster than DELETE for clearing a whole table
+        // RESTART IDENTITY resets any auto-increment sequences (if any) related to this table
+        await pool.query('TRUNCATE TABLE Inventory RESTART IDENTITY CASCADE');
+        res.json({ message: 'Inventory table cleared successfully.' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Failed to clear inventory' });
+    }
+});
+
 module.exports = router;

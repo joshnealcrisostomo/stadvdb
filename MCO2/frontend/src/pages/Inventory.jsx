@@ -17,6 +17,11 @@ const DownloadIcon = () => (
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M4 16v1a3 3 0 003 3h10a3 3 0 003-3v-1m-4-4l-4 4m0 0l-4-4m4 4V4" />
     </svg>
 );
+const TrashIcon = () => (
+    <svg className="w-4 h-4 mr-2" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M19 7l-.867 12.142A2 2 0 0116.138 21H7.862a2 2 0 01-1.995-1.858L5 7m5 4v6m4-6v6m1-10V4a1 1 0 00-1-1h-4a1 1 0 00-1 1v3M4 7h16" />
+    </svg>
+);
 
 const Inventory = () => {
     const [inventory, setInventory] = useState([]);
@@ -107,7 +112,26 @@ const Inventory = () => {
         window.URL.revokeObjectURL(url);
     };
 
-    // --- 5. FILTERING ---
+    // --- 5. TRUNCATE HANDLER (NEW) ---
+    const handleTruncate = async () => {
+        if (!window.confirm("Are you sure you want to clear ALL inventory data? This cannot be undone.")) {
+            return;
+        }
+
+        setLoading(true);
+        try {
+            const response = await axios.delete('/api/inventory');
+            setMessage({ type: 'success', text: response.data.message });
+            fetchInventory(); // Refresh table (should be empty now)
+        } catch (err) {
+            console.error("Error clearing inventory:", err);
+            setMessage({ type: 'error', text: "Failed to clear inventory." });
+        } finally {
+            setLoading(false);
+        }
+    };
+
+    // --- 6. FILTERING ---
     const filteredInventory = inventory.filter(item => 
         item.card_name?.toLowerCase().includes(searchTerm.toLowerCase())
     );
@@ -131,6 +155,15 @@ const Inventory = () => {
                         className="hidden" 
                     />
                     
+                    {/* Truncate Button (Red) */}
+                    <button 
+                        onClick={handleTruncate}
+                        disabled={loading}
+                        className="flex items-center px-4 py-2 bg-white border border-red-200 text-red-600 rounded-lg hover:bg-red-50 transition-colors text-sm font-medium shadow-sm"
+                    >
+                        <TrashIcon /> Clear All
+                    </button>
+
                     {/* Export Button */}
                     <button 
                         onClick={handleExport}
