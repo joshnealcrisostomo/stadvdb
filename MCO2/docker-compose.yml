@@ -1,3 +1,9 @@
+# BUILD: docker-compose up --build  
+
+# DOWN: docker-compose down -v
+
+# UP: docker-compose up
+
 services:
   # Frontend Service
   frontend:
