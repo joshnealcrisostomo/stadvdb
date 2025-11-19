@@ -9,16 +9,19 @@ const cors = require('cors');
 
 // --- 3. Import Your API Routes ---
 const pokemonApiRoutes = require('./routes/pokemonApi');
+const inventoryApiRoutes = require('./routes/inventoryApi'); // <--- NEW IMPORT
 
 // --- 4. Initialize Express App ---
 const app = express();
 
 // --- 5. Use Middleware ---
 app.use(cors());
-app.use(express.json());
+// INCREASED LIMIT: Essential for uploading large CSV JSON payloads
+app.use(express.json({ limit: '50mb' })); 
 
 // --- 6. Mount Your API Routes ---
 app.use('/api/pokemon', pokemonApiRoutes);
+app.use('/api/inventory', inventoryApiRoutes); // <--- NEW ROUTE MOUNT
 
 // --- 7. Basic Test Route ---
 app.get('/api', (req, res) => {
