@@ -50,13 +50,6 @@ const BuyerNavBar = () => {
                 <div className="w-[80%] h-px bg-[#e0e0e0] my-[10px]"></div>
 
                 <div 
-                    className={getMenuItemClass('/likedItems')}
-                    onClick={() => handleMenuClick('/likedItems')}
-                >
-                    <span>Liked Items</span>
-                </div>
-
-                <div 
                     className={getMenuItemClass('/cart')}
                     onClick={() => handleMenuClick('/cart')}
                 >
