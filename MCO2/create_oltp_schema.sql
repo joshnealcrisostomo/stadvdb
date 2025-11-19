@@ -4,14 +4,18 @@ DROP TABLE IF EXISTS "Set", Card, Customer, Product, Inventory, Sale, OrderItem;
 CREATE TABLE "Set" (
     set_id SERIAL PRIMARY KEY,
     set_name VARCHAR(255) NOT NULL,
-    series VARCHAR(255)
+    series VARCHAR(255),
+    release_date DATE
 );
 
 -- Card Table
 CREATE TABLE Card (
     card_id SERIAL PRIMARY KEY,
     card_name VARCHAR(255) NOT NULL,
-    set_id INTEGER REFERENCES "Set"(set_id)
+    set_id INTEGER REFERENCES "Set"(set_id),
+    rarity VARCHAR(100),
+    types VARCHAR(100),
+    image_url TEXT
 );
 
 -- Product Table

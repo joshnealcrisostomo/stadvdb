@@ -1,51 +1,70 @@
-# RUN THE WEB APP: docker-compose up --build
-
-# REMOVE DOCKER: docker-compose down
-
 services:
   # Frontend Service
   frontend:
     build:
-      context: ./frontend  # Path to frontend's Dockerfile
+      context: ./frontend
     ports:
-      - "5173:5173"  # Map host port 5173 to container port 5173
+      - "5173:5173"
     volumes:
-      - ./frontend/src:/app/src # Sync src folder for hot-reloading
+      - ./frontend/src:/app/src
 
   # Backend Service
   backend:
     build:
-      context: ./backend  # Path to backend's Dockerfile
+      context: ./backend
     ports:
-      - "5001:5001"  # Assuming your server.js runs on 3000
+      - "5001:5001"
     volumes:
-      - ./backend:/app # Sync entire backend folder
-      - /app/node_modules # Don't sync node_modules
+      - ./backend:/app
+      - /app/node_modules
     environment:
-      # Environment variables for your backend to connect to the DB
       DB_HOST: db
       DB_USER: postgres
-      DB_PASSWORD: mysecretpassword
-      DB_NAME: mco2_db
+      DB_PASS: Joshneal2245
+      DB_NAME: oltp_db
       DB_PORT: 5432
     depends_on:
-      - db  # Tells backend to wait for the 'db' service to be ready
+      - db
 
   # Database Service
   db:
-    image: postgres:14-alpine # Use a Postgres image
+    image: postgres:14-alpine
     environment:
       POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: mysecretpassword
-      POSTGRES_DB: mco2_db
+      POSTGRES_PASSWORD: Joshneal2245
+      POSTGRES_DB: oltp_db
     volumes:
-      # This line runs your schema.sql on startup
-      - ./backend/database/schema.sql:/docker-entrypoint-initdb.d/init.sql
-      # This line persists your database data
+      # AUTOMATION FIX 1: Mount your SQL file to the init folder
+      # Postgres will automatically run this when the container is created
+      - ./create_oltp_schema.sql:/docker-entrypoint-initdb.d/init.sql
       - postgres_data:/var/lib/postgresql/data
     ports:
-      - "5432:5432" # Expose DB port to your host for debugging
+      - "5432:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # AUTOMATION FIX 2: The Seeder Service
+  # This runs your Python script to fill the database, then exits
+  seeder:
+    image: python:3.9-slim
+    working_dir: /app
+    volumes:
+      - .:/app  # Mount your current folder so it can find the script and json data
+    environment:
+      DB_HOST: db
+      DB_USER: postgres
+      DB_PASS: Joshneal2245
+      DB_NAME: oltp_db
+      DB_PORT: 5432
+    depends_on:
+      db:
+        condition: service_healthy
+    # Command: Install deps -> Run Script
+    command: >
+      sh -c "pip install --default-timeout=1000 psycopg2-binary python-dotenv && python import_sample_data.py"
 
 volumes:
-  # Defines the persistent volume for the database
   postgres_data:

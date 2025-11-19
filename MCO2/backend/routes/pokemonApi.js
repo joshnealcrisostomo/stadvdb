@@ -1,192 +1,183 @@
 const express = require('express');
-const fs = require('fs/promises'); // Use the 'promises' version of File System
-const path = require('path'); // For building file paths
-
+const { Pool } = require('pg');
 const router = express.Router();
 
-// --- In-Memory Database ---
-let allCards = [];
-let allSets = [];
-let allRarities = [];
-let allTypes = [];
-// --------------------------
+const pool = new Pool({
+    host: process.env.DB_HOST,
+    user: process.env.DB_USER,
+    password: process.env.DB_PASS,
+    database: process.env.DB_NAME,
+    port: process.env.DB_PORT || 5432,
+});
 
-const DATA_PATH = path.join(__dirname, '..', 'data', 'pokemon-tcg-data-master', 'pokemon-tcg-data-master');
-const LOCAL_SETS_TO_LOAD = ['base1.json', 'base2.json', 'base3.json', 'base4.json', 'base5.json', 'base6.json', 'basep.json'];
+// --- API ROUTES ---
 
-async function loadDataIntoMemory() {
+router.get('/cards', async (req, res) => {
     try {
-        console.log("Loading all local Pokémon data into server memory...");
+        const { q, pageSize = 50, page = 1 } = req.query;
+        const limit = parseInt(pageSize, 10);
+        const offset = (parseInt(page, 10) - 1) * limit;
 
-        // 1. Load Sets filter
-        const setsPath = path.join(DATA_PATH, 'sets', 'en.json');
-        allSets = JSON.parse(await fs.readFile(setsPath, 'utf-8'));
-        console.log(`Loaded ${allSets.length} sets.`);
+        // 1. UPDATE SELECT: Added c.types
+        let sqlQuery = `
+            SELECT 
+                c.card_id, c.card_name, c.rarity, c.image_url, c.types,
+                s.set_id, s.set_name, s.series, s.release_date
+            FROM card c
+            LEFT JOIN "Set" s ON c.set_id = s.set_id
+        `;
 
-        // 2. Load Cards
-        const cardsPath = path.join(DATA_PATH, 'cards', 'en');
-        
-        for (const fileName of LOCAL_SETS_TO_LOAD) {
-            const filePath = path.join(cardsPath, fileName);
-            const fileContent = await fs.readFile(filePath, 'utf-8');
-            const setCards = JSON.parse(fileContent);
+        let whereClauses = [];
+        let values = [];
+        let paramIndex = 1;
 
-            // --- THIS IS THE FIX ---
-            const setId = fileName.replace('.json', '');
-            const setInfo = allSets.find(s => s.id === setId);
+        // --- Dynamic Filtering ---
+        if (q) {
+            const queries = q.split(' ');
+            queries.forEach(query => {
+                const parts = query.split(':');
+                if (parts.length < 2) return;
+                
+                const key = parts[0];
+                const value = parts.slice(1).join(':').replace(/["*]/g, '');
 
-            if (!setInfo) {
-                console.warn(`Warning: Could not find set info for ${fileName}. Cards from this set will be missing '.set' data.`);
-            }
-
-            const cardsWithSetData = setCards.map(card => {
-                card.set = setInfo; // Attach the set object to each card
-                return card;
+                if (key === 'name') {
+                    whereClauses.push(`c.card_name ILIKE $${paramIndex}`);
+                    values.push(`%${value}%`);
+                    paramIndex++;
+                } else if (key === 'set.id' || key === 'set.name') {
+                    whereClauses.push(`s.set_id = $${paramIndex}`);
+                    values.push(parseInt(value, 10));
+                    paramIndex++;
+                } else if (key === 'rarity') {
+                    whereClauses.push(`c.rarity ILIKE $${paramIndex}`);
+                    values.push(value);
+                    paramIndex++;
+                } else if (key === 'types') {
+                    // 2. UPDATE FILTER: Search inside the types string
+                    whereClauses.push(`c.types ILIKE $${paramIndex}`);
+                    values.push(`%${value}%`);
+                    paramIndex++;
+                }
             });
-            // --- END OF FIX ---
-
-            allCards.push(...cardsWithSetData);
-        }
-        console.log(`Successfully loaded ${allCards.length} local cards.`);
-
-        // --- 3. DYNAMICALLY BUILD FILTERS ---
-        const raritySet = new Set();
-        const typeSet = new Set();
-
-        for (const card of allCards) {
-            if (card.rarity) {
-                raritySet.add(card.rarity);
-            }
-            if (card.types && Array.isArray(card.types)) {
-                card.types.forEach(type => typeSet.add(type));
-            }
         }
 
-        allRarities = [...raritySet].sort();
-        allTypes = [...typeSet].sort();
+        if (whereClauses.length > 0) {
+            sqlQuery += ' WHERE ' + whereClauses.join(' AND ');
+        }
 
-        console.log(`Dynamically generated ${allRarities.length} rarities and ${allTypes.length} types.`);
-        console.log("--- Pokémon API is ready and running from local files. ---");
+        const countQuery = `SELECT COUNT(*) FROM (${sqlQuery}) AS total`;
+        const countResult = await pool.query(countQuery, values);
+        const totalCount = parseInt(countResult.rows[0].count, 10);
+
+        sqlQuery += ` ORDER BY c.card_id ASC LIMIT $${paramIndex} OFFSET $${paramIndex + 1}`;
+        values.push(limit, offset);
+
+        const { rows } = await pool.query(sqlQuery, values);
+
+        // 3. UPDATE MAPPING: Split string "Fire, Flying" -> ["Fire", "Flying"]
+        const formattedData = rows.map(row => ({
+            id: row.card_id.toString(),
+            name: row.card_name,
+            rarity: row.rarity,
+            types: row.types ? row.types.split(', ') : [], 
+            images: { small: row.image_url },
+            set: {
+                id: row.set_id.toString(),
+                name: row.set_name,
+                series: row.series,
+                releaseDate: row.release_date
+            }
+        }));
+
+        res.json({
+            data: formattedData,
+            page: parseInt(page, 10),
+            pageSize: limit,
+            count: formattedData.length,
+            totalCount: totalCount
+        });
 
     } catch (err) {
-        console.error("!!! FAILED TO LOAD LOCAL JSON DATA !!!", err.message);
-        console.error("Please ensure your 'backend/data' folder contains 'sets/en.json' and 'cards/en/base1.json', etc.");
+        console.error(err);
+        res.status(500).json({ error: 'Database query failed' });
     }
-}
+});
 
-// Run the function as soon as the server starts
-loadDataIntoMemory();
-
-// --- NEW API ROUTES (Reading from Memory) ---
-
-/**
- * @route   GET /api/pokemon/cards
- * @desc    Fetch a list of cards from memory
- * @access  Public
- */
-router.get('/cards', (req, res) => {
-    let results = [...allCards]; // Start with a copy of all cards
-
-    // --- INFINITE SCROLL (MODIFIED) ---
-    // Now accepts 'page' query param, defaulting to 1
-    const { q, select, pageSize = 50, page = 1 } = req.query;
-
-    // --- 1. Handle Filtering (the 'q' param) ---
-    if (q) {
-        const queries = q.split(' ');
+router.get('/cards/:id', async (req, res) => {
+    try {
+        const { id } = req.params;
+        // 4. UPDATE SINGLE CARD SELECT
+        const query = `
+            SELECT 
+                c.card_id, c.card_name, c.rarity, c.image_url, c.types,
+                s.set_id, s.set_name, s.series, s.release_date
+            FROM card c
+            LEFT JOIN "Set" s ON c.set_id = s.set_id
+            WHERE c.card_id = $1
+        `;
         
-        queries.forEach(query => {
-            const [key, value] = query.split(':', 2);
-            if (!key || !value) return;
+        const { rows } = await pool.query(query, [id]);
 
-            const cleanValue = value.replace(/["*]/g, '').toLowerCase();
+        if (rows.length === 0) {
+            return res.status(404).json({ error: 'Card not found' });
+        }
 
-            results = results.filter(card => {
-                if (key === 'name') {
-                    return card.name.toLowerCase().includes(cleanValue);
-                }
-                if (key === 'set.id') {
-                    return card.set && card.set.id === cleanValue;
-                }
-                if (key === 'rarity') {
-                    return card.rarity && card.rarity.toLowerCase() === cleanValue.toLowerCase();
-                }
-                if (key === 'types') {
-                    return card.types && card.types.some(type => type.toLowerCase() === cleanValue.toLowerCase());
-                }
-                return true;
-            });
-        });
-    }
+        const row = rows[0];
+        const card = {
+            id: row.card_id.toString(),
+            name: row.card_name,
+            rarity: row.rarity,
+            types: row.types ? row.types.split(', ') : [], // Fix format here too
+            images: { small: row.image_url },
+            set: {
+                id: row.set_id.toString(),
+                name: row.set_name,
+                series: row.series,
+                releaseDate: row.release_date
+            }
+        };
 
-    // --- 2. Handle Field Selection (the 'select' param) ---
-    if (select) {
-        const fields = select.split(',');
-        results = results.map(card => {
-            const newCard = {};
-            fields.forEach(field => {
-                if (field.includes('.')) {
-                    const [obj, prop] = field.split('.');
-                    if (card[obj]) {
-                        if (!newCard[obj]) {
-                            newCard[obj] = {};
-                        }
-                        newCard[obj][prop] = card[obj][prop];
-                    }
-                } else {
-                    newCard[field] = card[field];
-                }
-            });
-            return newCard;
-        });
-    }
-
-    // --- 3. Handle Pagination (MODIFIED) ---
-    const limit = parseInt(pageSize, 10);
-    const currentPage = parseInt(page, 10);
-    const startIndex = (currentPage - 1) * limit;
-    const endIndex = startIndex + limit; // Use start index + limit
-
-    const paginatedResults = results.slice(startIndex, endIndex);
-    const totalCount = results.length; // Total count of *filtered* items
-
-    // Send the final data, formatted just like the original API
-    res.json({
-        data: paginatedResults,
-        page: currentPage, // Send back the current page
-        pageSize: paginatedResults.length,
-        count: paginatedResults.length,
-        totalCount: totalCount // Send back the total filtered count
-    });
-});
-
-/**
- * @route   GET /api/pokemon/cards/:id
- * @desc    Fetch a SINGLE card from memory
- * @access  Public
- */
-router.get('/cards/:id', (req, res) => {
-    const cardId = req.params.id;
-    const card = allCards.find(c => c.id === cardId);
-
-    if (card) {
         res.json({ data: card });
-    } else {
-        res.status(404).json({ error: 'Card not found' });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Database query failed' });
     }
 });
 
-/**
- * @route   GET /api/pokemon/filters
- * @desc    Fetch all filter data from memory
- * @access  Public
- */
-router.get('/filters', (req, res) => {
-    res.json({
-        sets: allSets,
-        rarities: allRarities,
-        types: allTypes
-    });
+router.get('/filters', async (req, res) => {
+    try {
+        const setsResult = await pool.query('SELECT * FROM "Set" ORDER BY set_name');
+        const rarityResult = await pool.query('SELECT DISTINCT rarity FROM card WHERE rarity IS NOT NULL ORDER BY rarity');
+        
+        // 5. UPDATE FILTERS: Get unique types
+        // We split the comma-separated strings and get unique values
+        const typesResult = await pool.query('SELECT DISTINCT types FROM card WHERE types IS NOT NULL');
+        
+        const uniqueTypes = new Set();
+        typesResult.rows.forEach(row => {
+            if (row.types) {
+                row.types.split(', ').forEach(t => uniqueTypes.add(t));
+            }
+        });
+
+        const sets = setsResult.rows.map(s => ({
+            id: s.set_id.toString(),
+            name: s.set_name,
+            series: s.series
+        }));
+
+        const rarities = rarityResult.rows.map(r => r.rarity);
+
+        res.json({
+            sets: sets,
+            rarities: rarities,
+            types: Array.from(uniqueTypes).sort() 
+        });
+    } catch (err) {
+        console.error(err);
+        res.status(500).json({ error: 'Database query failed' });
+    }
 });
 
 module.exports = router;
