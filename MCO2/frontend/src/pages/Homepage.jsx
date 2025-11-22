@@ -8,6 +8,99 @@ const CartIcon = () => (
     </svg>
 );
 
+// --- ADD TO CART MODAL ---
+const AddToCartModal = ({ isOpen, onClose, onConfirm, product, quantity, setQuantity }) => {
+    if (!isOpen || !product) return null;
+
+    const handleIncrement = () => {
+        if (quantity < product.quantity) setQuantity(quantity + 1);
+    };
+
+    const handleDecrement = () => {
+        if (quantity > 1) setQuantity(quantity - 1);
+    };
+
+    return (
+        <div className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/50 backdrop-blur-sm animate-in fade-in duration-200">
+            <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden transform transition-all scale-100">
+                <div className="p-6">
+                    <div className="flex justify-between items-start mb-6">
+                        <h3 className="text-xl font-extrabold text-gray-900">Add to Cart</h3>
+                        <button onClick={onClose} className="text-gray-400 hover:text-gray-600 transition-colors">
+                            <svg className="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" />
+                            </svg>
+                        </button>
+                    </div>
+                    
+                    <div className="flex gap-5 mb-8">
+                        <div className="w-24 aspect-[3/4] bg-gray-100 rounded-lg flex-shrink-0 overflow-hidden border border-gray-200 shadow-sm">
+                             <img 
+                                src={product.image_url || "https://images.pokemontcg.io/base1/1.png"} 
+                                alt={product.card_name}
+                                className="w-full h-full object-contain"
+                            />
+                        </div>
+                        <div className="flex-1">
+                            <h4 className="font-bold text-lg text-gray-800 leading-tight mb-1">{product.card_name}</h4>
+                            <p className="text-sm text-gray-500 mb-2">{product.set_name} • {product.rarity}</p>
+                            <div className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium ${
+                                product.condition === 'Near Mint' ? 'bg-emerald-100 text-emerald-800' : 'bg-yellow-100 text-yellow-800'
+                            }`}>
+                                {product.condition}
+                            </div>
+                            <p className="text-sm font-medium text-gray-600 mt-2">Stock: {product.quantity}</p>
+                        </div>
+                    </div>
+
+                    <div className="mb-8">
+                        <label className="block text-sm font-bold text-gray-700 mb-3">Select Quantity</label>
+                        <div className="flex items-center justify-between bg-gray-50 rounded-xl border border-gray-200 p-1">
+                            <div className="flex items-center w-32">
+                                <button 
+                                    onClick={handleDecrement}
+                                    className="w-10 h-10 flex items-center justify-center text-gray-600 hover:bg-white hover:shadow-sm rounded-lg transition-all disabled:opacity-50"
+                                    disabled={quantity <= 1}
+                                >
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M20 12H4" /></svg>
+                                </button>
+                                <span className="flex-1 text-center font-bold text-lg text-gray-900">{quantity}</span>
+                                <button 
+                                    onClick={handleIncrement}
+                                    className="w-10 h-10 flex items-center justify-center text-gray-600 hover:bg-white hover:shadow-sm rounded-lg transition-all disabled:opacity-50"
+                                    disabled={quantity >= product.quantity}
+                                >
+                                    <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 6v6m0 0v6m0-6h6m-6 0H6" /></svg>
+                                </button>
+                            </div>
+                            <div className="pr-4 text-right">
+                                <span className="block text-xs text-gray-500 font-medium uppercase tracking-wider">Total</span>
+                                <span className="block font-extrabold text-xl text-[#5A6ACF]">${(product.price * quantity).toFixed(2)}</span>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div className="flex gap-3">
+                        <button 
+                            onClick={onClose}
+                            className="flex-1 px-4 py-3.5 border border-gray-300 text-gray-700 font-bold rounded-xl hover:bg-gray-50 transition-colors"
+                        >
+                            Cancel
+                        </button>
+                        <button 
+                            onClick={() => onConfirm(product, quantity)}
+                            className="flex-[2] bg-[#2a2a2a] text-white px-4 py-3.5 rounded-xl font-bold hover:bg-[#5A6ACF] transition-colors shadow-lg shadow-indigo-200 flex items-center justify-center gap-2"
+                        >
+                            <CartIcon />
+                            Add to Cart
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 const Homepage = () => {
     const [products, setProducts] = useState([]);
     const [loading, setLoading] = useState(false);
@@ -21,13 +114,18 @@ const Homepage = () => {
     const [selectedCondition, setSelectedCondition] = useState('');
     const [sortOrder, setSortOrder] = useState('price-asc');
 
-    // Dropdown Options (Fetched from API now)
+    // Dropdown Options
     const [sets, setSets] = useState([]);
     const [rarities, setRarities] = useState([]);
     const [types, setTypes] = useState([]);
     const [conditions, setConditions] = useState([]);
 
-    // --- 1. FETCH FILTER OPTIONS (Runs once on mount) ---
+    // --- MODAL STATE ---
+    const [isModalOpen, setIsModalOpen] = useState(false);
+    const [selectedProduct, setSelectedProduct] = useState(null);
+    const [quantity, setQuantity] = useState(1);
+
+    // --- 1. FETCH FILTER OPTIONS ---
     useEffect(() => {
         const fetchFilterOptions = async () => {
             try {
@@ -44,13 +142,12 @@ const Homepage = () => {
         fetchFilterOptions();
     }, []);
 
-    // --- 2. FETCH PRODUCTS (Runs when any filter changes) ---
+    // --- 2. FETCH PRODUCTS ---
     useEffect(() => {
         const fetchProducts = async () => {
             setLoading(true);
             setError(null);
             try {
-                // Build query params object
                 const params = {
                     search: searchTerm,
                     set: selectedSet,
@@ -59,12 +156,8 @@ const Homepage = () => {
                     type: selectedType,
                     sort: sortOrder
                 };
-
-                // Pass params to axios. 
-                // URL becomes: /api/inventory?search=...&set=...&sort=...
                 const response = await axios.get('/api/inventory', { params });
                 setProducts(response.data);
-                
             } catch (err) {
                 console.error("Error loading products:", err);
                 setError("Failed to load products.");
@@ -73,7 +166,6 @@ const Homepage = () => {
             }
         };
 
-        // Debounce search to prevent API spam while typing
         const delayDebounceFn = setTimeout(() => {
             fetchProducts();
         }, 300);
@@ -82,8 +174,41 @@ const Homepage = () => {
 
     }, [searchTerm, selectedSet, selectedRarity, selectedCondition, selectedType, sortOrder]);
 
+    // --- CART HANDLERS ---
+    const openAddToCartModal = (product) => {
+        setSelectedProduct(product);
+        setQuantity(1); // Reset quantity to 1 when opening
+        setIsModalOpen(true);
+    };
+
+    const closeAddToCartModal = () => {
+        setIsModalOpen(false);
+        setTimeout(() => setSelectedProduct(null), 200); // Delay clearing data for animation smoothness
+    };
+
+    const handleConfirmAddToCart = async (product, qty) => {
+        try {
+            // Optimistic UI update or simply wait for server response
+            console.log(`Adding ${qty} of ${product.card_name} to cart.`);
+            
+            await axios.post('/api/cart', {
+                product_id: product.product_id,
+                quantity: qty
+            });
+
+            // Optional: Show a success toast here
+            alert(`Added ${qty} ${product.card_name} to cart!`);
+            
+            closeAddToCartModal();
+            // Optional: Refresh products to update stock display if needed
+        } catch (err) {
+            console.error("Error adding to cart:", err);
+            alert("Failed to add to cart. Please try again.");
+        }
+    };
+
     return (
-        <div className="min-h-screen bg-[#f8f9fa] font-sans text-gray-900">
+        <div className="min-h-screen bg-[#f8f9fa] font-sans text-gray-900 relative">
             <main className="w-full max-w-[1600px] mx-auto px-6 py-8">
                 
                 {/* Header & Controls */}
@@ -106,52 +231,28 @@ const Homepage = () => {
                             </div>
                         </div>
 
-                        {/* Set Dropdown */}
-                        <select 
-                            value={selectedSet}
-                            onChange={(e) => setSelectedSet(e.target.value)}
-                            className="bg-white border border-gray-300 text-gray-700 text-sm rounded-lg focus:ring-[#5A6ACF] focus:border-[#5A6ACF] p-2.5 shadow-sm cursor-pointer min-w-[120px]"
-                        >
+                        {/* Filters (Sets, Rarity, Type, Condition, Sort) */}
+                        <select value={selectedSet} onChange={(e) => setSelectedSet(e.target.value)} className="bg-white border border-gray-300 text-gray-700 text-sm rounded-lg focus:ring-[#5A6ACF] focus:border-[#5A6ACF] p-2.5 shadow-sm cursor-pointer min-w-[120px]">
                             <option value="">All Sets</option>
                             {sets.map(set => <option key={set} value={set}>{set}</option>)}
                         </select>
                         
-                        {/* Rarity Dropdown */}
-                        <select 
-                            value={selectedRarity}
-                            onChange={(e) => setSelectedRarity(e.target.value)}
-                            className="bg-white border border-gray-300 text-gray-700 text-sm rounded-lg focus:ring-[#5A6ACF] focus:border-[#5A6ACF] p-2.5 shadow-sm cursor-pointer min-w-[120px]"
-                        >
+                        <select value={selectedRarity} onChange={(e) => setSelectedRarity(e.target.value)} className="bg-white border border-gray-300 text-gray-700 text-sm rounded-lg focus:ring-[#5A6ACF] focus:border-[#5A6ACF] p-2.5 shadow-sm cursor-pointer min-w-[120px]">
                             <option value="">All Rarities</option>
                             {rarities.map(r => <option key={r} value={r}>{r}</option>)}
                         </select>
 
-                        {/* Type Dropdown */}
-                        <select 
-                            value={selectedType}
-                            onChange={(e) => setSelectedType(e.target.value)}
-                            className="bg-white border border-gray-300 text-gray-700 text-sm rounded-lg focus:ring-[#5A6ACF] focus:border-[#5A6ACF] p-2.5 shadow-sm cursor-pointer min-w-[120px]"
-                        >
+                        <select value={selectedType} onChange={(e) => setSelectedType(e.target.value)} className="bg-white border border-gray-300 text-gray-700 text-sm rounded-lg focus:ring-[#5A6ACF] focus:border-[#5A6ACF] p-2.5 shadow-sm cursor-pointer min-w-[120px]">
                             <option value="">All Types</option>
                             {types.map(t => <option key={t} value={t}>{t}</option>)}
                         </select>
 
-                        {/* Condition Dropdown */}
-                        <select 
-                            value={selectedCondition}
-                            onChange={(e) => setSelectedCondition(e.target.value)}
-                            className="bg-white border border-gray-300 text-gray-700 text-sm rounded-lg focus:ring-[#5A6ACF] focus:border-[#5A6ACF] p-2.5 shadow-sm cursor-pointer min-w-[140px]"
-                        >
+                        <select value={selectedCondition} onChange={(e) => setSelectedCondition(e.target.value)} className="bg-white border border-gray-300 text-gray-700 text-sm rounded-lg focus:ring-[#5A6ACF] focus:border-[#5A6ACF] p-2.5 shadow-sm cursor-pointer min-w-[140px]">
                             <option value="">All Conditions</option>
                             {conditions.map(c => <option key={c} value={c}>{c}</option>)}
                         </select>
 
-                        {/* Sort Dropdown */}
-                        <select 
-                            value={sortOrder}
-                            onChange={(e) => setSortOrder(e.target.value)}
-                            className="bg-white border border-gray-300 text-gray-700 text-sm rounded-lg focus:ring-[#5A6ACF] focus:border-[#5A6ACF] p-2.5 shadow-sm cursor-pointer min-w-[160px]"
-                        >
+                        <select value={sortOrder} onChange={(e) => setSortOrder(e.target.value)} className="bg-white border border-gray-300 text-gray-700 text-sm rounded-lg focus:ring-[#5A6ACF] focus:border-[#5A6ACF] p-2.5 shadow-sm cursor-pointer min-w-[160px]">
                             <option value="price-asc">Price: Low to High</option>
                             <option value="price-desc">Price: High to Low</option>
                             <option value="newest">Newest Arrivals</option>
@@ -173,11 +274,7 @@ const Homepage = () => {
                         <p className="text-xl">No cards found matching your filters.</p>
                         <button 
                             onClick={() => {
-                                setSearchTerm(''); 
-                                setSelectedSet(''); 
-                                setSelectedRarity('');
-                                setSelectedType('');
-                                setSelectedCondition('');
+                                setSearchTerm(''); setSelectedSet(''); setSelectedRarity(''); setSelectedType(''); setSelectedCondition('');
                             }}
                             className="mt-4 text-[#5A6ACF] font-medium hover:underline"
                         >
@@ -187,17 +284,31 @@ const Homepage = () => {
                 ) : (
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 2xl:grid-cols-6 gap-6">
                         {products.map((product) => (
-                            <ProductCard key={product.product_id} product={product} />
+                            <ProductCard 
+                                key={product.product_id} 
+                                product={product} 
+                                onAddToCartClick={openAddToCartModal} 
+                            />
                         ))}
                     </div>
                 )}
             </main>
+
+            {/* Render Modal */}
+            <AddToCartModal 
+                isOpen={isModalOpen}
+                onClose={closeAddToCartModal}
+                onConfirm={handleConfirmAddToCart}
+                product={selectedProduct}
+                quantity={quantity}
+                setQuantity={setQuantity}
+            />
         </div>
     );
 };
 
 // --- PRODUCT CARD COMPONENT ---
-const ProductCard = ({ product }) => {
+const ProductCard = ({ product, onAddToCartClick }) => {
     const getConditionColor = (condition) => {
         switch(condition) {
             case 'Near Mint': return 'bg-emerald-100 text-emerald-700 border-emerald-200';
@@ -246,6 +357,7 @@ const ProductCard = ({ product }) => {
 
                 <button 
                     disabled={product.quantity === 0}
+                    onClick={() => onAddToCartClick(product)}
                     className={`mt-4 w-full py-3 rounded-xl font-bold text-sm transition-all flex items-center justify-center gap-2 cursor-pointer
                         ${product.quantity > 0 
                             ? 'bg-[#2a2a2a] text-white hover:bg-[#5A6ACF] shadow-md hover:shadow-lg active:scale-95' 
