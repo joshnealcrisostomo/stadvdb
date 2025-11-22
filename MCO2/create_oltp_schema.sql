@@ -24,8 +24,6 @@ CREATE TABLE Product (
     card_id INTEGER REFERENCES Card(card_id),
     condition VARCHAR(255) NOT NULL,
     price NUMERIC(10, 4) NOT NULL,
-
-    -- Ensures a card and condition combination is only one product
     UNIQUE (card_id, condition)
 );
 
@@ -47,6 +45,7 @@ CREATE TABLE Customer (
 );
 
 -- Status Enum
+DROP TYPE IF EXISTS order_status;
 CREATE TYPE order_status AS ENUM ('Pending', 'Shipped', 'Delivered');
 
 --Order Table
@@ -76,7 +75,7 @@ CREATE TABLE Cart (
 );
 
 --CartItem Table
-CREATE TABLE CartItem (
+CREATE TABLE "Cart_Item" (
     cart_item_id SERIAL PRIMARY KEY,
     cart_id INTEGER NOT NULL REFERENCES Cart(cart_id),
     product_id INTEGER NOT NULL REFERENCES Product(product_id),
@@ -85,3 +84,4 @@ CREATE TABLE CartItem (
     UNIQUE (cart_id, product_id)
 );
 
+CREATE INDEX idx_cart_item_cart_id ON "Cart_Item" (cart_id);
