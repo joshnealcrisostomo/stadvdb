@@ -5,8 +5,9 @@ from dotenv import load_dotenv
 load_dotenv()
 
 DB_HOST = os.getenv("DB_HOST", "localhost")
+DB_PORT = os.getenv("DB_PORT", "5433")
 DB_USER = os.getenv("DB_USER", "postgres")
-DB_PASS = os.getenv("DB_PASS", "password")
+DB_PASS = os.getenv("DB_PASS", "Joshneal2245")
 DB_NAME = os.getenv("DB_NAME", "pokemon_olap")
 
 star_schema_file = "create_olap_schema.sql"

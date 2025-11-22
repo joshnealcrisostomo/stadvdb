@@ -14,7 +14,7 @@ services:
     volumes:
       - ./frontend/src:/app/src
 
-  # Backend Service
+  # Backend Service (Connects to OLTP)
   backend:
     build:
       context: ./backend
@@ -32,7 +32,9 @@ services:
     depends_on:
       - db
 
-  # Database Service
+  # ---------------------------------------
+  # 1. OLTP Database (Source System)
+  # ---------------------------------------
   db:
     image: postgres:14-alpine
     environment:
@@ -40,8 +42,6 @@ services:
       POSTGRES_PASSWORD: Joshneal2245
       POSTGRES_DB: oltp_db
     volumes:
-      # AUTOMATION FIX 1: Mount your SQL file to the init folder
-      # Postgres will automatically run this when the container is created
       - ./create_oltp_schema.sql:/docker-entrypoint-initdb.d/init.sql
       - postgres_data:/var/lib/postgresql/data
     ports:
@@ -52,14 +52,38 @@ services:
       timeout: 5s
       retries: 5
 
-  # AUTOMATION FIX 2: The Seeder Service
-  # This runs your Python script to fill the database, then exits
+  # ---------------------------------------
+  # 2. OLAP Database (Data Warehouse)
+  # ---------------------------------------
+  db_olap:
+    image: postgres:14-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Joshneal2245
+      POSTGRES_DB: pokemon_olap
+    volumes:
+      # Mount the OLAP SQL here so it runs on startup
+      - ./create_olap_schema.sql:/docker-entrypoint-initdb.d/init.sql
+      - postgres_olap_data:/var/lib/postgresql/data
+    ports:
+      # HOST:CONTAINER - We use 5433 on the computer to access this specific DB
+      - "5433:5432"
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U postgres"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  # ---------------------------------------
+  # 3. Seeder (Populates OLTP only)
+  # ---------------------------------------
   seeder:
     image: python:3.9-slim
     working_dir: /app
     volumes:
-      - .:/app  # Mount your current folder so it can find the script and json data
+      - .:/app 
     environment:
+      # Targets the OLTP DB
       DB_HOST: db
       DB_USER: postgres
       DB_PASS: Joshneal2245
@@ -68,9 +92,9 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    # Command: Install deps -> Run Script
     command: >
       sh -c "pip install --default-timeout=1000 psycopg2-binary python-dotenv && python import_sample_data.py"
 
 volumes:
   postgres_data:
+  postgres_olap_data: # New volume for OLAP persistence
