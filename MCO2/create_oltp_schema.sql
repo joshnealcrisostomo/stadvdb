@@ -1,4 +1,4 @@
-DROP TABLE IF EXISTS "Set", Card, Customer, Product, Inventory, Sale, OrderItem;
+DROP TABLE IF EXISTS "Set", Card, Customer, Product, Inventory, "Order", OrderItem, Cart, CartItem CASCADE;
 
 -- "Set" Table
 CREATE TABLE "Set" (
@@ -46,21 +46,38 @@ CREATE TABLE Customer (
     password_hash VARCHAR(255) NOT NULL
 );
 
---Sale Table
-CREATE TABLE Sale (
-    sale_id SERIAL PRIMARY KEY,
+--Order Table
+CREATE TABLE "Order" (
+    order_id SERIAL PRIMARY KEY,
     customer_id INTEGER REFERENCES Customer(customer_id),
-    sale_date TIMESTAMPTZ NOT NULL,
+    order_date TIMESTAMPTZ NOT NULL,
     total_price NUMERIC(10, 4) NOT NULL
 );
 
 --OrderItem Table
 CREATE TABLE OrderItem (
-    sale_id INTEGER NOT NULL REFERENCES Sale(sale_id),
+    order_id INTEGER NOT NULL REFERENCES "Order"(order_id),
     product_id INTEGER NOT NULL REFERENCES Product(product_id),
     quantity INTEGER NOT NULL,
     price_at_sale NUMERIC(10, 4) NOT NULL,
-    PRIMARY KEY (sale_id, product_id) -- Composite Primary Key
+    PRIMARY KEY (order_id, product_id) -- Composite Primary Key
 );
 
+--Cart Table
+CREATE TABLE Cart (
+    cart_id SERIAL PRIMARY KEY,
+    customer_id INTEGER NOT NULL REFERENCES Customer(customer_id),
+    created_at TIMESTAMPTZ  NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    last_updated TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP
+);
+
+--CartItem Table
+CREATE TABLE CartItem (
+    cart_item_id SERIAL PRIMARY KEY,
+    cart_id INTEGER NOT NULL REFERENCES Cart(cart_id),
+    product_id INTEGER NOT NULL REFERENCES Product(product_id),
+    quantity INTEGER NOT NULL,
+    added_at  TIMESTAMPTZ NOT NULL DEFAULT CURRENT_TIMESTAMP,
+    UNIQUE (cart_id, product_id)
+);
 
