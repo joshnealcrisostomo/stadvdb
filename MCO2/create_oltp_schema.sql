@@ -46,21 +46,25 @@ CREATE TABLE Customer (
     password_hash VARCHAR(255) NOT NULL
 );
 
+-- Status Enum
+CREATE TYPE order_status AS ENUM ('Pending', 'Shipped', 'Delivered');
+
 --Order Table
 CREATE TABLE "Order" (
     order_id SERIAL PRIMARY KEY,
     customer_id INTEGER REFERENCES Customer(customer_id),
     order_date TIMESTAMPTZ NOT NULL,
-    total_price NUMERIC(10, 4) NOT NULL
+    status order_status NOT NULL,
+    total_amt NUMERIC(10, 4) NOT NULL
 );
-
+    
 --OrderItem Table
 CREATE TABLE OrderItem (
+    order_item_id SERIAL PRIMARY KEY,
     order_id INTEGER NOT NULL REFERENCES "Order"(order_id),
     product_id INTEGER NOT NULL REFERENCES Product(product_id),
     quantity INTEGER NOT NULL,
     price_at_sale NUMERIC(10, 4) NOT NULL,
-    PRIMARY KEY (order_id, product_id) -- Composite Primary Key
 );
 
 --Cart Table
