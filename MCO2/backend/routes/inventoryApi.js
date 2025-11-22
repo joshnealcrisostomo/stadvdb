@@ -137,29 +137,37 @@ router.get('/filters', async (req, res) => {
     }
 });
 
-// 3. POST Inventory (Import) - Unchanged
+// 3. POST Inventory (Import) - Bulk Upsert
 router.post('/upload', async (req, res) => {
     const client = await pool.connect();
     try {
-        const items = req.body; 
-        if (!Array.isArray(items) || items.length === 0) return res.status(400).json({ error: 'Invalid data format.' });
+        const items = req.body; // Expect array of objects
+        if (!items.length) return res.status(400).send("No items");
 
-        await client.query('BEGIN'); 
-        for (const item of items) {
-            const productId = parseInt(item.product_id || item.id, 10);
-            const quantity = parseInt(item.quantity, 10);
-            const lastUpdated = item.last_updated || new Date().toISOString(); 
-            if (!productId || isNaN(quantity)) continue; 
+        // Prepare arrays for bulk SQL operation
+        const productIds = items.map(i => i.product_id);
+        const quantities = items.map(i => i.quantity);
+        
+        await client.query('BEGIN');
 
-            const query = `INSERT INTO Inventory (product_id, quantity, last_updated) VALUES ($1, $2, $3) ON CONFLICT (product_id) DO UPDATE SET quantity = EXCLUDED.quantity, last_updated = EXCLUDED.last_updated`;
-            await client.query(query, [productId, quantity, lastUpdated]);
-        }
-        await client.query('COMMIT'); 
-        res.json({ message: `Successfully processed ${items.length} items.` });
+        // ONE QUERY to handle the entire file
+        const query = `
+            INSERT INTO Inventory (product_id, quantity, last_updated)
+            SELECT * FROM UNNEST($1::int[], $2::int[], ARRAY_FILL(NOW(), ARRAY[array_length($1::int[], 1)]))
+            ON CONFLICT (product_id) 
+            DO UPDATE SET 
+                quantity = EXCLUDED.quantity, -- Or "inventory.quantity + EXCLUDED.quantity" if adding stock
+                last_updated = NOW();
+        `;
+
+        await client.query(query, [productIds, quantities]);
+
+        await client.query('COMMIT');
+        res.json({ message: "Batch upload complete" });
     } catch (err) {
         await client.query('ROLLBACK');
         console.error(err);
-        res.status(500).json({ error: 'Failed to upload inventory' });
+        res.status(500).send("Import failed");
     } finally {
         client.release();
     }

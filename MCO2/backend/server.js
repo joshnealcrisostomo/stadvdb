@@ -13,7 +13,8 @@ const cors = require('cors');
 // If you create a 'routes' folder, move these files there and update paths to './routes/...'
 const cartRoutes = require('./routes/cartApi');
 const inventoryApiRoutes = require('./routes/inventoryApi'); 
-const pokemonApiRoutes = require('./routes/pokemonApi'); // Placeholder for future use
+const pokemonApiRoutes = require('./routes/pokemonApi');
+const checkoutApi = require('./routes/checkoutApi');
 
 // --- 4. Initialize Express App ---
 const app = express();
@@ -27,6 +28,7 @@ app.use(express.json({ limit: '50mb' }));
 app.use('/api', cartRoutes); // Keeps the cart functionality working
 app.use('/api/inventory', inventoryApiRoutes); // Connects the Homepage logic
 app.use('/api/pokemon', pokemonApiRoutes); // Connects the Pokemon logic
+app.use('/api/checkout', checkoutApi);
 
 // --- 7. Basic Test Route ---
 app.get('/api', (req, res) => {

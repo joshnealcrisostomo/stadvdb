@@ -325,14 +325,14 @@ const ProductCard = ({ product, onAddToCartClick }) => {
     return (
         <div className="bg-white rounded-2xl shadow-sm hover:shadow-xl transition-all duration-300 border border-gray-100 flex flex-col h-full group relative overflow-hidden">
             
-            <div className="relative w-full aspect-[3/4] bg-[#F1F2F7] flex items-center justify-center overflow-hidden p-4">
+            <div className="relative w-full aspect-[3/4] bg-[#F1F2F7] flex items-center justify-center overflow-hidden p-4 pt-12">
                  <div className={`absolute top-3 left-3 z-10 px-2.5 py-1 rounded-md text-[11px] font-bold uppercase border tracking-wider shadow-sm ${getConditionColor(product.condition)}`}>
                     {product.condition}
                 </div>
                 <img 
                     src={imageUrl} 
                     alt={product.card_name}
-                    className="h-full w-auto mt-15 object-contain drop-shadow-md transform group-hover:scale-110 transition-transform duration-300 ease-out"
+                    className="h-full w-auto object-contain drop-shadow-md transform group-hover:scale-110 transition-transform duration-300 ease-out"
                     loading="lazy"
                 />
             </div>

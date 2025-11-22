@@ -1,16 +1,16 @@
 const { Client } = require('pg');
 const bcrypt = require('bcrypt');
 
+// Connect to the DB using Environment Variables (with fallbacks for local testing)
 const client = new Client({
-    user: 'postgres',           // POSTGRES_USER
-    host: 'localhost',          // Connects to mapped port 5432 on host
-    database: 'oltp_db',        // POSTGRES_DB
-    password: 'Joshneal2245',   // POSTGRES_PASSWORD
-    port: 5432,
+    user: process.env.DB_USER || 'postgres',
+    host: process.env.DB_HOST || 'localhost',
+    database: process.env.DB_NAME || 'oltp_db',
+    password: process.env.DB_PASS || 'Joshneal2245',
+    port: process.env.DB_PORT || 5432,
 });
 
 const seedUsers = async () => {
-    // The hardcoded data requested
     const usersToInsert = [
         {
             first_name: "Ash",
@@ -34,7 +34,7 @@ const seedUsers = async () => {
 
     try {
         await client.connect();
-        console.log('🐳 Connected to Docker PostgreSQL instance...');
+        console.log(`🐳 Connected to database at ${client.host}...`);
 
         for (const user of usersToInsert) {
             // Hash password with 10 rounds of salt
@@ -57,7 +57,7 @@ const seedUsers = async () => {
                 const res = await client.query(query, values);
                 console.log(`✅ Inserted: ${res.rows[0].user_name} (ID: ${res.rows[0].customer_id})`);
             } catch (insertError) {
-                // Handle duplicate usernames if script is run twice
+                // Handle duplicate usernames
                 if (insertError.code === '23505') {
                     console.log(`⚠️  Skipped: ${user.user_name} already exists.`);
                 } else {
