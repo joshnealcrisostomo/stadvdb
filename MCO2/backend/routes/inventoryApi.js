@@ -11,8 +11,6 @@ const pool = new Pool({
     port: process.env.DB_PORT || 5432,
 });
 
-// --- ROUTES ---
-
 // 1. GET Inventory with Server-Side Filtering & Sorting
 router.get('/', async (req, res) => {
     try {

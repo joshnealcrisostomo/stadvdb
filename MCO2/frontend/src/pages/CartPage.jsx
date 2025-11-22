@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Trash2, CreditCard, ShoppingBag, AlertCircle, CheckCircle } from 'lucide-react';
+import api from '../api/axios';
 
 const Cart = () => {
     const [cartItems, setCartItems] = useState([]);
     const [loading, setLoading] = useState(true);
-    const [processing, setProcessing] = useState(false); // For the checkout button
+    const [processing, setProcessing] = useState(false);
     const [error, setError] = useState(null);
     const [successMsg, setSuccessMsg] = useState(null);
     const navigate = useNavigate();
@@ -18,11 +19,8 @@ const Cart = () => {
     useEffect(() => {
         const fetchCart = async () => {
             try {
-                const response = await fetch('/api/cart'); 
-                if (!response.ok) throw new Error('Failed to fetch cart items');
-                
-                const data = await response.json();
-                setCartItems(data);
+                const response = await api.get('/cart'); 
+                setCartItems(response.data);
             } catch (err) {
                 console.error("Error loading cart:", err);
                 setError('Could not load cart items.');
@@ -40,26 +38,14 @@ const Cart = () => {
         setSuccessMsg(null);
 
         try {
-            const response = await fetch('/api/checkout', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                // No body needed as the backend knows the user via session/default ID
-            });
+            const response = await api.post('/checkout', {});
 
-            const data = await response.json();
-
-            if (!response.ok) {
-                throw new Error(data.error || 'Checkout failed');
-            }
-
-            // Success!
-            setSuccessMsg(data.message);
+            setSuccessMsg(response.data.message);
             setCartItems([]); // Clear UI immediately
             
         } catch (err) {
-            setError(err.message);
+            const errorMsg = err.response?.data?.error || err.message || 'Checkout failed';
+            setError(errorMsg);
         } finally {
             setProcessing(false);
         }
@@ -82,16 +68,12 @@ const Cart = () => {
                     <ShoppingBag className="w-8 h-8 text-indigo-600" />
                     Your Cart
                 </h1>
-
-                {/* Error Message Banner */}
                 {error && (
                     <div className="bg-red-50 text-red-600 p-4 rounded-lg mb-6 border border-red-100 flex items-center gap-2">
                         <AlertCircle size={20} />
                         {error}
                     </div>
                 )}
-
-                {/* Success Message Banner */}
                 {successMsg && (
                     <div className="bg-green-50 text-green-600 p-4 rounded-lg mb-6 border border-green-100 flex items-center gap-2">
                         <CheckCircle size={20} />
@@ -110,7 +92,6 @@ const Cart = () => {
                     </div>
                 ) : (
                     <>
-                        {/* If cart is empty due to success, hide the grid, otherwise show it */}
                         {cartItems.length > 0 && (
                             <div className="flex flex-col lg:flex-row gap-8">
                                 <div className="flex-1">

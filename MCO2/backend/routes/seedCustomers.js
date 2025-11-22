@@ -1,7 +1,6 @@
 const { Client } = require('pg');
 const bcrypt = require('bcrypt');
 
-// Connect to the DB using Environment Variables (with fallbacks for local testing)
 const client = new Client({
     user: process.env.DB_USER || 'postgres',
     host: process.env.DB_HOST || 'localhost',
@@ -34,7 +33,7 @@ const seedUsers = async () => {
 
     try {
         await client.connect();
-        console.log(`🐳 Connected to database at ${client.host}...`);
+        console.log(`Connected to database at ${client.host}...`);
 
         for (const user of usersToInsert) {
             // Hash password with 10 rounds of salt
@@ -55,11 +54,11 @@ const seedUsers = async () => {
 
             try {
                 const res = await client.query(query, values);
-                console.log(`✅ Inserted: ${res.rows[0].user_name} (ID: ${res.rows[0].customer_id})`);
+                console.log(`Inserted: ${res.rows[0].user_name} (ID: ${res.rows[0].customer_id})`);
             } catch (insertError) {
                 // Handle duplicate usernames
                 if (insertError.code === '23505') {
-                    console.log(`⚠️  Skipped: ${user.user_name} already exists.`);
+                    console.log(`   Skipped: ${user.user_name} already exists.`);
                 } else {
                     throw insertError;
                 }
@@ -67,7 +66,7 @@ const seedUsers = async () => {
         }
 
     } catch (err) {
-        console.error('❌ Error seeding users:', err);
+        console.error('Error seeding users:', err);
     } finally {
         await client.end();
     }

@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 import axios from 'axios';
 
-// --- ICONS (Using SVG for simplicity, no extra deps) ---
 const SearchIcon = () => (
     <svg className="w-5 h-5 text-gray-400" fill="none" stroke="currentColor" viewBox="0 0 24 24">
         <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M21 21l-6-6m2-5a7 7 0 11-14 0 7 7 0 0114 0z" />
@@ -112,7 +111,7 @@ const Inventory = () => {
         window.URL.revokeObjectURL(url);
     };
 
-    // --- 5. TRUNCATE HANDLER (NEW) ---
+    // --- 5. TRUNCATE HANDLER ---
     const handleTruncate = async () => {
         if (!window.confirm("Are you sure you want to clear ALL inventory data? This cannot be undone.")) {
             return;
@@ -138,15 +137,12 @@ const Inventory = () => {
 
     return (
         <div className="h-full flex flex-col font-sans bg-[#fafafa] p-6">
-            
-            {/* Header Section */}
             <div className="flex justify-between items-end mb-6">
                 <div>
                     <h1 className="text-3xl font-bold text-gray-800">Inventory</h1>
                     <p className="text-gray-500 mt-1">Manage stock levels and prices for your store.</p>
                 </div>
                 <div className="flex gap-3">
-                    {/* Hidden File Input */}
                     <input 
                         type="file" 
                         accept=".csv" 
@@ -155,7 +151,6 @@ const Inventory = () => {
                         className="hidden" 
                     />
                     
-                    {/* Truncate Button (Red) */}
                     <button 
                         onClick={handleTruncate}
                         disabled={loading}
@@ -164,7 +159,6 @@ const Inventory = () => {
                         <TrashIcon /> Clear All
                     </button>
 
-                    {/* Export Button */}
                     <button 
                         onClick={handleExport}
                         disabled={loading}
@@ -173,7 +167,6 @@ const Inventory = () => {
                         <DownloadIcon /> Export CSV
                     </button>
 
-                    {/* Import Button (Primary) */}
                     <button 
                         onClick={() => fileInputRef.current.click()}
                         disabled={loading}
@@ -184,14 +177,12 @@ const Inventory = () => {
                 </div>
             </div>
 
-            {/* Feedback Message */}
             {message && (
                 <div className={`mb-4 p-3 rounded-lg text-sm font-medium ${message.type === 'success' ? 'bg-green-100 text-green-700' : 'bg-red-100 text-red-700'}`}>
                     {message.text}
                 </div>
             )}
 
-            {/* Controls Bar */}
             <div className="bg-white p-4 rounded-t-lg border border-gray-200 border-b-0 flex justify-between items-center">
                 <div className="relative w-72">
                     <input
@@ -210,7 +201,6 @@ const Inventory = () => {
                 </div>
             </div>
 
-            {/* Table Section */}
             <div className="bg-white border border-gray-200 rounded-b-lg shadow-sm overflow-hidden flex-grow flex flex-col">
                 <div className="overflow-x-auto flex-grow">
                     <table className="w-full text-left text-sm text-gray-600">
@@ -267,7 +257,6 @@ const Inventory = () => {
                     </table>
                 </div>
                 
-                {/* Pagination Footer (Mock for visual completeness) */}
                 <div className="bg-gray-50 px-6 py-3 border-t border-gray-200 flex items-center justify-between">
                     <button className="text-gray-500 hover:text-gray-700 text-sm font-medium disabled:opacity-50" disabled>Previous</button>
                     <span className="text-sm text-gray-600">Page 1 of 1</span>

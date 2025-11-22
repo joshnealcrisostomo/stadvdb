@@ -14,7 +14,6 @@ const pool = new Pool({
 // Retrieves the current user's cart items with full details
 router.get('/cart', async (req, res) => {
     try {
-        // In a real app, extract ID from req.user
         const customerId = req.user?.id || 1;
 
         const query = `

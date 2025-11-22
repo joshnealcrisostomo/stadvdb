@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from 'react';
-import axios from 'axios';
+import api from '../api/axios';
 
 // --- ICONS ---
 const CartIcon = () => (
@@ -174,7 +174,7 @@ const Homepage = () => {
     useEffect(() => {
         const fetchFilterOptions = async () => {
             try {
-                const response = await axios.get('/api/inventory/filters');
+                const response = await api.get('/inventory/filters');
                 const { sets, rarities, conditions, types } = response.data;
                 setSets(sets || []);
                 setRarities(rarities || []);
@@ -201,7 +201,7 @@ const Homepage = () => {
                     type: selectedType,
                     sort: sortOrder
                 };
-                const response = await axios.get('/api/inventory', { params });
+                const response = await api.get('/inventory', { params });
                 setProducts(response.data);
             } catch (err) {
                 console.error("Error loading products:", err);
@@ -235,7 +235,7 @@ const Homepage = () => {
         try {
             console.log(`Adding ${qty} of ${product.card_name} to cart.`);
             
-            await axios.post('/api/cart', {
+            await api.post('/cart', { 
                 product_id: product.product_id,
                 quantity: qty
             });
@@ -246,7 +246,7 @@ const Homepage = () => {
             // Show custom toast instead of alert
             showToast(`Added ${qty}x ${product.card_name} to your cart!`, 'success');
             
-            // Optional: Refresh products to update stock display if needed
+            // Refresh products to update stock display if needed
         } catch (err) {
             console.error("Error adding to cart:", err);
             closeAddToCartModal();
@@ -257,14 +257,9 @@ const Homepage = () => {
     return (
         <div className="min-h-screen bg-[#f8f9fa] font-sans text-gray-900 relative">
             <main className="w-full max-w-[1600px] mx-auto px-6 py-8">
-                
-                {/* Header & Controls */}
                 <div className="flex flex-col md:flex-row md:items-center justify-between mb-8 gap-4">
                     <h2 className="text-3xl font-extrabold text-gray-900 tracking-tight">Latest Arrivals</h2>
-                    
-                    {/* Filter Bar */}
                     <div className="flex flex-wrap gap-3">
-                        {/* Search */}
                          <div className="relative group">
                             <input
                                 type="text"
@@ -307,7 +302,6 @@ const Homepage = () => {
                     </div>
                 </div>
 
-                {/* Product Grid */}
                 {loading ? (
                     <div className="flex justify-center items-center h-64">
                         <div className="animate-spin rounded-full h-12 w-12 border-t-2 border-b-2 border-[#5A6ACF]"></div>
@@ -341,7 +335,6 @@ const Homepage = () => {
                 )}
             </main>
 
-            {/* Render Modal */}
             <AddToCartModal 
                 isOpen={isModalOpen}
                 onClose={closeAddToCartModal}
@@ -351,7 +344,6 @@ const Homepage = () => {
                 setQuantity={setQuantity}
             />
 
-            {/* Render Toast */}
             <Toast 
                 show={toast.show} 
                 message={toast.message} 

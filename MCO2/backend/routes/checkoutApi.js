@@ -13,8 +13,6 @@ const pool = new Pool({
 // POST /api/checkout
 // Triggers the stored procedure to move items from Cart -> Order
 router.post('/', async (req, res) => {
-    // In a real app, get this from req.user.id
-    // For now, we default to 1 as per your previous code
     const customerId = req.user?.id || 1; 
 
     const client = await pool.connect();
@@ -40,7 +38,6 @@ router.post('/', async (req, res) => {
         console.error("Checkout Error:", err.message);
 
         // Handle specific Database Constraints
-        // "inventory_quantity_check" is the name of the constraint we added in SQL
         if (err.message.includes('inventory_quantity_check')) {
             return res.status(400).json({ 
                 error: "One or more items in your cart are out of stock." 

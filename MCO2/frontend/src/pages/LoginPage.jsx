@@ -2,11 +2,11 @@ import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import brandIcon from '../assets/game.png';
 
-const validCredentials = {
-    'Buyer1': 'Buyer1_1234',
-    'Buyer2': 'Buyer2_1234',
-    'Buyer3': 'Buyer3_1234',
-    'Seller1': 'Seller1_1234',
+const userDatabase = {
+    'Buyer1': { pass: 'Buyer1_1234', id: 1 }, // Maps to Ash
+    'Buyer2': { pass: 'Buyer2_1234', id: 2 }, // Maps to Zoro
+    'Buyer3': { pass: 'Buyer3_1234', id: 3 }, // Maps to Killua
+    'Seller1': { pass: 'Seller1_1234', id: 4 }, // Adjust ID as needed for seller
 };
 
 const Login = () => {
@@ -24,12 +24,17 @@ const Login = () => {
             return;
         }
 
-        if (validCredentials[username] && validCredentials[username] === password) {
-            console.log('Login successful for user:', username);
+        const userRecord = userDatabase[username];
+
+        if (userRecord && userRecord.pass === password) {
+            console.log('Login successful for user:', username, 'ID:', userRecord.id);
 
             const userRole = username.startsWith('Seller') ? 'seller' : 'buyer';
+            
             localStorage.setItem('userRole', userRole);
             localStorage.setItem('username', username);
+            
+            localStorage.setItem('userId', userRecord.id); 
 
             if (userRole === 'seller') {
                 navigate('/statistics');
