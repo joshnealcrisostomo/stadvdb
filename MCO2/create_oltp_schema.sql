@@ -64,7 +64,7 @@ CREATE TABLE OrderItem (
     order_id INTEGER NOT NULL REFERENCES "Order"(order_id),
     product_id INTEGER NOT NULL REFERENCES Product(product_id),
     quantity INTEGER NOT NULL,
-    price_at_sale NUMERIC(10, 4) NOT NULL,
+    price_at_sale NUMERIC(10, 4) NOT NULL
 );
 
 --Cart Table
