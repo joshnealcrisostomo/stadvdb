@@ -8,6 +8,40 @@ const CartIcon = () => (
     </svg>
 );
 
+const CheckIcon = () => (
+    <svg className="w-5 h-5 text-emerald-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M5 13l4 4L19 7" />
+    </svg>
+);
+
+const ErrorIcon = () => (
+    <svg className="w-5 h-5 text-red-500" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+        <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M12 8v4m0 4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z" />
+    </svg>
+);
+
+// --- TOAST NOTIFICATION COMPONENT ---
+const Toast = ({ show, message, type, onClose }) => {
+    if (!show) return null;
+
+    return (
+        <div className={`fixed bottom-6 right-6 z-[60] flex items-center gap-3 px-6 py-4 bg-white rounded-xl shadow-2xl border border-gray-100 transform transition-all duration-300 animate-in slide-in-from-bottom-5 fade-in`}>
+            <div className={`p-2 rounded-full ${type === 'success' ? 'bg-emerald-50' : 'bg-red-50'}`}>
+                {type === 'success' ? <CheckIcon /> : <ErrorIcon />}
+            </div>
+            <div>
+                <h4 className={`text-sm font-bold ${type === 'success' ? 'text-gray-900' : 'text-red-600'}`}>
+                    {type === 'success' ? 'Success' : 'Error'}
+                </h4>
+                <p className="text-sm text-gray-500">{message}</p>
+            </div>
+            <button onClick={onClose} className="ml-4 text-gray-400 hover:text-gray-600">
+                <svg className="w-4 h-4" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M6 18L18 6M6 6l12 12" /></svg>
+            </button>
+        </div>
+    );
+};
+
 // --- ADD TO CART MODAL ---
 const AddToCartModal = ({ isOpen, onClose, onConfirm, product, quantity, setQuantity }) => {
     if (!isOpen || !product) return null;
@@ -125,6 +159,17 @@ const Homepage = () => {
     const [selectedProduct, setSelectedProduct] = useState(null);
     const [quantity, setQuantity] = useState(1);
 
+    // --- TOAST STATE ---
+    const [toast, setToast] = useState({ show: false, message: '', type: 'success' });
+
+    const showToast = (message, type = 'success') => {
+        setToast({ show: true, message, type });
+        // Auto hide after 3 seconds
+        setTimeout(() => {
+            setToast((prev) => ({ ...prev, show: false }));
+        }, 3000);
+    };
+
     // --- 1. FETCH FILTER OPTIONS ---
     useEffect(() => {
         const fetchFilterOptions = async () => {
@@ -188,7 +233,6 @@ const Homepage = () => {
 
     const handleConfirmAddToCart = async (product, qty) => {
         try {
-            // Optimistic UI update or simply wait for server response
             console.log(`Adding ${qty} of ${product.card_name} to cart.`);
             
             await axios.post('/api/cart', {
@@ -196,14 +240,17 @@ const Homepage = () => {
                 quantity: qty
             });
 
-            // Optional: Show a success toast here
-            alert(`Added ${qty} ${product.card_name} to cart!`);
-            
+            // Close modal first
             closeAddToCartModal();
+
+            // Show custom toast instead of alert
+            showToast(`Added ${qty}x ${product.card_name} to your cart!`, 'success');
+            
             // Optional: Refresh products to update stock display if needed
         } catch (err) {
             console.error("Error adding to cart:", err);
-            alert("Failed to add to cart. Please try again.");
+            closeAddToCartModal();
+            showToast("Failed to add item to cart. Please try again.", 'error');
         }
     };
 
@@ -302,6 +349,14 @@ const Homepage = () => {
                 product={selectedProduct}
                 quantity={quantity}
                 setQuantity={setQuantity}
+            />
+
+            {/* Render Toast */}
+            <Toast 
+                show={toast.show} 
+                message={toast.message} 
+                type={toast.type} 
+                onClose={() => setToast(prev => ({ ...prev, show: false }))}
             />
         </div>
     );
