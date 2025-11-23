@@ -13,7 +13,9 @@ const pool = new Pool({
 // POST /api/checkout
 // Triggers the stored procedure to move items from Cart -> Order
 router.post('/', async (req, res) => {
-    const customerId = req.user?.id || 1; 
+    // const customerId = req.user?.id || 1; 
+
+    const customerId = req.headers['x-test-user-id'] || req.user?.id || 1;
 
     const client = await pool.connect();
 

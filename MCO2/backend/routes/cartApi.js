@@ -14,7 +14,8 @@ const pool = new Pool({
 // Retrieves the current user's cart items with full details
 router.get('/cart', async (req, res) => {
     try {
-        const customerId = req.user?.id || 1;
+        // const customerId = req.user?.id || 1;
+        const customerId = req.headers['x-test-user-id'] || req.user?.id || 1;
 
         const query = `
             SELECT 
@@ -57,8 +58,10 @@ router.get('/cart', async (req, res) => {
 // Optimized "Add to Cart" using UPSERT (Insert or Update) logic
 router.post('/cart', async (req, res) => {
     const { product_id, quantity } = req.body;
-    const customerId = req.user?.id || 1; // Fallback to user ID 1
+    // const customerId = req.user?.id || 1; // Fallback to user ID 1
 
+    const customerId = req.headers['x-test-user-id'] || req.user?.id || 1;
+    
     const client = await pool.connect();
 
     try {
