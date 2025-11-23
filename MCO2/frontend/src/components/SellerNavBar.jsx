@@ -57,13 +57,6 @@ const SellerNavBar = () => {
                 </div>
 
                 <div 
-                    className={getMenuItemClass('/removeItems')}
-                    onClick={() => handleMenuClick('/removeItems')}
-                >
-                    <span>Remove Items</span>
-                </div>
-
-                <div 
                     className={getMenuItemClass('/inventory')}
                     onClick={() => handleMenuClick('/inventory')}
                 >
