@@ -30,7 +30,8 @@ services:
       DB_NAME: oltp_db
       DB_PORT: 5432
     depends_on:
-      - db
+      db:
+        condition: service_healthy
 
   # ---------------------------------------
   # 1. OLTP Database (Source System)
