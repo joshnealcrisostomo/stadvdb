@@ -93,20 +93,28 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    command: >
-      sh -c "
+    command: |
+      bash -c '
         until pg_isready -h db -U postgres; do
-          echo 'Waiting for OLTP primary...';
+          echo "Waiting for OLTP primary...";
           sleep 2;
         done;
+
+        export PGPASSWORD=replica_pass
         until pg_basebackup -h db -D /var/lib/postgresql/data -U replicator -vP --wal-method=stream; do
-          echo 'Trying replication backup...';
+          echo "Trying replication backup...";
           sleep 2;
         done;
-        echo \"primary_conninfo = 'host=db port=5432 user=replicator password=replica_pass'\" >> /var/lib/postgresql/data/postgresql.auto.conf;
-        touch /var/lib/postgresql/data/standby.signal;
-        postgres -c hot_standby=on
-      "
+
+        echo "primary_conninfo = '\''host=db port=5432 user=replicator password=replica_pass'\''" >> /var/lib/postgresql/data/postgresql.auto.conf
+        touch /var/lib/postgresql/data/standby.signal
+
+        chmod 0700 /var/lib/postgresql/data
+        chown -R postgres:postgres /var/lib/postgresql/data
+
+        exec su postgres -c "postgres -c hot_standby=on"
+      '
+
 
 
   # -----------------------------
@@ -126,20 +134,30 @@ services:
     depends_on:
       db_olap:
         condition: service_healthy
-    command: >
-      sh -c "
+    command: |
+      bash -c '
         until pg_isready -h db_olap -U postgres; do
-          echo 'Waiting for OLAP primary...';
+          echo "Waiting for OLAP primary...";
           sleep 2;
         done;
+
+        export PGPASSWORD=replica_pass
         until pg_basebackup -h db_olap -D /var/lib/postgresql/data -U replicator -vP --wal-method=stream; do
-          echo 'Trying replication backup...';
+          echo "Trying replication backup...";
           sleep 2;
         done;
-        echo \"primary_conninfo = 'host=db_olap port=5432 user=replicator password=replica_pass'\" >> /var/lib/postgresql/data/postgresql.auto.conf;
-        touch /var/lib/postgresql/data/standby.signal;
-        postgres -c hot_standby=on
-      "
+
+        echo "primary_conninfo = '\''host=db_olap port=5432 user=replicator password=replica_pass'\''" \
+          >> /var/lib/postgresql/data/postgresql.auto.conf
+
+        touch /var/lib/postgresql/data/standby.signal
+
+        chmod 0700 /var/lib/postgresql/data
+        chown -R postgres:postgres /var/lib/postgresql/data
+
+        exec su postgres -c "postgres -c hot_standby=on"
+      '
+
 
 
 
