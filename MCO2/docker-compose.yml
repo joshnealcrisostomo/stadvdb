@@ -117,6 +117,35 @@ services:
     command: >
       sh -c "npm install pg bcrypt && node seedCustomers.js"
 
+# ---------------------------------------
+# 5. Inventory Seeder (CSV Import)
+# ---------------------------------------
+  inventory_seeder:
+    image: node:18
+    working_dir: /app
+    volumes:
+      # Mount the script
+      - ./backend/routes/seedInventory.js:/app/seedInventory.js
+      # Mount the CSV file (Make sure this file exists on your host!)
+      - ./mock_inventory.csv:/app/inventory.csv
+      # Persistence for the "Lock File"
+      - seed_marker:/app/data
+    environment:
+      DB_HOST: db
+      DB_USER: postgres
+      DB_PASS: Joshneal2245
+      DB_NAME: oltp_db
+      DB_PORT: 5432
+    depends_on:
+      db:
+        condition: service_healthy
+      seeder:
+        condition: service_completed_successfully
+    # Install csv-parser, pg, then run the script
+    command: >
+      sh -c "npm install pg csv-parser && node seedInventory.js"
+
 volumes:
   postgres_data:
   postgres_olap_data:
+  seed_marker:
