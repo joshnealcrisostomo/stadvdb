@@ -1,51 +1,67 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { 
     LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, 
     XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer 
 } from 'recharts';
 
-// Revenue Trends (Join dim_date + fact_sales)
-const REVENUE_DATA = [
-    { full_date: '2023-01-01', total_revenue: 4000 },
-    { full_date: '2023-02-01', total_revenue: 3000 },
-    { full_date: '2023-03-01', total_revenue: 5000 },
-    { full_date: '2023-04-01', total_revenue: 7500 },
-    { full_date: '2023-05-01', total_revenue: 6000 },
-    { full_date: '2023-06-01', total_revenue: 9000 },
-];
+const API_BASE_URL = 'http://localhost:5001/api/reports';
 
-// Top Selling Cards (dim_product + fact_sales)
-const TOP_PRODUCTS_DATA = [
-    { card_name: 'Charizard VMAX', quantity_sold: 120 },
-    { card_name: 'Pikachu Illustrator', quantity_sold: 98 },
-    { card_name: 'Umbreon VMAX', quantity_sold: 75 },
-    { card_name: 'Mewtwo EX', quantity_sold: 50 },
-    { card_name: 'Rayquaza GX', quantity_sold: 40 },
-];
-
-// Sales by Set (dim_product + fact_sales) 
-const SET_DATA = [
-    { set_name: 'Darkness Ablaze', total_revenue: 15000 },
-    { set_name: 'Evolving Skies', total_revenue: 12000 },
-    { set_name: 'Base Set', total_revenue: 8000 },
-    { set_name: 'Promo', total_revenue: 5000 },
-];
-
-const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042'];
+const COLORS = ['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#AF19FF'];
 
 const Statistics = () => {
-    // State for the "buttons redirect" requirement
     const [activeTab, setActiveTab] = useState('overview');
+    
+    const [revenueData, setRevenueData] = useState([]);
+    const [topProductsData, setTopProductsData] = useState([]);
+    const [setData, setSetData] = useState([]);
+    
+    const [loading, setLoading] = useState(true);
+    const [error, setError] = useState(null);
+
+    useEffect(() => {
+        const fetchReportData = async () => {
+            try {
+                setLoading(true);
+                
+                // Revenue Trends
+                const revenueRes = await fetch(`${API_BASE_URL}/revenue-trends`);
+                if (!revenueRes.ok) throw new Error("Failed to fetch revenue");
+                const revenueJson = await revenueRes.json();
+                
+                // Top Products
+                const productsRes = await fetch(`${API_BASE_URL}/top-products`);
+                if (!productsRes.ok) throw new Error("Failed to fetch top products");
+                const productsJson = await productsRes.json();
+
+                // Sales by Set
+                const setsRes = await fetch(`${API_BASE_URL}/sales-by-set`);
+                if (!setsRes.ok) throw new Error("Failed to fetch sets");
+                const setsJson = await setsRes.json();
+
+                setRevenueData(revenueJson);
+                setTopProductsData(productsJson);
+                setSetData(setsJson);
+                setLoading(false);
+            } catch (err) {
+                console.error("Failed to connect to OLAP DB:", err);
+                setError("Failed to load reports. Is the Backend Server running?");
+                setLoading(false);
+            }
+        };
+
+        fetchReportData();
+    }, []); // Empty dependency array, will run once the page opens.
 
     // Chart Components
     const RevenueChart = () => (
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 flex flex-col h-96">
             <h3 className="text-lg font-bold text-gray-700 mb-4">Revenue Trends</h3>
-            <p className="text-xs text-gray-400 mb-2">Source: fact_sales (total_revenue) & dim_date (full_date)</p>
+            <p className="text-xs text-gray-400 mb-2">Source: fact_sales & dim_date</p>
             <ResponsiveContainer width="100%" height="100%">
-                <LineChart data={REVENUE_DATA}>
+                <LineChart data={revenueData}>
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="full_date" tickFormatter={(str) => str.substring(0,7)} />
+                    {/* Maps to 'full_date' from your SQL query */}
+                    <XAxis dataKey="full_date" tickFormatter={(str) => str ? str.substring(0,10) : ''} />
                     <YAxis />
                     <Tooltip />
                     <Legend />
@@ -58,11 +74,12 @@ const Statistics = () => {
     const TopCardsChart = () => (
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 flex flex-col h-96">
             <h3 className="text-lg font-bold text-gray-700 mb-4">Top Selling Cards</h3>
-            <p className="text-xs text-gray-400 mb-2">Source: fact_sales (quantity_sold) & dim_product (card_name)</p>
+            <p className="text-xs text-gray-400 mb-2">Source: fact_sales & dim_product</p>
             <ResponsiveContainer width="100%" height="100%">
-                <BarChart data={TOP_PRODUCTS_DATA} layout="vertical">
+                <BarChart data={topProductsData} layout="vertical">
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis type="number" />
+                    {/* Maps to 'card_name' from your SQL query */}
                     <YAxis type="category" dataKey="card_name" width={120} />
                     <Tooltip />
                     <Legend />
@@ -75,11 +92,11 @@ const Statistics = () => {
     const SetPieChart = () => (
         <div className="bg-white p-6 rounded-lg shadow-sm border border-gray-200 flex flex-col h-96">
             <h3 className="text-lg font-bold text-gray-700 mb-4">Revenue by Set</h3>
-            <p className="text-xs text-gray-400 mb-2">Source: fact_sales (total_revenue) & dim_product (set_name)</p>
+            <p className="text-xs text-gray-400 mb-2">Source: fact_sales & dim_product</p>
             <ResponsiveContainer width="100%" height="100%">
                 <PieChart>
                     <Pie
-                        data={SET_DATA}
+                        data={setData}
                         cx="50%"
                         cy="50%"
                         labelLine={false}
@@ -88,7 +105,7 @@ const Statistics = () => {
                         fill="#8884d8"
                         dataKey="total_revenue"
                     >
-                        {SET_DATA.map((entry, index) => (
+                        {setData.map((entry, index) => (
                             <Cell key={`cell-${index}`} fill={COLORS[index % COLORS.length]} />
                         ))}
                     </Pie>
@@ -98,23 +115,26 @@ const Statistics = () => {
         </div>
     );
 
+    if (loading) return <div className="h-screen flex items-center justify-center text-gray-500">Loading Analytics from OLAP DB...</div>;
+    if (error) return <div className="h-screen flex items-center justify-center text-red-600 font-bold p-10 text-center">{error} <br/> <span className="text-sm font-normal text-black mt-2 block">Check console (F12) for details.</span></div>;
+
     return (
         <div className="h-screen flex flex-col font-sans bg-[#fafafa] p-10 pt-0 overflow-y-auto">
             
-            {/* Header & Navigation Buttons */}
+            {/* --- SECTION 1: HEADER & SECTION 2: NAVIGATION BUTTONS --- */}
             <div className="sticky top-0 z-10 bg-[#fafafa] pt-10 pb-6 flex flex-col md:flex-row justify-between items-center border-b border-gray-200 mb-6">
                 
-                {/* HEADER (Identifies Data Source) */}
+                {/* SECTION 1: HEADER */}
                 <div>
                     <h1 className="text-3xl font-bold text-gray-800 tracking-tight">
                         Analytics Dashboard
                     </h1>
                     <p className="text-gray-500 text-sm mt-1">
-                        Read-only reports from <span className="font-mono text-blue-600 bg-blue-50 px-1 rounded">OLAP Database</span>
+                        Live reports from <span className="font-mono text-green-600 bg-green-50 px-1 rounded">OLAP Database</span>
                     </p>
                 </div>
 
-                {/* NAVIGATION BUTTONS */}
+                {/* SECTION 2: NAVIGATION BUTTONS */}
                 <div className="flex bg-white p-1 rounded-xl border border-gray-200 shadow-sm mt-4 md:mt-0">
                     {['overview', 'revenue', 'products', 'sets'].map((tab) => (
                         <button

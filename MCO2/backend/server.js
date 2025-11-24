@@ -9,6 +9,7 @@ const inventoryApiRoutes = require('./routes/inventoryApi');
 const pokemonApiRoutes = require('./routes/pokemonApi');
 const checkoutApi = require('./routes/checkoutApi');
 const testRoutes = require('./routes/testApi');
+const reportRoutes = require('./routes/reportRoutes');
 
 const app = express();
 
@@ -16,6 +17,7 @@ app.use(cors());
 app.use(express.json({ limit: '50mb' })); 
 
 app.use('/api/test', testRoutes);
+app.use('/api/reports', reportRoutes);
 
 app.use(authMiddleware);
 
