@@ -63,7 +63,6 @@ services:
       POSTGRES_PASSWORD: Joshneal2245
       POSTGRES_DB: pokemon_olap
     volumes:
-      # Mount the OLAP SQL here so it runs on startup
       - ./create_olap_schema.sql:/docker-entrypoint-initdb.d/init.sql
       - postgres_olap_data:/var/lib/postgresql/data
     ports:
@@ -124,9 +123,7 @@ services:
     image: node:18
     working_dir: /app
     volumes:
-      # Mount the script
       - ./backend/routes/seedInventory.js:/app/seedInventory.js
-      # Mount the CSV file (Make sure this file exists on your host!)
       - ./mock_inventory.csv:/app/inventory.csv
       # Persistence for the "Lock File"
       - seed_marker:/app/data
@@ -144,6 +141,24 @@ services:
     # Install csv-parser, pg, then run the script
     command: >
       sh -c "npm install pg csv-parser && node seedInventory.js"
+
+# ---------------------------------------
+# 6. JMeter Load Tester
+# ---------------------------------------
+  load_tester:
+    image: justb4/jmeter:5.5
+    entrypoint: ["/bin/bash", "/tests/run_jmeter.sh"]
+    volumes:
+      - ./tests:/tests
+      - ./results:/results
+    depends_on:
+      backend:
+        condition: service_started
+      # WAITS for the database to be fully populated
+      inventory_seeder:
+        condition: service_completed_successfully
+      customer_seeder:
+        condition: service_completed_successfully
 
 volumes:
   postgres_data:
