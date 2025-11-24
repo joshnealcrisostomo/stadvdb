@@ -52,6 +52,24 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
+    command: >
+      sh -c "
+        postgres &
+        pid=$$!;
+        sleep 5;
+        psql -v ON_ERROR_STOP=1 --username postgres -c \"DO \$\$ BEGIN
+          IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname='replicator') THEN
+            CREATE USER replicator REPLICATION LOGIN ENCRYPTED PASSWORD 'replica_pass';
+          END IF;
+        END \$\$;\";
+        echo \"wal_level = replica\" >> /var/lib/postgresql/data/postgresql.conf;
+        echo \"max_wal_senders = 3\" >> /var/lib/postgresql/data/postgresql.conf;
+        echo \"wal_keep_size = 256MB\" >> /var/lib/postgresql/data/postgresql.conf;
+        echo \"hot_standby = on\" >> /var/lib/postgresql/data/postgresql.conf;
+        kill -TERM $pid;
+        wait $pid;
+        postgres -c config_file=/var/lib/postgresql/data/postgresql.conf
+      "
 
   # ---------------------------------------
   # 2. OLAP Database (Data Warehouse)
@@ -95,8 +113,65 @@ services:
     command: >
       sh -c "pip install --default-timeout=1000 psycopg2-binary python-dotenv && python import_sample_data.py"
 
+  # -----------------------------
+  # 3. OLTP Hot Standby
+  # -----------------------------
+  db_hot:
+    image: postgres:14-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Joshneal2245
+      POSTGRES_DB: oltp_db
+      PGDATA: /var/lib/postgresql/data
+    ports:
+      - "5434:5432"
+    volumes:
+      - postgres_hot_data:/var/lib/postgresql/data
+    depends_on:
+      db:
+        condition: service_healthy
+    command: >
+      sh -c "
+        until pg_basebackup -h db -D /var/lib/postgresql/data -U replicator -vP --wal-method=stream; do
+          echo 'Waiting for OLTP primary...';
+          sleep 5;
+        done;
+        echo \"primary_conninfo = 'host=db port=5432 user=replicator password=replica_pass'\" >> /var/lib/postgresql/data/postgresql.auto.conf;
+        touch /var/lib/postgresql/data/standby.signal;
+        postgres -c hot_standby=on
+      "
+
+  # -----------------------------
+  # 4. OLAP Hot Standby
+  # -----------------------------
+  db_olap_hot:
+    image: postgres:14-alpine
+    environment:
+      POSTGRES_USER: postgres
+      POSTGRES_PASSWORD: Joshneal2245
+      POSTGRES_DB: pokemon_olap
+      PGDATA: /var/lib/postgresql/data
+    ports:
+      - "5435:5432"
+    volumes:
+      - postgres_olap_hot_data:/var/lib/postgresql/data
+    depends_on:
+      db_olap:
+        condition: service_healthy
+    command: >
+      sh -c "
+        until pg_basebackup -h db_olap -D /var/lib/postgresql/data -U replicator -vP --wal-method=stream; do
+          echo 'Waiting for OLAP primary...';
+          sleep 5;
+        done;
+        echo \"primary_conninfo = 'host=db_olap port=5432 user=replicator password=replica_pass'\" >> /var/lib/postgresql/data/postgresql.auto.conf;
+        touch /var/lib/postgresql/data/standby.signal;
+        postgres -c hot_standby=on
+      "
+
+
   # ---------------------------------------
-  # 4. Node Customer Seeder (NEW)
+  # 5. Node Customer Seeder (NEW)
   # ---------------------------------------
   customer_seeder:
     image: node:18
@@ -162,5 +237,7 @@ services:
 
 volumes:
   postgres_data:
+  postgres_hot_data:
   postgres_olap_data:
+  postgres_olap_hot_data:
   seed_marker:
