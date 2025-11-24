@@ -8,14 +8,14 @@ load_dotenv()
 # 1. CONFIGURATION
 SOURCE_CONFIG = {
     "host": os.getenv("DB_SOURCE_HOST", "localhost"),
-    "database": os.getenv("DB_SOURCE_NAME", "pokemon_app_db"),
+    "database": os.getenv("DB_SOURCE_NAME", "oltp_db"),
     "user": os.getenv("DB_SOURCE_USER", "postgres"),
     "password": os.getenv("DB_SOURCE_PASS", "password")
 }
 
 TARGET_CONFIG = {
     "host": os.getenv("DB_TARGET_HOST", "localhost"),
-    "database": os.getenv("DB_TARGET_NAME", "pokemon_olap_db"),
+    "database": os.getenv("DB_TARGET_NAME", "pokemon_olap"),
     "user": os.getenv("DB_TARGET_USER", "postgres"),
     "password": os.getenv("DB_TARGET_PASS", "password")
 }
@@ -40,8 +40,8 @@ def run_etl_bridge():
         
         cur_dim_source = conn_source.cursor() 
 
-        # Products
-        print("Extracting Products...")
+        # products
+        print("Extracting products...")
         # Note: "Set" is a reserved keyword in SQL, use double quotes: "Set"
         cur_dim_source.execute("""
             SELECT 
@@ -52,8 +52,8 @@ def run_etl_bridge():
                 c.rarity, 
                 p.condition, 
                 p.price
-            FROM Product p 
-            JOIN Card c ON p.card_id = c.card_id 
+            FROM product p 
+            JOIN card c ON p.card_id = c.card_id 
             JOIN "Set" s ON c.set_id = s.set_id
         """)
         products = cur_dim_source.fetchall()
@@ -66,11 +66,11 @@ def run_etl_bridge():
                 condition = EXCLUDED.condition;
         """, products)
 
-        # Customers
-        print("Extracting Customers...")
+        # customers
+        print("Extracting customers...")
         cur_dim_source.execute("""
             SELECT customer_id, user_name, first_name || ' ' || last_name 
-            FROM Customer
+            FROM customer
         """)
         customers = cur_dim_source.fetchall()
         
@@ -125,7 +125,7 @@ def run_etl_bridge():
         print("Extracting Sales...")
         
         cur_source.itersize = 2000 
-        # match OrderItem and "Order" tables
+        # match orderitem and "Order" tables
         cur_source.execute("""
             SELECT 
                 to_char(o.order_date, 'YYYYMMDD')::int,
@@ -135,7 +135,7 @@ def run_etl_bridge():
                 oi.quantity, 
                 oi.price_at_sale,
                 (oi.quantity * oi.price_at_sale)
-            FROM OrderItem oi 
+            FROM orderitem oi 
             JOIN "Order" o ON oi.order_id = o.order_id
         """)
         

@@ -160,6 +160,39 @@ services:
       customer_seeder:
         condition: service_completed_successfully
 
+# ---------------------------------------
+# 7. ETL Bridge (Moves data from OLTP -> OLAP)
+# ---------------------------------------
+  etl_bridge:
+    image: python:3.9-slim
+    working_dir: /app
+    volumes:
+      - ./ETL.py:/app/ETL.py
+    environment:
+      # Source (OLTP) Configuration
+      DB_SOURCE_HOST: db
+      DB_SOURCE_NAME: oltp_db       
+      DB_SOURCE_USER: postgres
+      DB_SOURCE_PASS: Joshneal2245
+      
+      # Target (OLAP) Configuration
+      DB_TARGET_HOST: db_olap
+      DB_TARGET_NAME: pokemon_olap
+      DB_TARGET_USER: postgres
+      DB_TARGET_PASS: Joshneal2245
+    depends_on:
+      db:
+        condition: service_healthy
+      db_olap:
+        condition: service_healthy
+      # Wait for data seeding to finish before running ETL
+      inventory_seeder:
+        condition: service_completed_successfully
+      customer_seeder:
+        condition: service_completed_successfully
+    command: >
+      sh -c "pip install psycopg2-binary python-dotenv && python ETL.py"
+
 volumes:
   postgres_data:
   postgres_olap_data:
