@@ -69,7 +69,7 @@ services:
       - postgres_olap_data:/var/lib/postgresql/data
     ports:
       # HOST:CONTAINER - We use 5433 on the computer to access this specific DB
-      - "5436:5432"
+      - "5440:5432"
     healthcheck:
       test: ["CMD-SHELL", "pg_isready -U postgres"]
       interval: 5s
@@ -95,14 +95,19 @@ services:
         condition: service_healthy
     command: >
       sh -c "
-        until pg_basebackup -h db -D /var/lib/postgresql/data -U replicator -vP --wal-method=stream; do
+        until pg_isready -h db -U postgres; do
           echo 'Waiting for OLTP primary...';
-          sleep 5;
+          sleep 2;
+        done;
+        until pg_basebackup -h db -D /var/lib/postgresql/data -U replicator -vP --wal-method=stream; do
+          echo 'Trying replication backup...';
+          sleep 2;
         done;
         echo \"primary_conninfo = 'host=db port=5432 user=replicator password=replica_pass'\" >> /var/lib/postgresql/data/postgresql.auto.conf;
         touch /var/lib/postgresql/data/standby.signal;
         postgres -c hot_standby=on
       "
+
 
   # -----------------------------
   # 4. OLAP Hot Standby
@@ -123,14 +128,20 @@ services:
         condition: service_healthy
     command: >
       sh -c "
-        until pg_basebackup -h db_olap -D /var/lib/postgresql/data -U replicator -vP --wal-method=stream; do
+        until pg_isready -h db_olap -U postgres; do
           echo 'Waiting for OLAP primary...';
-          sleep 5;
+          sleep 2;
+        done;
+        until pg_basebackup -h db_olap -D /var/lib/postgresql/data -U replicator -vP --wal-method=stream; do
+          echo 'Trying replication backup...';
+          sleep 2;
         done;
         echo \"primary_conninfo = 'host=db_olap port=5432 user=replicator password=replica_pass'\" >> /var/lib/postgresql/data/postgresql.auto.conf;
         touch /var/lib/postgresql/data/standby.signal;
         postgres -c hot_standby=on
       "
+
+
 
  # ---------------------------------------
   # 5. Python Seeder (Existing)
