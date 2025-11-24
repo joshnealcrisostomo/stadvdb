@@ -3,16 +3,11 @@ import os
 import csv
 from dotenv import load_dotenv
 
-# Load environment variables
 load_dotenv()
 
-# --- CONFIGURATION ---
-# Use 'localhost' if running from your machine (outside Docker)
-# Use 'db' if running inside Docker container
-# For manual run, 'localhost' is usually correct if you exposed port 5432
 DB_HOST = os.getenv("DB_HOST", "localhost") 
 DB_USER = os.getenv("DB_USER", "postgres")
-DB_PASS = os.getenv("DB_PASS", "Joshneal2245") # Hardcoded fallback based on your env
+DB_PASS = os.getenv("DB_PASS", "Joshneal2245")
 DB_NAME = os.getenv("DB_NAME", "oltp_db")
 DB_PORT = os.getenv("DB_PORT", "5432")
 
@@ -39,7 +34,7 @@ def populate_inventory_from_csv():
     
     try:
         with open(INVENTORY_FILE, 'r', encoding='utf-8') as f:
-            reader = csv.DictReader(f) # Expects header: product_id, quantity, last_updated
+            reader = csv.DictReader(f)
             count = 0
             updated_count = 0
             

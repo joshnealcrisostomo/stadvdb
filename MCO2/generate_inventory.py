@@ -2,8 +2,7 @@ import csv
 import random
 from datetime import datetime, timezone
 
-# --- CONFIGURATION ---
-INPUT_PRODUCT_FILE = "mock_products.csv"  # The file you just made
+INPUT_PRODUCT_FILE = "mock_products.csv"
 OUTPUT_INVENTORY_FILE = "mock_inventory.csv"
 
 def generate_inventory_csv():
@@ -21,8 +20,6 @@ def generate_inventory_csv():
                 # Detect if the first row is actually a header
                 pass 
             else:
-                # If no header, reset pointer (or handle logic to keep row)
-                # For simplicity, assuming your previous script added a header
                 pass
 
             # Start Product IDs at 1 (matching PostgreSQL SERIAL behavior)

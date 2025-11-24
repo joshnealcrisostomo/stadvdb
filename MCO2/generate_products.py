@@ -1,9 +1,8 @@
 import csv
 import random
 
-# --- CONFIGURATION ---
 OUTPUT_FILE = "mock_products.csv"
-TOTAL_ROWS = 600  # Generating 600 to ensure we have plenty
+TOTAL_ROWS = 600
 MIN_CARD_ID = 1
 MAX_CARD_ID = 1504
 
@@ -58,7 +57,6 @@ def generate_csv():
         existing_combinations.add((card_id, condition))
         rows.append([card_id, condition, final_price])
 
-    # Write to CSV
     with open(OUTPUT_FILE, mode='w', newline='', encoding='utf-8') as file:
         writer = csv.writer(file)
         # Header matching your DB columns (skipping product_id as it is SERIAL)

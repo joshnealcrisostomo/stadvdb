@@ -8,7 +8,6 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
-# --- CONFIGURATION ---
 DB_HOST = os.getenv("DB_HOST", "localhost")
 DB_USER = os.getenv("DB_USER", "postgres")
 DB_PASS = os.getenv("DB_PASS", "password")
@@ -157,7 +156,7 @@ def populate_products(conn):
     
     try:
         with open(PRODUCTS_FILE, 'r', encoding='utf-8') as f:
-            reader = csv.DictReader(f) # Expects header: card_id, condition, price
+            reader = csv.DictReader(f)
             count = 0
             
             for row in reader:
@@ -173,11 +172,10 @@ def populate_products(conn):
                         """,
                         (row['card_id'], row['condition'], row['price'])
                     )
-                    # We don't need the product_id anymore since we aren't inserting inventory
+
                     count += 1
                     
                 except Exception as inner_e:
-                    # This usually happens if card_id doesn't exist in the Card table
                     # print(f"Skipping product row {row}: {inner_e}")
                     pass
 
