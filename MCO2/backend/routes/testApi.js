@@ -1,4 +1,3 @@
-// backend/routes/testApi.js
 const express = require('express');
 const { Pool } = require('pg');
 const router = express.Router();

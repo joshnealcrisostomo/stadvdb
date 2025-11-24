@@ -10,15 +10,12 @@ const pool = new Pool({
     port: process.env.DB_PORT || 5432,
 });
 
-// --- API ROUTES ---
-
 router.get('/cards', async (req, res) => {
     try {
         const { q, pageSize = 50, page = 1 } = req.query;
         const limit = parseInt(pageSize, 10);
         const offset = (parseInt(page, 10) - 1) * limit;
 
-        // 1. UPDATE SELECT: Added c.types
         let sqlQuery = `
             SELECT 
                 c.card_id, c.card_name, c.rarity, c.image_url, c.types,
@@ -54,7 +51,6 @@ router.get('/cards', async (req, res) => {
                     values.push(value);
                     paramIndex++;
                 } else if (key === 'types') {
-                    // 2. UPDATE FILTER: Search inside the types string
                     whereClauses.push(`c.types ILIKE $${paramIndex}`);
                     values.push(`%${value}%`);
                     paramIndex++;
@@ -75,7 +71,6 @@ router.get('/cards', async (req, res) => {
 
         const { rows } = await pool.query(sqlQuery, values);
 
-        // 3. UPDATE MAPPING: Split string "Fire, Flying" -> ["Fire", "Flying"]
         const formattedData = rows.map(row => ({
             id: row.card_id.toString(),
             name: row.card_name,
@@ -107,7 +102,6 @@ router.get('/cards', async (req, res) => {
 router.get('/cards/:id', async (req, res) => {
     try {
         const { id } = req.params;
-        // 4. UPDATE SINGLE CARD SELECT
         const query = `
             SELECT 
                 c.card_id, c.card_name, c.rarity, c.image_url, c.types,
@@ -128,7 +122,7 @@ router.get('/cards/:id', async (req, res) => {
             id: row.card_id.toString(),
             name: row.card_name,
             rarity: row.rarity,
-            types: row.types ? row.types.split(', ') : [], // Fix format here too
+            types: row.types ? row.types.split(', ') : [],
             images: { small: row.image_url },
             set: {
                 id: row.set_id.toString(),
@@ -150,8 +144,6 @@ router.get('/filters', async (req, res) => {
         const setsResult = await pool.query('SELECT * FROM "Set" ORDER BY set_name');
         const rarityResult = await pool.query('SELECT DISTINCT rarity FROM card WHERE rarity IS NOT NULL ORDER BY rarity');
         
-        // 5. UPDATE FILTERS: Get unique types
-        // We split the comma-separated strings and get unique values
         const typesResult = await pool.query('SELECT DISTINCT types FROM card WHERE types IS NOT NULL');
         
         const uniqueTypes = new Set();

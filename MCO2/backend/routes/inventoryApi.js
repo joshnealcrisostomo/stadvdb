@@ -2,7 +2,6 @@ const express = require('express');
 const { Pool } = require('pg');
 const router = express.Router();
 
-// Database Connection
 const pool = new Pool({
     host: process.env.DB_HOST,
     user: process.env.DB_USER,
@@ -14,7 +13,6 @@ const pool = new Pool({
 // 1. GET Inventory with Server-Side Filtering & Sorting
 router.get('/', async (req, res) => {
     try {
-        // Extract query parameters
         const { search, set, rarity, type, condition, sort } = req.query;
 
         let sqlQuery = `
@@ -39,8 +37,6 @@ router.get('/', async (req, res) => {
         let values = [];
         let paramIndex = 1;
 
-        // --- Dynamic Filtering (Server-Side) ---
-        
         if (search) {
             sqlQuery += ` AND c.card_name ILIKE $${paramIndex}`;
             values.push(`%${search}%`);
@@ -66,7 +62,6 @@ router.get('/', async (req, res) => {
         }
 
         if (type) {
-            // Uses ILIKE to search inside the "Types" string (e.g., "Fire, Flying")
             sqlQuery += ` AND c.types ILIKE $${paramIndex}`;
             values.push(`%${type}%`);
             paramIndex++;
@@ -97,11 +92,10 @@ router.get('/', async (req, res) => {
     }
 });
 
-// 2. GET Filter Options (New Endpoint)
+// 2. GET Filter Options
 // Fetches unique values for Sets, Rarities, Conditions, and Types
 router.get('/filters', async (req, res) => {
     try {
-        // We perform separate queries to get distinct values efficiently
         const setsQuery = `SELECT DISTINCT s.set_name FROM "Set" s JOIN Card c ON s.set_id = c.set_id JOIN Product p ON c.card_id = p.card_id JOIN Inventory i ON p.product_id = i.product_id ORDER BY s.set_name`;
         const raritiesQuery = `SELECT DISTINCT c.rarity FROM Card c JOIN Product p ON c.card_id = p.card_id JOIN Inventory i ON p.product_id = i.product_id WHERE c.rarity IS NOT NULL ORDER BY c.rarity`;
         const conditionsQuery = `SELECT DISTINCT condition FROM Product ORDER BY condition`;
@@ -114,7 +108,6 @@ router.get('/filters', async (req, res) => {
             pool.query(typesQuery)
         ]);
 
-        // Process Types (Split comma-separated strings and get unique)
         const uniqueTypes = new Set();
         typesResult.rows.forEach(row => {
             if (row.types) {
@@ -139,16 +132,14 @@ router.get('/filters', async (req, res) => {
 router.post('/upload', async (req, res) => {
     const client = await pool.connect();
     try {
-        const items = req.body; // Expect array of objects
+        const items = req.body;
         if (!items.length) return res.status(400).send("No items");
 
-        // Prepare arrays for bulk SQL operation
         const productIds = items.map(i => i.product_id);
         const quantities = items.map(i => i.quantity);
         
         await client.query('BEGIN');
 
-        // ONE QUERY to handle the entire file
         const query = `
             INSERT INTO Inventory (product_id, quantity, last_updated)
             SELECT * FROM UNNEST($1::int[], $2::int[], ARRAY_FILL(NOW(), ARRAY[array_length($1::int[], 1)]))
@@ -171,7 +162,7 @@ router.post('/upload', async (req, res) => {
     }
 });
 
-// 4. DELETE Inventory - Unchanged
+// 4. DELETE Inventory
 router.delete('/', async (req, res) => {
     try {
         await pool.query('TRUNCATE TABLE Inventory RESTART IDENTITY CASCADE');

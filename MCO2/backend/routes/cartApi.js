@@ -76,7 +76,6 @@ router.post('/cart', async (req, res) => {
 
         let cartId;
         if (cartRes.rows.length === 0) {
-            // Create new cart if none exists
             const newCart = await client.query(
                 `INSERT INTO cart (customer_id, created_at, last_updated) 
                  VALUES ($1, NOW(), NOW()) 

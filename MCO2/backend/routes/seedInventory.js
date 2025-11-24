@@ -1,13 +1,11 @@
-// backend/routes/seedInventory.js
 const fs = require('fs');
 const path = require('path');
 const { Pool } = require('pg');
-const csv = require('csv-parser'); // We will install this in the docker command
+const csv = require('csv-parser');
 
 const LOCK_FILE = '/app/data/inventory_seeded.lock';
 const CSV_FILE = '/app/inventory.csv';
 
-// Database Connection (Same as your API)
 const pool = new Pool({
     host: process.env.DB_HOST,
     user: process.env.DB_USER,
@@ -30,8 +28,7 @@ async function seed() {
     fs.createReadStream(CSV_FILE)
         .pipe(csv())
         .on('data', (data) => {
-            // Map CSV columns to your Schema expected format
-            // Adjust these keys based on your actual CSV headers
+
             results.push({
                 product_id: parseInt(data.product_id), 
                 quantity: parseInt(data.quantity)
@@ -45,7 +42,7 @@ async function seed() {
 
             const client = await pool.connect();
             try {
-                // 3. BULK UPSERT (Logic adapted from your inventoryApi.js)
+                // 3. BULK UPSERT
                 const productIds = results.map(i => i.product_id);
                 const quantities = results.map(i => i.quantity);
 
@@ -66,7 +63,6 @@ async function seed() {
                 console.log(`>> Successfully imported ${results.length} items.`);
 
                 // 4. CREATE LOCK FILE
-                // This ensures it doesn't run again until the volume is destroyed
                 if (!fs.existsSync('/app/data')) fs.mkdirSync('/app/data');
                 fs.writeFileSync(LOCK_FILE, 'Seeded on ' + new Date().toISOString());
                 console.log('>> Lock file created.');
@@ -77,7 +73,7 @@ async function seed() {
                 process.exit(1);
             } finally {
                 client.release();
-                pool.end(); // Close connection
+                pool.end();
             }
         });
 }

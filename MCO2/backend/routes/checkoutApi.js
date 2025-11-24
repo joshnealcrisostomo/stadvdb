@@ -25,7 +25,6 @@ router.post('/', async (req, res) => {
         // CALL the stored procedure
         // logic: It calculates total, locks inventory (deadlock safe), 
         // deducts stock, creates order, moves items, and clears cart.
-        // The 'NULL' is a placeholder for the OUT parameter p_order_id
         const result = await client.query('CALL checkout_cart($1, NULL)', [customerId]);
 
         await client.query('COMMIT');
@@ -39,7 +38,6 @@ router.post('/', async (req, res) => {
         await client.query('ROLLBACK');
         console.error("Checkout Error:", err.message);
 
-        // Handle specific Database Constraints
         if (err.message.includes('inventory_quantity_check')) {
             return res.status(400).json({ 
                 error: "One or more items in your cart are out of stock." 

@@ -2,11 +2,10 @@ const express = require('express');
 const router = express.Router();
 const { Pool } = require('pg');
 
-// OLAP Connection
 const olapPool = new Pool({
     user: process.env.DB_USER || 'postgres',
     host: process.env.DB_HOST || 'localhost',
-    database: 'pokemon_olap_db', // <--- IMPORTANT: Connects to the OLAP DB
+    database: 'pokemon_olap_db',
     password: process.env.DB_PASSWORD || 'password',
     port: process.env.DB_PORT || 5432,
 });
