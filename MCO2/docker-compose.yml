@@ -44,6 +44,7 @@ services:
       POSTGRES_DB: oltp_db
     volumes:
       - ./create_oltp_schema.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./init-replication.sh:/docker-entrypoint-initdb.d/init-replication.sh
       - postgres_data:/var/lib/postgresql/data
     ports:
       - "5432:5432"
@@ -52,24 +53,6 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
-    command: >
-      sh -c "
-        postgres &
-        pid=$$!;
-        sleep 5;
-        psql -v ON_ERROR_STOP=1 --username postgres -c \"DO \$\$ BEGIN
-          IF NOT EXISTS (SELECT FROM pg_roles WHERE rolname='replicator') THEN
-            CREATE USER replicator REPLICATION LOGIN ENCRYPTED PASSWORD 'replica_pass';
-          END IF;
-        END \$\$;\";
-        echo \"wal_level = replica\" >> /var/lib/postgresql/data/postgresql.conf;
-        echo \"max_wal_senders = 3\" >> /var/lib/postgresql/data/postgresql.conf;
-        echo \"wal_keep_size = 256MB\" >> /var/lib/postgresql/data/postgresql.conf;
-        echo \"hot_standby = on\" >> /var/lib/postgresql/data/postgresql.conf;
-        kill -TERM $pid;
-        wait $pid;
-        postgres -c config_file=/var/lib/postgresql/data/postgresql.conf
-      "
 
   # ---------------------------------------
   # 2. OLAP Database (Data Warehouse)
@@ -82,6 +65,7 @@ services:
       POSTGRES_DB: pokemon_olap
     volumes:
       - ./create_olap_schema.sql:/docker-entrypoint-initdb.d/init.sql
+      - ./init-replication.sh:/docker-entrypoint-initdb.d/init-replication.sh
       - postgres_olap_data:/var/lib/postgresql/data
     ports:
       # HOST:CONTAINER - We use 5433 on the computer to access this specific DB
@@ -91,27 +75,6 @@ services:
       interval: 5s
       timeout: 5s
       retries: 5
-
-  # ---------------------------------------
-  # 3. Python Seeder (Existing)
-  # ---------------------------------------
-  seeder:
-    image: python:3.9-slim
-    working_dir: /app
-    volumes:
-      - .:/app 
-    environment:
-      # Targets the OLTP DB
-      DB_HOST: db
-      DB_USER: postgres
-      DB_PASS: Joshneal2245
-      DB_NAME: oltp_db
-      DB_PORT: 5432
-    depends_on:
-      db:
-        condition: service_healthy
-    command: >
-      sh -c "pip install --default-timeout=1000 psycopg2-binary python-dotenv && python import_sample_data.py"
 
   # -----------------------------
   # 3. OLTP Hot Standby
@@ -169,9 +132,28 @@ services:
         postgres -c hot_standby=on
       "
 
-
+ # ---------------------------------------
+  # 5. Python Seeder (Existing)
   # ---------------------------------------
-  # 5. Node Customer Seeder (NEW)
+  seeder:
+    image: python:3.9-slim
+    working_dir: /app
+    volumes:
+      - .:/app 
+    environment:
+      # Targets the OLTP DB
+      DB_HOST: db
+      DB_USER: postgres
+      DB_PASS: Joshneal2245
+      DB_NAME: oltp_db
+      DB_PORT: 5432
+    depends_on:
+      db:
+        condition: service_healthy
+    command: >
+      sh -c "pip install --default-timeout=1000 psycopg2-binary python-dotenv && python import_sample_data.py"
+  # ---------------------------------------
+  # 6. Node Customer Seeder (NEW)
   # ---------------------------------------
   customer_seeder:
     image: node:18
