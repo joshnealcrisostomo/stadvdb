@@ -95,17 +95,26 @@ services:
         condition: service_healthy
     command: |
       bash -c '
+        # 1. Wait for Primary
         until pg_isready -h db -U postgres; do
           echo "Waiting for OLTP primary...";
           sleep 2;
         done;
 
-        export PGPASSWORD=replica_pass
-        until pg_basebackup -h db -D /var/lib/postgresql/data -U replicator -vP --wal-method=stream; do
-          echo "Trying replication backup...";
-          sleep 2;
-        done;
+        # 2. CHECK IF DATA EXISTS
+        if [ ! -s "/var/lib/postgresql/data/PG_VERSION" ]; then
+          echo "Data directory is empty. Starting replication backup..."
+          
+          export PGPASSWORD=replica_pass
+          until pg_basebackup -h db -D /var/lib/postgresql/data -U replicator -vP --wal-method=stream; do
+            echo "Trying replication backup...";
+            sleep 2;
+          done;
+        else
+          echo "Data already exists. Skipping backup."
+        fi
 
+        # 3. Continue with configuration
         echo "primary_conninfo = '\''host=db port=5432 user=replicator password=replica_pass'\''" >> /var/lib/postgresql/data/postgresql.auto.conf
         touch /var/lib/postgresql/data/standby.signal
 
@@ -139,11 +148,18 @@ services:
           sleep 2;
         done;
 
-        export PGPASSWORD=replica_pass
-        until pg_basebackup -h db_olap -D /var/lib/postgresql/data -U replicator -vP --wal-method=stream; do
-          echo "Trying replication backup...";
-          sleep 2;
-        done;
+        # CHECK IF DATA EXISTS
+        if [ ! -s "/var/lib/postgresql/data/PG_VERSION" ]; then
+          echo "Data directory is empty. Starting replication backup..."
+
+          export PGPASSWORD=replica_pass
+          until pg_basebackup -h db_olap -D /var/lib/postgresql/data -U replicator -vP --wal-method=stream; do
+            echo "Trying replication backup...";
+            sleep 2;
+          done;
+        else
+          echo "Data already exists. Skipping backup."
+        fi
 
         echo "primary_conninfo = '\''host=db_olap port=5432 user=replicator password=replica_pass'\''" \
           >> /var/lib/postgresql/data/postgresql.auto.conf
