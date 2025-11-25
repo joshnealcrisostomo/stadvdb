@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 set -e
 
 PRIMARY_HOST=$1    # e.g., db
