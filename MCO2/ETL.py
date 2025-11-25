@@ -1,5 +1,6 @@
 import psycopg2
 import os
+import time  # <--- NEW IMPORT
 from datetime import timedelta, date
 from dotenv import load_dotenv
 
@@ -25,33 +26,26 @@ def run_etl_bridge():
     conn_target = None
     
     try:
-        print("Connecting to databases...")
+        print("--- Starting ETL Batch ---")
         conn_source = psycopg2.connect(**SOURCE_CONFIG)
         
-        # Create a named cursor for Server-Side iteration (Saves RAM)
+        # Create a named cursor for Server-Side iteration
         cur_source = conn_source.cursor(name='server_side_cursor') 
 
         conn_target = psycopg2.connect(**TARGET_CONFIG)
         conn_target.autocommit = True
         cur_target = conn_target.cursor()
 
+        # ... [Rest of your existing extraction logic remains exactly the same] ...
         
         # STEP 1: DIMENSIONS 
-        
         cur_dim_source = conn_source.cursor() 
 
         # Products
-        print("Extracting Products...")
-        # Note: "Set" is a reserved keyword in SQL, use double quotes: "Set"
+        # print("Extracting Products...") 
         cur_dim_source.execute("""
             SELECT 
-                p.product_id, 
-                c.card_name, 
-                s.set_name, 
-                s.series, 
-                c.rarity, 
-                p.condition, 
-                p.price
+                p.product_id, c.card_name, s.set_name, s.series, c.rarity, p.condition, p.price
             FROM Product p 
             JOIN Card c ON p.card_id = c.card_id 
             JOIN "Set" s ON c.set_id = s.set_id
@@ -67,11 +61,8 @@ def run_etl_bridge():
         """, products)
 
         # Customers
-        print("Extracting Customers...")
-        cur_dim_source.execute("""
-            SELECT customer_id, user_name, first_name || ' ' || last_name 
-            FROM Customer
-        """)
+        # print("Extracting Customers...")
+        cur_dim_source.execute("SELECT customer_id, user_name, first_name || ' ' || last_name FROM Customer")
         customers = cur_dim_source.fetchall()
         
         cur_target.executemany("""
@@ -85,8 +76,7 @@ def run_etl_bridge():
         cur_dim_source.close()
 
         # Date
-        print("Syncing Date Dimension...")
-        # Using standard cursor for scalar values
+        # print("Syncing Date Dimension...")
         cur_date_source = conn_source.cursor()
         cur_date_source.execute('SELECT MIN(order_date), MAX(order_date) FROM "Order"')
         row = cur_date_source.fetchone()
@@ -95,7 +85,6 @@ def run_etl_bridge():
         min_date = row[0].date() if row and row[0] else date.today()
         max_date = row[1].date() if row and row[1] else date.today()
         
-        # Python Generator for Dates
         date_rows = []
         curr = min_date
         while curr <= max_date:
@@ -111,30 +100,19 @@ def run_etl_bridge():
             ON CONFLICT (date_key) DO NOTHING;
         """, date_rows)
 
-        
         # FACT TABLE 
-        
-        # Build Memory Map
         cur_target.execute("SELECT product_id_oltp, product_key FROM dim_product")
         p_map = dict(cur_target.fetchall())
         
         cur_target.execute("SELECT customer_id_oltp, customer_key FROM dim_customer")
         c_map = dict(cur_target.fetchall())
 
-        # Extract Data via Server Side Cursor
-        print("Extracting Sales...")
-        
+        # print("Extracting Sales...")
         cur_source.itersize = 2000 
-        # match OrderItem and "Order" tables
         cur_source.execute("""
             SELECT 
-                to_char(o.order_date, 'YYYYMMDD')::int,
-                oi.product_id, 
-                o.customer_id, 
-                o.order_id, 
-                oi.quantity, 
-                oi.price_at_sale,
-                (oi.quantity * oi.price_at_sale)
+                to_char(o.order_date, 'YYYYMMDD')::int, oi.product_id, o.customer_id, 
+                o.order_id, oi.quantity, oi.price_at_sale, (oi.quantity * oi.price_at_sale)
             FROM OrderItem oi 
             JOIN "Order" o ON oi.order_id = o.order_id
         """)
@@ -145,13 +123,10 @@ def run_etl_bridge():
 
         while True:
             rows = cur_source.fetchmany(BATCH_SIZE)
-            if not rows:
-                break
+            if not rows: break
             
             for row in rows:
                 d_key, pid, cid, oid, qty, price, total = row
-                
-                # Ensure we have matching dimensions
                 if pid in p_map and cid in c_map:
                     batch_buffer.append((d_key, p_map[pid], c_map[cid], oid, qty, price, total))
             
@@ -166,15 +141,27 @@ def run_etl_bridge():
                 """, batch_buffer)
                 total_loaded += len(batch_buffer)
                 batch_buffer = [] 
-                print(f"   ... Synced {total_loaded} rows")
 
-        print("\nETL Completed Successfully!")
+        print(f"ETL Batch Completed. Synced {total_loaded} sales rows.")
 
     except Exception as e:
-        print(f"\nETL Failed: {e}")
+        print(f"ETL Batch Failed: {e}")
     finally:
         if conn_source: conn_source.close()
         if conn_target: conn_target.close()
 
+# --- UPDATED MAIN EXECUTION LOOP ---
 if __name__ == "__main__":
-    run_etl_bridge()
+    # Default to 60 seconds if not set in docker-compose
+    SLEEP_INTERVAL = int(os.getenv("ETL_INTERVAL", "60"))
+    
+    print(f"Starting ETL Service. Running every {SLEEP_INTERVAL} seconds.")
+    
+    while True:
+        try:
+            run_etl_bridge()
+        except Exception as e:
+            print(f"CRITICAL ERROR in Loop: {e}")
+        
+        # Sleep to reduce load on DB (Batch processing)
+        time.sleep(SLEEP_INTERVAL)
