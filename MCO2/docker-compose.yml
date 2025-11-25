@@ -304,6 +304,8 @@
           condition: service_healthy
         sales_seeder:
           condition: service_completed_successfully  
+        load_tester:
+          condition: service_completed_successfully
       command: >
         sh -c "pip install --default-timeout=1000 psycopg2-binary python-dotenv && python ETL.py"
 
@@ -326,6 +328,8 @@
           condition: service_completed_successfully
         inventory_seeder:
           condition: service_completed_successfully
+        load_tester:
+          condition: service_completed_successfully  
       command: >
         sh -c "pip install --default-timeout=1000 psycopg2-binary python-dotenv && python mock_sales.py"
 
