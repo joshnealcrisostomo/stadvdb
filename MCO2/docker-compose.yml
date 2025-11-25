@@ -156,12 +156,9 @@ services:
         exec su postgres -c "postgres -c hot_standby=on"
       '
 
-
-
-
- # ---------------------------------------
-  # 5. Python Seeder (Existing)
-  # ---------------------------------------
+# ---------------------------------------
+# 5. Python Seeder
+# ---------------------------------------
   seeder:
     image: python:3.9-slim
     working_dir: /app
@@ -179,9 +176,10 @@ services:
         condition: service_healthy
     command: >
       sh -c "pip install --default-timeout=1000 psycopg2-binary python-dotenv && python import_sample_data.py"
-  # ---------------------------------------
-  # 6. Node Customer Seeder (NEW)
-  # ---------------------------------------
+  
+# ---------------------------------------
+# 6. Node Customer Seeder
+# ---------------------------------------
   customer_seeder:
     image: node:18
     working_dir: /app
@@ -196,12 +194,11 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    # Installs dependencies in the container temporarily, then runs the script
     command: >
       sh -c "npm install pg bcrypt && node seedCustomers.js"
 
 # ---------------------------------------
-# 5. Inventory Seeder (CSV Import)
+# 7. Inventory Seeder (CSV Import)
 # ---------------------------------------
   inventory_seeder:
     image: node:18
@@ -209,7 +206,6 @@ services:
     volumes:
       - ./backend/routes/seedInventory.js:/app/seedInventory.js
       - ./mock_inventory.csv:/app/inventory.csv
-      # Persistence for the "Lock File"
       - seed_marker:/app/data
     environment:
       DB_HOST: db
@@ -222,12 +218,11 @@ services:
         condition: service_healthy
       seeder:
         condition: service_completed_successfully
-    # Install csv-parser, pg, then run the script
     command: >
       sh -c "npm install pg csv-parser && node seedInventory.js"
 
 # ---------------------------------------
-# 6. JMeter Load Tester
+# 8. JMeter Load Tester
 # ---------------------------------------
   load_tester:
     image: justb4/jmeter:5.5
@@ -238,14 +233,13 @@ services:
     depends_on:
       backend:
         condition: service_started
-      # WAITS for the database to be fully populated
       inventory_seeder:
         condition: service_completed_successfully
       customer_seeder:
         condition: service_completed_successfully
 
 # ---------------------------------------
-# 7. ETL Bridge (Moves data from OLTP -> OLAP)
+# 9. ETL Bridge (Moves data from OLTP -> OLAP)
 # ---------------------------------------
   etl_bridge:
     image: python:3.9-slim
@@ -253,13 +247,11 @@ services:
     volumes:
       - ./ETL.py:/app/ETL.py
     environment:
-      # Source (OLTP) Configuration
       DB_SOURCE_HOST: db
       DB_SOURCE_NAME: oltp_db       
       DB_SOURCE_USER: postgres
       DB_SOURCE_PASS: Joshneal2245
       
-      # Target (OLAP) Configuration
       DB_TARGET_HOST: db_olap
       DB_TARGET_NAME: pokemon_olap
       DB_TARGET_USER: postgres
@@ -275,7 +267,6 @@ services:
         condition: service_completed_successfully
       seeder:
         condition: service_completed_successfully  
-    # ERROR FIX BELOW: Added --default-timeout=1000 to the pip command
     command: >
       sh -c "pip install --default-timeout=1000 psycopg2-binary python-dotenv && python ETL.py"
 
