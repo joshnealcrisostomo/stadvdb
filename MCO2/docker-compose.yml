@@ -306,10 +306,36 @@
         customer_seeder:
           condition: service_completed_successfully
         seeder:
+          condition: service_completed_successfully
+        sales_seeder:
           condition: service_completed_successfully  
       command: >
         sh -c "pip install --default-timeout=1000 psycopg2-binary python-dotenv && python ETL.py"
-  
+
+# ---------------------------------------
+# 7.5 Sales Seeder (Mock Transaction Data)
+# ---------------------------------------
+    sales_seeder:
+      image: python:3.9-slim
+      working_dir: /app
+      volumes:
+        - ./mock_sales.py:/app/mock_sales.py
+      environment:
+        # Configuration matches mock_sales.py expectations
+        DB_SOURCE_HOST: db
+        DB_SOURCE_NAME: oltp_db
+        DB_SOURCE_USER: postgres
+        DB_SOURCE_PASS: Joshneal2245
+        DB_SOURCE_PORT: 5432
+      depends_on:
+        # Must wait for customers and products to exist first
+        customer_seeder:
+          condition: service_completed_successfully
+        inventory_seeder:
+          condition: service_completed_successfully
+      command: >
+        sh -c "pip install --default-timeout=1000 psycopg2-binary python-dotenv && python mock_sales.py"
+
   volumes:
     postgres_data:
     postgres_hot_data:
