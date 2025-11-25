@@ -59,10 +59,30 @@ const Statistics = () => {
             const products = await productsRes.json();
             const sets = await setsRes.json();
 
+            // Safety conversion: Ensure numbers are actually Numbers (not strings)
+            // This is crucial for Recharts to render correctly
+            const formattedSets = sets.map(item => ({
+                ...item,
+                total_revenue: Number(item.total_revenue),
+                quantity_sold: Number(item.quantity_sold)
+            }));
+
+            const formattedProducts = products.map(item => ({
+                ...item,
+                total_revenue: Number(item.total_revenue),
+                quantity_sold: Number(item.quantity_sold)
+            }));
+
+            const formattedRevenue = revenue.map(item => ({
+                ...item,
+                total_revenue: Number(item.total_revenue),
+                total_quantity: Number(item.total_quantity)
+            }));
+
             setSummaryData(summary);
-            setRevenueData(revenue);
-            setTopProductsData(products);
-            setSetData(sets);
+            setRevenueData(formattedRevenue);
+            setTopProductsData(formattedProducts);
+            setSetData(formattedSets);
         } catch (error) {
             console.error("Failed to fetch dashboard data", error);
         } finally {
@@ -330,8 +350,8 @@ const Statistics = () => {
 
                         {/* SETS TAB */}
                         {activeTab === 'sets' && (
-                            <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm h-[500px]">
-                                <h3 className="font-bold text-gray-700 mb-6">Distribution by Card Set</h3>
+                            <div className="bg-white p-6 rounded-xl border border-gray-200 shadow-sm h-[600px]">
+                                <h3 className="font-bold text-gray-700">Distribution by Card Set</h3>
                                 <ResponsiveContainer width="100%" height="90%">
                                     <PieChart>
                                         <Pie
@@ -339,6 +359,7 @@ const Statistics = () => {
                                             cx="50%"
                                             cy="50%"
                                             labelLine={false}
+                                            nameKey="set_name" 
                                             label={({ set_name, percent }) => percent > 0.05 ? `${set_name} ${(percent * 100).toFixed(0)}%` : ''}
                                             outerRadius={160}
                                             fill="#8884d8"

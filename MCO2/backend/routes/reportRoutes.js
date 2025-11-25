@@ -77,10 +77,10 @@ router.get('/summary', async (req, res) => {
 
         const query = `
             SELECT 
-                COALESCE(SUM(f.total_revenue), 0) as total_revenue,
-                COALESCE(SUM(f.quantity_sold), 0) as total_units,
-                COUNT(DISTINCT f.order_id) as total_orders,
-                ROUND(AVG(f.unit_price), 2) as avg_price
+                COALESCE(SUM(f.total_revenue), 0)::float as total_revenue,
+                COALESCE(SUM(f.quantity_sold), 0)::integer as total_units,
+                COUNT(DISTINCT f.order_id)::integer as total_orders,
+                ROUND(AVG(f.unit_price), 2)::float as avg_price
             FROM fact_sales f
             JOIN dim_date d ON f.date_key = d.date_key
             JOIN dim_product p ON f.product_key = p.product_key
@@ -103,8 +103,8 @@ router.get('/revenue-trends', async (req, res) => {
         const query = `
             SELECT 
                 d.full_date, 
-                SUM(f.total_revenue) as total_revenue,
-                SUM(f.quantity_sold) as total_quantity
+                SUM(f.total_revenue)::float as total_revenue,
+                SUM(f.quantity_sold)::integer as total_quantity
             FROM fact_sales f 
             JOIN dim_date d ON f.date_key = d.date_key 
             JOIN dim_product p ON f.product_key = p.product_key
@@ -130,8 +130,8 @@ router.get('/top-products', async (req, res) => {
         const query = `
             SELECT 
                 p.card_name, 
-                SUM(f.quantity_sold) as quantity_sold,
-                SUM(f.total_revenue) as total_revenue
+                SUM(f.quantity_sold)::integer as quantity_sold,
+                SUM(f.total_revenue)::float as total_revenue
             FROM fact_sales f 
             JOIN dim_product p ON f.product_key = p.product_key 
             JOIN dim_date d ON f.date_key = d.date_key
@@ -156,8 +156,8 @@ router.get('/sales-by-set', async (req, res) => {
         const query = `
             SELECT 
                 p.set_name, 
-                SUM(f.total_revenue) as total_revenue,
-                SUM(f.quantity_sold) as quantity_sold
+                SUM(f.total_revenue)::float as total_revenue,
+                SUM(f.quantity_sold)::integer as quantity_sold
             FROM fact_sales f 
             JOIN dim_product p ON f.product_key = p.product_key 
             JOIN dim_date d ON f.date_key = d.date_key
