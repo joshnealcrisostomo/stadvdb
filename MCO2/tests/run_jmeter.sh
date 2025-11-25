@@ -1,6 +1,6 @@
 # chmod +x tests/run_jmeter.sh
 
-#!/bin/bash
+#!/bin/sh
 
 LOCK_FILE="/results/tests_completed.lock"
 
