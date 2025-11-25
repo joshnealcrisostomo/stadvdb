@@ -4,10 +4,10 @@ const { Pool } = require('pg');
 
 const olapPool = new Pool({
     user: process.env.DB_USER || 'postgres',
-    host: process.env.DB_HOST || 'localhost',
-    database: 'pokemon_olap_db',
-    password: process.env.DB_PASSWORD || 'password',
-    port: process.env.DB_PORT || 5432,
+    host: process.env.DB_OLAP_HOST || 'db_olap', 
+    database: process.env.DB_OLAP_NAME || 'pokemon_olap', 
+    password: process.env.DB_PASSWORD || 'Joshneal2245',
+    port: 5432
 });
 
 // API Endpoints
