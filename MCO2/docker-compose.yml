@@ -1,294 +1,318 @@
-# BUILD: docker-compose up --build  
+  # BUILD: docker-compose up --build  
 
-# DOWN: docker-compose down -v
+  # DOWN: docker-compose down -v
 
-# UP: docker-compose up
+  # UP: docker-compose up
 
-services:
-  # Frontend Service
-  frontend:
-    build:
-      context: ./frontend
-    ports:
-      - "5173:5173"
-    volumes:
-      - ./frontend/src:/app/src
+  services:
+    # Frontend Service
+    frontend:
+      build:
+        context: ./frontend
+      ports:
+        - "5173:5173"
+      volumes:
+        - ./frontend/src:/app/src
 
-  # Backend Service (Connects to OLTP)
-  backend:
-    build:
-      context: ./backend
-    ports:
-      - "5001:5001"
-    volumes:
-      - ./backend:/app
-      - /app/node_modules
-    environment:
-      DB_HOST: db
-      DB_USER: postgres
-      DB_PASS: Joshneal2245
-      DB_NAME: oltp_db
-      DB_PORT: 5432
-    depends_on:
-      db:
-        condition: service_healthy
+    # Backend Service (Connects to OLTP)
+    backend:
+      build:
+        context: ./backend
+      ports:
+        - "5001:5001"
+      volumes:
+        - ./backend:/app
+        - /app/node_modules
+      environment:
+        DB_HOST: db
+        DB_USER: postgres
+        DB_PASS: Joshneal2245
+        DB_NAME: oltp_db
+        DB_PORT: 5432
+      depends_on:
+        db:
+          condition: service_healthy
+
+    # ---------------------------------------
+    # 1. OLTP Database (Source System)
+    # ---------------------------------------
+    db:
+      image: postgres:14-alpine
+      environment:
+        POSTGRES_USER: postgres
+        POSTGRES_PASSWORD: Joshneal2245
+        POSTGRES_DB: oltp_db
+      volumes:
+        - ./create_oltp_schema.sql:/docker-entrypoint-initdb.d/init.sql
+        - ./init-replication.sh:/docker-entrypoint-initdb.d/init-replication.sh
+        - postgres_data:/var/lib/postgresql/data
+      ports:
+        - "5432:5432"
+      healthcheck:
+        test: ["CMD-SHELL", "pg_isready -U postgres"]
+        interval: 5s
+        timeout: 5s
+        retries: 5
+
+    # ---------------------------------------
+    # 2. OLAP Database (Data Warehouse)
+    # ---------------------------------------
+    db_olap:
+      image: postgres:14-alpine
+      environment:
+        POSTGRES_USER: postgres
+        POSTGRES_PASSWORD: Joshneal2245
+        POSTGRES_DB: pokemon_olap
+      volumes:
+        - ./create_olap_schema.sql:/docker-entrypoint-initdb.d/init.sql
+        - ./init-replication.sh:/docker-entrypoint-initdb.d/init-replication.sh
+        - postgres_olap_data:/var/lib/postgresql/data
+      ports:
+        # HOST:CONTAINER - We use 5433 on the computer to access this specific DB
+        - "5440:5432"
+      healthcheck:
+        test: ["CMD-SHELL", "pg_isready -U postgres"]
+        interval: 5s
+        timeout: 5s
+        retries: 5
+
+    # -----------------------------
+    # 3. OLTP Hot Standby
+    # -----------------------------
+    db_hot:
+      image: postgres:14-alpine
+      user: postgres
+      environment:
+        POSTGRES_USER: postgres
+        POSTGRES_PASSWORD: Joshneal2245
+        POSTGRES_DB: oltp_db
+        PGDATA: /var/lib/postgresql/data
+      volumes:
+        - postgres_hot_data:/var/lib/postgresql/data
+      ports:
+        - "5434:5432"
+      depends_on:
+        db:
+          condition: service_healthy
+      command: >
+        bash -c "
+          # Wait for primary
+          until pg_isready -h db -U postgres; do
+            echo 'Waiting for OLTP primary...'
+            sleep 2
+          done
+
+          # Replication setup if data dir empty
+          if [ ! -s '/var/lib/postgresql/data/PG_VERSION' ]; then
+            echo 'Data directory empty. Starting replication...'
+            export PGPASSWORD=replica_pass
+            until pg_basebackup -h db -D /var/lib/postgresql/data -U replicator -vP --wal-method=stream; do
+              echo 'Trying replication backup...'
+              sleep 2
+            done
+          fi
+
+          # Configure standby
+          echo \"primary_conninfo = 'host=db port=5432 user=replicator password=replica_pass'\" >> /var/lib/postgresql/data/postgresql.auto.conf
+          touch /var/lib/postgresql/data/standby.signal
+          chmod 0700 /var/lib/postgresql/data
+          chown -R postgres:postgres /var/lib/postgresql/data
+
+          # Start PostgreSQL in hot_standby mode
+          exec postgres -c hot_standby=on
+        "
+
+
+    failover_watcher_oltp:
+      image: postgres:14-alpine
+      user: postgres
+      depends_on:
+        db:
+          condition: service_started
+        db_hot:
+          condition: service_started
+      volumes:
+        - postgres_hot_data:/var/lib/postgresql/data
+        - ./failover-watcher.sh:/failover-watcher.sh
+      entrypoint: ["sh", "/failover-watcher.sh", "db", "/var/lib/postgresql/data"]
+
+
+    # -----------------------------
+    # 4. OLAP Hot Standby
+    # -----------------------------
+    db_olap_hot:
+      image: postgres:14-alpine
+      user: postgres
+      environment:
+        POSTGRES_USER: postgres
+        POSTGRES_PASSWORD: Joshneal2245
+        POSTGRES_DB: pokemon_olap
+        PGDATA: /var/lib/postgresql/data
+      ports:
+        - "5435:5432"
+      volumes:
+        - postgres_olap_hot_data:/var/lib/postgresql/data
+        - ./failover-watcher.sh:/failover-watcher.sh
+      depends_on:
+        db_olap:
+          condition: service_healthy
+      command: >
+        bash -c "
+          # Wait for OLAP primary
+          until pg_isready -h db_olap -U postgres; do
+            echo 'Waiting for OLAP primary...'
+            sleep 2
+          done
+
+          # Replication setup if data dir empty
+          if [ ! -s '/var/lib/postgresql/data/PG_VERSION' ]; then
+            echo 'Data directory empty. Starting OLAP replication...'
+            export PGPASSWORD=replica_pass
+            until pg_basebackup -h db_olap -D /var/lib/postgresql/data -U replicator -vP --wal-method=stream; do
+              echo 'Trying OLAP replication backup...'
+              sleep 2
+            done
+          fi
+
+          # Configure standby
+          echo \"primary_conninfo = 'host=db_olap port=5432 user=replicator password=replica_pass'\" >> /var/lib/postgresql/data/postgresql.auto.conf
+          touch /var/lib/postgresql/data/standby.signal
+          chmod 0700 /var/lib/postgresql/data
+          chown -R postgres:postgres /var/lib/postgresql/data
+
+          # Start PostgreSQL in hot_standby mode
+          exec postgres -c hot_standby=on
+        "
+
+    failover_watcher_olap:
+      image: postgres:14-alpine
+      user: postgres
+      depends_on:
+        db_olap:
+          condition: service_started
+        db_olap_hot:
+          condition: service_started
+      volumes:
+        - postgres_olap_hot_data:/var/lib/postgresql/data
+        - ./failover-watcher.sh:/failover-watcher.sh
+      entrypoint: ["sh", "/failover-watcher.sh", "db_olap", "/var/lib/postgresql/data"]
+  # ---------------------------------------
+  # 5. Python Seeder
+  # ---------------------------------------
+    seeder:
+      image: python:3.9-slim
+      working_dir: /app
+      volumes:
+        - .:/app 
+      environment:
+        # Targets the OLTP DB
+        DB_HOST: db
+        DB_USER: postgres
+        DB_PASS: Joshneal2245
+        DB_NAME: oltp_db
+        DB_PORT: 5432
+      depends_on:
+        db:
+          condition: service_healthy
+      command: >
+        sh -c "pip install --default-timeout=1000 psycopg2-binary python-dotenv && python import_sample_data.py"
+    
+  # ---------------------------------------
+  # 6. Node Customer Seeder
+  # ---------------------------------------
+    customer_seeder:
+      image: node:18
+      working_dir: /app
+      volumes:
+        - ./backend/routes/seedCustomers.js:/app/seedCustomers.js
+      environment:
+        DB_HOST: db
+        DB_USER: postgres
+        DB_PASS: Joshneal2245
+        DB_NAME: oltp_db
+        DB_PORT: 5432
+      depends_on:
+        db:
+          condition: service_healthy
+      command: >
+        sh -c "npm install pg bcrypt && node seedCustomers.js"
 
   # ---------------------------------------
-  # 1. OLTP Database (Source System)
+  # 7. Inventory Seeder (CSV Import)
   # ---------------------------------------
-  db:
-    image: postgres:14-alpine
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: Joshneal2245
-      POSTGRES_DB: oltp_db
-    volumes:
-      - ./create_oltp_schema.sql:/docker-entrypoint-initdb.d/init.sql
-      - ./init-replication.sh:/docker-entrypoint-initdb.d/init-replication.sh
-      - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
+    inventory_seeder:
+      image: node:18
+      working_dir: /app
+      volumes:
+        - ./backend/routes/seedInventory.js:/app/seedInventory.js
+        - ./mock_inventory.csv:/app/inventory.csv
+        - seed_marker:/app/data
+      environment:
+        DB_HOST: db
+        DB_USER: postgres
+        DB_PASS: Joshneal2245
+        DB_NAME: oltp_db
+        DB_PORT: 5432
+      depends_on:
+        db:
+          condition: service_healthy
+        seeder:
+          condition: service_completed_successfully
+      command: >
+        sh -c "npm install pg csv-parser && node seedInventory.js"
 
   # ---------------------------------------
-  # 2. OLAP Database (Data Warehouse)
+  # 8. JMeter Load Tester
   # ---------------------------------------
-  db_olap:
-    image: postgres:14-alpine
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: Joshneal2245
-      POSTGRES_DB: pokemon_olap
-    volumes:
-      - ./create_olap_schema.sql:/docker-entrypoint-initdb.d/init.sql
-      - ./init-replication.sh:/docker-entrypoint-initdb.d/init-replication.sh
-      - postgres_olap_data:/var/lib/postgresql/data
-    ports:
-      # HOST:CONTAINER - We use 5433 on the computer to access this specific DB
-      - "5440:5432"
-    healthcheck:
-      test: ["CMD-SHELL", "pg_isready -U postgres"]
-      interval: 5s
-      timeout: 5s
-      retries: 5
+    load_tester:
+      image: justb4/jmeter:5.5
+      entrypoint: ["/bin/bash", "/tests/run_jmeter.sh"]
+      volumes:
+        - ./tests:/tests
+        - ./results:/results
+      depends_on:
+        backend:
+          condition: service_started
+        inventory_seeder:
+          condition: service_completed_successfully
+        customer_seeder:
+          condition: service_completed_successfully
 
-  # -----------------------------
-  # 3. OLTP Hot Standby
-  # -----------------------------
-  db_hot:
-    image: postgres:14-alpine
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: Joshneal2245
-      POSTGRES_DB: oltp_db
-      PGDATA: /var/lib/postgresql/data
-    ports:
-      - "5434:5432"
-    volumes:
-      - postgres_hot_data:/var/lib/postgresql/data
-    depends_on:
-      db:
-        condition: service_healthy
-    command: |
-      bash -c '
-        # 1. Wait for Primary
-        until pg_isready -h db -U postgres; do
-          echo "Waiting for OLTP primary...";
-          sleep 2;
-        done;
-
-        # 2. CHECK IF DATA EXISTS
-        if [ ! -s "/var/lib/postgresql/data/PG_VERSION" ]; then
-          echo "Data directory is empty. Starting replication backup..."
-          
-          export PGPASSWORD=replica_pass
-          until pg_basebackup -h db -D /var/lib/postgresql/data -U replicator -vP --wal-method=stream; do
-            echo "Trying replication backup...";
-            sleep 2;
-          done;
-        else
-          echo "Data already exists. Skipping backup."
-        fi
-
-        # 3. Continue with configuration
-        echo "primary_conninfo = '\''host=db port=5432 user=replicator password=replica_pass'\''" >> /var/lib/postgresql/data/postgresql.auto.conf
-        touch /var/lib/postgresql/data/standby.signal
-
-        chmod 0700 /var/lib/postgresql/data
-        chown -R postgres:postgres /var/lib/postgresql/data
-
-        exec su postgres -c "postgres -c hot_standby=on"
-      '
-
-  # -----------------------------
-  # 4. OLAP Hot Standby
-  # -----------------------------
-  db_olap_hot:
-    image: postgres:14-alpine
-    environment:
-      POSTGRES_USER: postgres
-      POSTGRES_PASSWORD: Joshneal2245
-      POSTGRES_DB: pokemon_olap
-      PGDATA: /var/lib/postgresql/data
-    ports:
-      - "5435:5432"
-    volumes:
-      - postgres_olap_hot_data:/var/lib/postgresql/data
-    depends_on:
-      db_olap:
-        condition: service_healthy
-    command: |
-      bash -c '
-        until pg_isready -h db_olap -U postgres; do
-          echo "Waiting for OLAP primary...";
-          sleep 2;
-        done;
-
-        # CHECK IF DATA EXISTS
-        if [ ! -s "/var/lib/postgresql/data/PG_VERSION" ]; then
-          echo "Data directory is empty. Starting replication backup..."
-
-          export PGPASSWORD=replica_pass
-          until pg_basebackup -h db_olap -D /var/lib/postgresql/data -U replicator -vP --wal-method=stream; do
-            echo "Trying replication backup...";
-            sleep 2;
-          done;
-        else
-          echo "Data already exists. Skipping backup."
-        fi
-
-        echo "primary_conninfo = '\''host=db_olap port=5432 user=replicator password=replica_pass'\''" \
-          >> /var/lib/postgresql/data/postgresql.auto.conf
-
-        touch /var/lib/postgresql/data/standby.signal
-
-        chmod 0700 /var/lib/postgresql/data
-        chown -R postgres:postgres /var/lib/postgresql/data
-
-        exec su postgres -c "postgres -c hot_standby=on"
-      '
-
-# ---------------------------------------
-# 5. Python Seeder
-# ---------------------------------------
-  seeder:
-    image: python:3.9-slim
-    working_dir: /app
-    volumes:
-      - .:/app 
-    environment:
-      # Targets the OLTP DB
-      DB_HOST: db
-      DB_USER: postgres
-      DB_PASS: Joshneal2245
-      DB_NAME: oltp_db
-      DB_PORT: 5432
-    depends_on:
-      db:
-        condition: service_healthy
-    command: >
-      sh -c "pip install --default-timeout=1000 psycopg2-binary python-dotenv && python import_sample_data.py"
+  # ---------------------------------------
+  # 9. ETL Bridge (Moves data from OLTP -> OLAP)
+  # ---------------------------------------
+    etl_bridge:
+      image: python:3.9-slim
+      working_dir: /app
+      volumes:
+        - ./ETL.py:/app/ETL.py
+      environment:
+        DB_SOURCE_HOST: db
+        DB_SOURCE_NAME: oltp_db       
+        DB_SOURCE_USER: postgres
+        DB_SOURCE_PASS: Joshneal2245
+        
+        DB_TARGET_HOST: db_olap
+        DB_TARGET_NAME: pokemon_olap
+        DB_TARGET_USER: postgres
+        DB_TARGET_PASS: Joshneal2245
+      depends_on:
+        db:
+          condition: service_healthy
+        db_olap:
+          condition: service_healthy
+        inventory_seeder:
+          condition: service_completed_successfully
+        customer_seeder:
+          condition: service_completed_successfully
+        seeder:
+          condition: service_completed_successfully  
+      command: >
+        sh -c "pip install --default-timeout=1000 psycopg2-binary python-dotenv && python ETL.py"
   
-# ---------------------------------------
-# 6. Node Customer Seeder
-# ---------------------------------------
-  customer_seeder:
-    image: node:18
-    working_dir: /app
-    volumes:
-      - ./backend/routes/seedCustomers.js:/app/seedCustomers.js
-    environment:
-      DB_HOST: db
-      DB_USER: postgres
-      DB_PASS: Joshneal2245
-      DB_NAME: oltp_db
-      DB_PORT: 5432
-    depends_on:
-      db:
-        condition: service_healthy
-    command: >
-      sh -c "npm install pg bcrypt && node seedCustomers.js"
-
-# ---------------------------------------
-# 7. Inventory Seeder (CSV Import)
-# ---------------------------------------
-  inventory_seeder:
-    image: node:18
-    working_dir: /app
-    volumes:
-      - ./backend/routes/seedInventory.js:/app/seedInventory.js
-      - ./mock_inventory.csv:/app/inventory.csv
-      - seed_marker:/app/data
-    environment:
-      DB_HOST: db
-      DB_USER: postgres
-      DB_PASS: Joshneal2245
-      DB_NAME: oltp_db
-      DB_PORT: 5432
-    depends_on:
-      db:
-        condition: service_healthy
-      seeder:
-        condition: service_completed_successfully
-    command: >
-      sh -c "npm install pg csv-parser && node seedInventory.js"
-
-# ---------------------------------------
-# 8. JMeter Load Tester
-# ---------------------------------------
-  load_tester:
-    image: justb4/jmeter:5.5
-    entrypoint: ["/bin/bash", "/tests/run_jmeter.sh"]
-    volumes:
-      - ./tests:/tests
-      - ./results:/results
-    depends_on:
-      backend:
-        condition: service_started
-      inventory_seeder:
-        condition: service_completed_successfully
-      customer_seeder:
-        condition: service_completed_successfully
-
-# ---------------------------------------
-# 9. ETL Bridge (Moves data from OLTP -> OLAP)
-# ---------------------------------------
-  etl_bridge:
-    image: python:3.9-slim
-    working_dir: /app
-    volumes:
-      - ./ETL.py:/app/ETL.py
-    environment:
-      DB_SOURCE_HOST: db
-      DB_SOURCE_NAME: oltp_db       
-      DB_SOURCE_USER: postgres
-      DB_SOURCE_PASS: Joshneal2245
-      
-      DB_TARGET_HOST: db_olap
-      DB_TARGET_NAME: pokemon_olap
-      DB_TARGET_USER: postgres
-      DB_TARGET_PASS: Joshneal2245
-    depends_on:
-      db:
-        condition: service_healthy
-      db_olap:
-        condition: service_healthy
-      inventory_seeder:
-        condition: service_completed_successfully
-      customer_seeder:
-        condition: service_completed_successfully
-      seeder:
-        condition: service_completed_successfully  
-    command: >
-      sh -c "pip install --default-timeout=1000 psycopg2-binary python-dotenv && python ETL.py"
-
-volumes:
-  postgres_data:
-  postgres_hot_data:
-  postgres_olap_data:
-  postgres_olap_hot_data:
-  seed_marker:
+  volumes:
+    postgres_data:
+    postgres_hot_data:
+    postgres_olap_data:
+    postgres_olap_hot_data:
+    seed_marker:
