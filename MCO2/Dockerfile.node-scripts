@@ -1,0 +1,10 @@
+FROM node:18-alpine
+
+WORKDIR /app
+
+# Install dependencies layer
+COPY package.json package-lock.json* ./
+# If no package.json exists yet and you just want the libs:
+RUN npm install pg bcrypt csv-parser
+
+COPY . .

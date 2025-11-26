@@ -1,35 +1,34 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import React, { lazy, Suspense } from 'react';
+import { Routes, Route } from 'react-router-dom';
+import Layout from './components/Layout.jsx';
+
+// Import your pages
+const Homepage = lazy(() => import('./pages/Homepage.jsx'));
+const LoginPage = lazy(() => import('./pages/LoginPage.jsx'));
+const Statistics = lazy(() => import('./pages/Statistics.jsx'));
+const CartPage = lazy(() => import('./pages/CartPage.jsx'));
+const RestockItems = lazy(() => import('./pages/Restock.jsx'))
+const Inventory = lazy(() => import('./pages/Inventory.jsx'));
+
+const Loading = () => <div>Loading...</div>;
 
 function App() {
-  const [count, setCount] = useState(0)
-
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
+    <Suspense fallback={<Loading />}>
+      <Routes>
+        <Route path="/" element={<LoginPage />} />
+        
+        <Route element={<Layout />}>
+          <Route path="/shop" element={<Homepage />} />
+          <Route path="/statistics" element={<Statistics />} />
+          <Route path="/cart" element={<CartPage />} />
+          <Route path="/restockItems" element={<RestockItems />} />
+          <Route path="/inventory" element={<Inventory />} />
+        </Route>
+        
+      </Routes>
+    </Suspense>
+  );
 }
 
-export default App
+export default App;
