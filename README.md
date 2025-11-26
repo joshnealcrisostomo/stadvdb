@@ -3,6 +3,8 @@
 
 * Make sure to convert `run_jmeter.sh`, `init-replication.sh`, and `failover-watcher.sh` from CRLF to LF
 
+![LF Screenshot](MCO2_images/lf.png)
+
 ## Overview
 
 This project is a full-stack web application designed to demonstrate high-concurrency database operations, advanced replication strategies (Physical & Logical), and Data Warehousing (OLAP). It features a "Trading Card" store where users can browse cards, manage carts, and checkout, while a separate background system generates analytical reports.
