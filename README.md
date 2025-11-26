@@ -1,4 +1,5 @@
 # Pokemon Trading Card E-Commerce System
+* MCO2 Folder
 
 ## Overview
 
