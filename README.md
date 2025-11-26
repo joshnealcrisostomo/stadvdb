@@ -12,13 +12,13 @@ The entire system is containerized and orchestrated via Docker Compose.
 
 The application simulates a high-traffic e-commerce platform with the following core features:
 
-### 1\. Transactional Store (OLTP)
+### 1. Transactional Store (OLTP)
 
   * **Product Browsing & Cart Management:** Users can add items to their cart. The system uses an optimized "Upsert" strategy to efficiently handle concurrent cart updates.
   * **Safe Checkout:** A robust checkout process handles the complex logic of moving items from Cart to Order. It utilizes a **Stored Procedure** (`checkout_cart`) to ensure ACID compliance.
   * **Inventory Management:** Strict database constraints (`CHECK quantity >= 0`) prevent overselling, even during "Flash Sale" race conditions.
 
-### 2\. Analytical Reporting (OLAP)
+### 2. Analytical Reporting (OLAP)
 
   * **Automated Data Warehousing:** Sales data is automatically synced to a separate OLAP database for reporting.
   * **Real-time Transformation:** Instead of nightly batch jobs, triggers transform raw operational data into a Star Schema in real-time.
@@ -29,7 +29,7 @@ The application simulates a high-traffic e-commerce platform with the following 
 
 The system employs a dual-database architecture to separate concerns.
 
-### 1\. OLTP Schema (Transactional)
+### 1. OLTP Schema (Transactional)
 
 **File:** `create_oltp_schema.sql`
 
@@ -42,7 +42,7 @@ The system employs a dual-database architecture to separate concerns.
       * `Customer`: Signed-in customers who use the app.
       * `Order`, `orderitem`: Stores the checked-out items of customers. 
 
-### 2\. OLAP Schema (Analytical)
+### 2. OLAP Schema (Analytical)
 
 **File:** `create_olap_schema.sql`
 
@@ -57,13 +57,13 @@ The system employs a dual-database architecture to separate concerns.
 
 The architecture implements two distinct types of replication:
 
-### 1\. Hot Backup (Physical Replication)
+### 1. Hot Backup (Physical Replication)
 
   * **Purpose:** High Availability (HA) and Disaster Recovery for the OLTP database.
   * **Mechanism:** The `db_hot` service streams Write-Ahead Logs (WAL) directly from the primary `db` using `pg_basebackup` and streaming replication.
   * **Automatic Failover:** A `failover_watcher_oltp` service monitors the primary. If the primary goes down, it runs `pg_ctl promote` on the standby to promote it to the new primary.
 
-### 2\. Reporting Replica (Logical Replication)
+### 2. Reporting Replica (Logical Replication)
 
   * **Purpose:** Offloading analytical queries to a dedicated Data Warehouse.
   * **Mechanism:** The OLTP database defines a publication `olap_source_pub` containing only relevant tables (`Order`, `Product`, etc.). The OLAP database subscribes to this via `olap_sub`, receiving data changes in real-time without replicating the entire physical storage structure.
