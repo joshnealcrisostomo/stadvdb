@@ -38,7 +38,7 @@ services:
       - /app/node_modules
     environment:
       <<: *app-env
-      DB_HOST: db
+      DB_HOST: db_proxy
       DB_NAME: ${DB_NAME_OLTP}
     depends_on:
       db:
@@ -84,13 +84,13 @@ services:
         condition: service_healthy
     command: >
           bash -c "
-            until pg_isready -h db -U ${POSTGRES_USER}; do echo 'Waiting for OLTP primary...'; sleep 2; done
+            until pg_isready -h db_proxy -U ${POSTGRES_USER}; do echo 'Waiting for OLTP primary...'; sleep 2; done
             if [ ! -s '/var/lib/postgresql/data/PG_VERSION' ]; then
               export PGPASSWORD=${REPLICA_PASS}
-              pg_basebackup -h db -D /var/lib/postgresql/data -U ${REPLICA_USER} -vP --wal-method=stream
+              pg_basebackup -h db_proxy -D /var/lib/postgresql/data -U ${REPLICA_USER} -vP --wal-method=stream
             fi
             touch /var/lib/postgresql/data/standby.signal
-            echo \"primary_conninfo = 'host=db port=5432 user=${REPLICA_USER} password=${REPLICA_PASS}'\" >> /var/lib/postgresql/data/postgresql.auto.conf
+            echo \"primary_conninfo = 'host=db_proxy port=5432 user=${REPLICA_USER} password=${REPLICA_PASS}'\" >> /var/lib/postgresql/data/postgresql.auto.conf
 
             chown -R postgres:postgres /var/lib/postgresql/data
             chmod 700 /var/lib/postgresql/data
@@ -119,6 +119,7 @@ services:
     environment:
       <<: *db-env
       POSTGRES_DB: ${DB_NAME_OLAP}
+      DB_HOST: db_proxy 
     volumes:
       - ./init-replication.sh:/docker-entrypoint-initdb.d/01_init-replication.sh
       - ./create_olap_schema.sql:/docker-entrypoint-initdb.d/02_init.sql
@@ -126,8 +127,10 @@ services:
     ports:
       - "5433:5432"
     depends_on:
-      db:
+      db_proxy:
         condition: service_healthy  
+      
+
 
   db_olap_hot:
     <<: *db-common
@@ -295,6 +298,17 @@ services:
         echo 'Running OLAP Backfill...'
         psql -h db_olap -U ${POSTGRES_USER} -d ${DB_NAME_OLAP} -f /backfill.sql
       "        
+
+  db_proxy:
+    image: haproxy:2.7
+    ports:
+      - "5436:5432"   # Your apps connect to this port
+    volumes:
+      - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg
+    depends_on:
+      - db
+      - db_hot
+
 
 volumes:
   postgres_data:
