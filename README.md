@@ -53,6 +53,8 @@ The system employs a dual-database architecture to separate concerns.
       * `Customer`: Signed-in customers who use the app.
       * `Order`, `orderitem`: Stores the checked-out items of customers. 
 
+![OLTP Screenshot](MCO2_images/oltp-diagram.png)
+
 ### 2. OLAP Schema (Analytical)
 
 **File:** `create_olap_schema.sql`
@@ -61,6 +63,8 @@ The system employs a dual-database architecture to separate concerns.
   * **Fact Table:** `fact_sales` (Central table linking to dimensions).
   * **Dimension Tables:** `dim_product`, `dim_customer`, `dim_date` (Denormalized for simple reporting queries).
   * **Sync Mechanism:** Uses PostgreSQL **Logical Replication** (`olap_sub`) combined with "Forward" and "Backfill" triggers to populate the data warehouse immediately upon sale.
+
+![OLAP Screenshot](MCO2_images/olap-diagram.png)
 
 -----
 
