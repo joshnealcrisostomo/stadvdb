@@ -111,12 +111,20 @@ We use **Apache JMeter** to validate the system's resilience against concurrency
 1.  **Deadlock Avoidance (`mixed_cart_deadlock.jmx`)** 
       * **Test:** 500 users buy items A then B, while 500 others buy B then A.
       * **Result:** The database handles this without deadlocking due to the resource ordering strategy in the stored procedure.
+
+![Deadlock Screenshot](MCO2_images/deadlock.png)
+
 2.  **Flash Sale Integrity (`flash_sale_oltp_integrity.jmx`)**
       * **Test:** 1,000 users attempt to buy the same limited-stock item simultaneously.
       * **Result:** `CHECK` constraints prevent inventory from dropping below zero; late users receive a "Out of Stock" error.
+
+![Flash Screenshot](MCO2_images/flash.png)
+
 3. **Batch Updates (`real-batch-updates.jmx`)**
       * **Test:** A "Seller" locks 100 rows for restocking while users try to buy them.
       * **Result:** User transactions wait (lock) until the update is committed, ensuring Isolation.
+
+![Update Screenshot](MCO2_images/update.png)
 
 ### Reports are generated in the `results/` directory.
 
