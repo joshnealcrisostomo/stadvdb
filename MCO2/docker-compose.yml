@@ -52,6 +52,7 @@ services:
       environment:
         <<: *db-env
         POSTGRES_DB: ${DB_NAME_OLTP}
+        TZ: Asia/Manila
       volumes:
         - ./init-replication.sh:/docker-entrypoint-initdb.d/01_init-replication.sh
         - ./create_oltp_schema.sql:/docker-entrypoint-initdb.d/02_init.sql
@@ -75,6 +76,7 @@ services:
       <<: *db-env
       POSTGRES_DB: ${DB_NAME_OLTP}
       PGDATA: /var/lib/postgresql/data
+      TZ: Asia/Manila
     volumes:
       - postgres_hot_data:/var/lib/postgresql/data
     ports:
@@ -120,6 +122,7 @@ services:
       <<: *db-env
       POSTGRES_DB: ${DB_NAME_OLAP}
       DB_HOST: db_proxy 
+      TZ: Asia/Manila
     volumes:
       - ./init-replication.sh:/docker-entrypoint-initdb.d/01_init-replication.sh
       - ./create_olap_schema.sql:/docker-entrypoint-initdb.d/02_init.sql
@@ -138,6 +141,7 @@ services:
       <<: *db-env
       POSTGRES_DB: ${DB_NAME_OLAP}
       PGDATA: /var/lib/postgresql/data
+      TZ: Asia/Manila
     volumes:
       - postgres_olap_hot_data:/var/lib/postgresql/data
     ports:
