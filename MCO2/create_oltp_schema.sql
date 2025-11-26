@@ -149,3 +149,16 @@ BEGIN
 
 END;
 $$;
+
+-- Create a publication for the tables we need in the report
+CREATE PUBLICATION olap_source_pub FOR TABLE 
+    "Order", 
+    OrderItem, 
+    Product, 
+    Card, 
+    "Set", 
+    Customer;
+
+-- The replicator user needs permission to select data to copy it to the subscriber.
+GRANT USAGE ON SCHEMA public TO replicator;
+GRANT SELECT ON ALL TABLES IN SCHEMA public TO replicator;

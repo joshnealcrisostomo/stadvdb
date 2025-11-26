@@ -20,13 +20,15 @@ END
 \$\$;
 EOSQL
 
-# Allow replication connections
+# Allow replication connections (IPv4 and IPv6)
 grep -qxF "host replication replicator 0.0.0.0/0 md5" "$PGDATA/pg_hba.conf" || \
 echo "host replication replicator 0.0.0.0/0 md5" >> "$PGDATA/pg_hba.conf"
 
 # Set WAL settings
-grep -qxF "wal_level = replica" "$PGDATA/postgresql.conf" || echo "wal_level = replica" >> "$PGDATA/postgresql.conf"
-grep -qxF "max_wal_senders = 3" "$PGDATA/postgresql.conf" || echo "max_wal_senders = 3" >> "$PGDATA/postgresql.conf"
+grep -qxF "wal_level = logical" "$PGDATA/postgresql.conf" || echo "wal_level = logical" >> "$PGDATA/postgresql.conf"
+grep -qxF "max_wal_senders = 12" "$PGDATA/postgresql.conf" || echo "max_wal_senders = 12" >> "$PGDATA/postgresql.conf"
+grep -qxF "max_replication_slots = 12" "$PGDATA/postgresql.conf" || echo "max_replication_slots = 12" >> "$PGDATA/postgresql.conf"
+
 grep -qxF "wal_keep_size = 256MB" "$PGDATA/postgresql.conf" || echo "wal_keep_size = 256MB" >> "$PGDATA/postgresql.conf"
 grep -qxF "hot_standby = on" "$PGDATA/postgresql.conf" || echo "hot_standby = on" >> "$PGDATA/postgresql.conf"
 

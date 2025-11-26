@@ -48,16 +48,26 @@ services:
   # 1. OLTP Database Stack
   # ---------------------------------------
   db:
-    <<: *db-common
-    environment:
-      <<: *db-env
-      POSTGRES_DB: ${DB_NAME_OLTP}
-    volumes:
-      - ./create_oltp_schema.sql:/docker-entrypoint-initdb.d/init.sql
-      - ./init-replication.sh:/docker-entrypoint-initdb.d/init-replication.sh
-      - postgres_data:/var/lib/postgresql/data
-    ports:
-      - "5432:5432"
+      <<: *db-common
+      environment:
+        <<: *db-env
+        POSTGRES_DB: ${DB_NAME_OLTP}
+      volumes:
+        - ./init-replication.sh:/docker-entrypoint-initdb.d/01_init-replication.sh
+        - ./create_oltp_schema.sql:/docker-entrypoint-initdb.d/02_init.sql
+        - postgres_data:/var/lib/postgresql/data
+        - postgres_wal_archive:/var/lib/postgresql/archive
+      ports:
+        - "5432:5432"
+      depends_on:
+        fix_archive_permissions:
+          condition: service_completed_successfully
+      command: >
+        postgres
+        -c wal_level=logical 
+        -c archive_mode=on 
+        -c archive_command='test ! -f /var/lib/postgresql/archive/%f && cp %p /var/lib/postgresql/archive/%f' 
+        -c archive_timeout=3600
 
   db_hot:
     <<: *db-common
@@ -72,22 +82,25 @@ services:
     depends_on:
       db:
         condition: service_healthy
-    # Optimized command: Removed inline bash complexity where possible
     command: >
-      bash -c "
-        until pg_isready -h db -U ${POSTGRES_USER}; do echo 'Waiting for OLTP primary...'; sleep 2; done
-        if [ ! -s '/var/lib/postgresql/data/PG_VERSION' ]; then
-          export PGPASSWORD=${REPLICA_PASS}
-          pg_basebackup -h db -D /var/lib/postgresql/data -U ${REPLICA_USER} -vP --wal-method=stream
-        fi
-        touch /var/lib/postgresql/data/standby.signal
-        echo \"primary_conninfo = 'host=db port=5432 user=${REPLICA_USER} password=${REPLICA_PASS}'\" >> /var/lib/postgresql/data/postgresql.auto.conf
-        chown -R postgres:postgres /var/lib/postgresql/data
-        exec postgres -c hot_standby=on
-      "
+          bash -c "
+            until pg_isready -h db -U ${POSTGRES_USER}; do echo 'Waiting for OLTP primary...'; sleep 2; done
+            if [ ! -s '/var/lib/postgresql/data/PG_VERSION' ]; then
+              export PGPASSWORD=${REPLICA_PASS}
+              pg_basebackup -h db -D /var/lib/postgresql/data -U ${REPLICA_USER} -vP --wal-method=stream
+            fi
+            touch /var/lib/postgresql/data/standby.signal
+            echo \"primary_conninfo = 'host=db port=5432 user=${REPLICA_USER} password=${REPLICA_PASS}'\" >> /var/lib/postgresql/data/postgresql.auto.conf
+
+            chown -R postgres:postgres /var/lib/postgresql/data
+            chmod 700 /var/lib/postgresql/data
+            
+            exec su-exec postgres postgres -c hot_standby=on
+          "
 
   failover_watcher_oltp:
     image: postgres:14-alpine
+    user: postgres
     depends_on:
       db:
         condition: service_started
@@ -107,11 +120,14 @@ services:
       <<: *db-env
       POSTGRES_DB: ${DB_NAME_OLAP}
     volumes:
-      - ./create_olap_schema.sql:/docker-entrypoint-initdb.d/init.sql
-      - ./init-replication.sh:/docker-entrypoint-initdb.d/init-replication.sh
+      - ./init-replication.sh:/docker-entrypoint-initdb.d/01_init-replication.sh
+      - ./create_olap_schema.sql:/docker-entrypoint-initdb.d/02_init.sql
       - postgres_olap_data:/var/lib/postgresql/data
     ports:
       - "5433:5432"
+    depends_on:
+      db:
+        condition: service_healthy  
 
   db_olap_hot:
     <<: *db-common
@@ -135,12 +151,18 @@ services:
         fi
         touch /var/lib/postgresql/data/standby.signal
         echo \"primary_conninfo = 'host=db_olap port=5432 user=${REPLICA_USER} password=${REPLICA_PASS}'\" >> /var/lib/postgresql/data/postgresql.auto.conf
+        
+        # --- FIX START ---
         chown -R postgres:postgres /var/lib/postgresql/data
-        exec postgres -c hot_standby=on
+        chmod 700 /var/lib/postgresql/data
+        # --- FIX END ---
+        
+        exec su-exec postgres postgres -c hot_standby=on
       "
 
   failover_watcher_olap:
     image: postgres:14-alpine
+    user: postgres
     depends_on:
       db_olap:
         condition: service_started
@@ -228,31 +250,6 @@ services:
           condition: service_completed_successfully
       command: python mock_sales.py
 
-  etl_bridge:
-    build:
-      context: .
-      dockerfile: Dockerfile.python-scripts
-    volumes:
-      - ./ETL.py:/app/ETL.py
-    environment:
-      ETL_INTERVAL: 300
-      DB_SOURCE_HOST: db
-      DB_SOURCE_NAME: ${DB_NAME_OLTP}
-      DB_SOURCE_USER: ${POSTGRES_USER}
-      DB_SOURCE_PASS: ${POSTGRES_PASSWORD}
-      DB_TARGET_HOST: db_olap
-      DB_TARGET_NAME: ${DB_NAME_OLAP}
-      DB_TARGET_USER: ${POSTGRES_USER}
-      DB_TARGET_PASS: ${POSTGRES_PASSWORD}
-    depends_on:
-      db:
-        condition: service_healthy
-      db_olap:
-        condition: service_healthy
-      sales_seeder:
-        condition: service_completed_successfully
-    command: python ETL.py
-
   # ---------------------------------------
   # 4. Utilities
   # ---------------------------------------
@@ -270,9 +267,39 @@ services:
       customer_seeder:
         condition: service_completed_successfully
 
+  fix_archive_permissions:
+    image: postgres:14-alpine
+    user: root
+    volumes:
+      - postgres_wal_archive:/var/lib/postgresql/archive
+    command: chown -R postgres:postgres /var/lib/postgresql/archive
+
+  # ---------------------------------------
+  # 5. Finalizer (Runs automatic backfill)
+  # ---------------------------------------
+  olap_finisher:
+    image: postgres:14-alpine
+    environment:
+      PGPASSWORD: ${POSTGRES_PASSWORD}
+    volumes:
+      - ./backfill_olap.sql:/backfill.sql
+    depends_on:
+      db_olap:
+        condition: service_healthy
+      sales_seeder:
+        condition: service_completed_successfully
+    command: >
+      sh -c "
+        echo 'Sales Seeder finished. Waiting 10s for replication lag to clear...'
+        sleep 10
+        echo 'Running OLAP Backfill...'
+        psql -h db_olap -U ${POSTGRES_USER} -d ${DB_NAME_OLAP} -f /backfill.sql
+      "        
+
 volumes:
   postgres_data:
   postgres_hot_data:
   postgres_olap_data:
   postgres_olap_hot_data:
   seed_marker:
+  postgres_wal_archive:
