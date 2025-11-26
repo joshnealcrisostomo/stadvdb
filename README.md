@@ -18,11 +18,21 @@ The application simulates a high-traffic e-commerce platform with the following 
   * **Product Browsing & Cart Management:** Users can add items to their cart. The system uses an optimized "Upsert" strategy to efficiently handle concurrent cart updates.
   * **Safe Checkout:** A robust checkout process handles the complex logic of moving items from Cart to Order. It utilizes a **Stored Procedure** (`checkout_cart`) to ensure ACID compliance.
   * **Inventory Management:** Strict database constraints (`CHECK quantity >= 0`) prevent overselling, even during "Flash Sale" race conditions.
+  
+![Login Screenshot](MCO2_images/login-page.png)
+
+![Shop Screenshot](MCO2_images/shop.png)
+
+![Cart Screenshot](MCO2_images/cart.png)
+
+![Inventory Screenshot](MCO2_images/inventory.png)
 
 ### 2. Analytical Reporting (OLAP)
 
   * **Automated Data Warehousing:** Sales data is automatically synced to a separate OLAP database for reporting.
   * **Real-time Transformation:** Instead of nightly batch jobs, triggers transform raw operational data into a Star Schema in real-time.
+
+![Reports Screenshot](MCO2_images/reports.png)
 
 -----
 
