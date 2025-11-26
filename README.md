@@ -78,10 +78,14 @@ The architecture implements two distinct types of replication:
   * **Mechanism:** The `db_hot` service streams Write-Ahead Logs (WAL) directly from the primary `db` using `pg_basebackup` and streaming replication.
   * **Automatic Failover:** A `failover_watcher_oltp` service monitors the primary. If the primary goes down, it runs `pg_ctl promote` on the standby to promote it to the new primary.
 
+![Hot Screenshot](MCO2_images/hot-backup.png)
+
 ### 2. Reporting Replica (Logical Replication)
 
   * **Purpose:** Offloading analytical queries to a dedicated Data Warehouse.
   * **Mechanism:** The OLTP database defines a publication `olap_source_pub` containing only relevant tables (`Order`, `Product`, etc.). The OLAP database subscribes to this via `olap_sub`, receiving data changes in real-time without replicating the entire physical storage structure.
+
+![Replication Screenshot](MCO2_images/replication.png)
 
 -----
 
@@ -99,6 +103,8 @@ To ensure data durability and point-in-time recovery, WAL archiving is strictly 
     command: postgres ... -c archive_command='test ! -f /var/lib/postgresql/archive/%f && cp %p /var/lib/postgresql/archive/%f'
     ```
     This copies every completed WAL segment to a mounted volume `postgres_wal_archive`, simulating a secure backup location.
+
+![WAL Screenshot](MCO2_images/wal.png)
 
 -----
 
