@@ -110,19 +110,22 @@ We use **Apache JMeter** to validate the system's resilience against concurrency
 
 1.  **Deadlock Avoidance (`mixed_cart_deadlock.jmx`)** 
       * **Test:** 500 users buy items A then B, while 500 others buy B then A.
-      * **Result:** The database handles this without deadlocking due to the resource ordering strategy in the stored procedure.
+      * **Result:** 100% Pass Rate (0% Error)
+      * **Insight:** The graph shows successful requests with zero failures. This confirms that the Resource Ordering strategy in the checkout_cart stored procedure successfully prevented the "Circular Wait" condition, which would have otherwise caused widespread transaction failures.
 
 ![Deadlock Screenshot](MCO2_images/deadlock.png)
 
 2.  **Flash Sale Integrity (`flash_sale_oltp_integrity.jmx`)**
       * **Test:** 1,000 users attempt to buy the same limited-stock item simultaneously.
-      * **Result:** `CHECK` constraints prevent inventory from dropping below zero; late users receive a "Out of Stock" error.
+      * **Result:** 45% Error Rate
+      * **Insight:** The dashboard shows ~900 failures on the Checkout endpoint. This is a successful test result. It proves that the Database Constraint CHECK (quantity >= 0) correctly enforced data integrity. Once inventory hit 0, the database rejected all subsequent writes, preventing the system from selling items that did not exist.
 
 ![Flash Screenshot](MCO2_images/flash.png)
 
 3. **Batch Updates (`real-batch-updates.jmx`)**
       * **Test:** A "Seller" locks 100 rows for restocking while users try to buy them.
-      * **Result:** User transactions wait (lock) until the update is committed, ensuring Isolation.
+      * **Result:**100% Pass Rate, but with high latency.
+      * **Insight:** The Checkout average response time spiked to ~5138ms. This corresponds exactly to the 5-second sleep timer in the Seller's locking transaction. This confirms that Row-Level Locking is working: buyers were queueing (waiting) for the admin to finish, ensuring no "Dirty Reads" or write conflicts occurred.
 
 ![Update Screenshot](MCO2_images/update.png)
 
