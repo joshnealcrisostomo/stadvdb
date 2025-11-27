@@ -167,7 +167,7 @@ The `docker-compose.yml` orchestrates the entire stack. Below is a summary of th
 ---------
 
 ## Video Demo Link
-[Drive Link](https://drive.google.com/file/d/1uCV7HWOeSoACc-_HFL4q7LMkDXkey6xI/view?usp=sharing)
+[https://drive.google.com/file/d/1uCV7HWOeSoACc-_HFL4q7LMkDXkey6xI/view?usp=sharing](https://drive.google.com/file/d/1uCV7HWOeSoACc-_HFL4q7LMkDXkey6xI/view?usp=sharing)
 
 
 
