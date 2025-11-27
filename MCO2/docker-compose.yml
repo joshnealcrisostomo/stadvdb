@@ -40,9 +40,8 @@ services:
       <<: *app-env
       DB_HOST: db_proxy
       DB_NAME: ${DB_NAME_OLTP}
-    depends_on:
-      db:
-        condition: service_healthy
+
+
 
   # ---------------------------------------
   # 1. OLTP Database Stack
@@ -121,7 +120,7 @@ services:
     environment:
       <<: *db-env
       POSTGRES_DB: ${DB_NAME_OLAP}
-      DB_HOST: db_proxy 
+      DB_HOST: db 
       TZ: Asia/Manila
     volumes:
       - ./init-replication.sh:/docker-entrypoint-initdb.d/01_init-replication.sh
@@ -130,7 +129,7 @@ services:
     ports:
       - "5433:5432"
     depends_on:
-      db_proxy:
+      db:
         condition: service_healthy  
       
 
@@ -273,6 +272,9 @@ services:
         condition: service_completed_successfully
       customer_seeder:
         condition: service_completed_successfully
+      db_proxy:
+        condition: service_started
+
 
   fix_archive_permissions:
     image: postgres:14-alpine
@@ -306,12 +308,14 @@ services:
   db_proxy:
     image: haproxy:2.7
     ports:
-      - "5436:5432"   # Your apps connect to this port
+      - "5436:5432"
     volumes:
       - ./haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg
     depends_on:
       - db
       - db_hot
+   
+
 
 
 volumes:

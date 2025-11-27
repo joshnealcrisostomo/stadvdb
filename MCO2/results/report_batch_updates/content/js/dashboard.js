@@ -173,7 +173,7 @@ $(document).ready(function() {
     });
 
     // Creates APDEX table
-    createTable($("#apdexTable"), {"supportsControllersDiscrimination": true, "overall": {"data": [0.6721311475409836, 500, 1500, "Total"], "isController": false}, "titles": ["Apdex", "T (Toleration threshold)", "F (Frustration threshold)", "Label"], "items": [{"data": [0.36666666666666664, 500, 1500, "Checkout"], "isController": false}, {"data": [1.0, 500, 1500, "Add (50) to Cart"], "isController": false}, {"data": [0.0, 500, 1500, "HTTP Request"], "isController": false}]}, function(index, item){
+    createTable($("#apdexTable"), {"supportsControllersDiscrimination": true, "overall": {"data": [0.4918032786885246, 500, 1500, "Total"], "isController": false}, "titles": ["Apdex", "T (Toleration threshold)", "F (Frustration threshold)", "Label"], "items": [{"data": [0.0, 500, 1500, "Checkout"], "isController": false}, {"data": [1.0, 500, 1500, "Add (50) to Cart"], "isController": false}, {"data": [0.0, 500, 1500, "HTTP Request"], "isController": false}]}, function(index, item){
         switch(index){
             case 0:
                 item = item.toFixed(3);
@@ -187,7 +187,7 @@ $(document).ready(function() {
     }, [[0, 0]], 3);
 
     // Create statistics table
-    createTable($("#statisticsTable"), {"supportsControllersDiscrimination": true, "overall": {"data": ["Total", 61, 0, 0.0, 1714.5901639344263, 9, 5153, 117.0, 5107.2, 5132.9, 5153.0, 11.726259131103422, 4.171134599673203, 2.5544186731064977], "isController": false}, "titles": ["Label", "#Samples", "FAIL", "Error %", "Average", "Min", "Max", "Median", "90th pct", "95th pct", "99th pct", "Transactions/s", "Received", "Sent"], "items": [{"data": ["Checkout", 30, 0, 0.0, 3220.2000000000007, 9, 5138, 5042.0, 5121.7, 5135.8, 5138.0, 5.836575875486381, 1.9607247081712063, 1.157055569066148], "isController": false}, {"data": ["Add (50) to Cart", 30, 0, 0.0, 94.36666666666667, 56, 141, 95.0, 132.4, 137.7, 141.0, 212.7659574468085, 80.16123670212767, 50.69813829787235], "isController": false}, {"data": ["HTTP Request", 1, 0, 0.0, 5153.0, 5153, 5153, 5153.0, 5153.0, 5153.0, 5153.0, 0.19406171162429653, 0.06159185183388318, 0.037334137880846115], "isController": false}]}, function(index, item){
+    createTable($("#statisticsTable"), {"supportsControllersDiscrimination": true, "overall": {"data": ["Total", 61, 0, 0.0, 2750.7377049180327, 327, 5290, 4954.0, 5160.6, 5200.4, 5290.0, 10.96925013486783, 3.899050024725769, 2.389513745279626], "isController": false}, "titles": ["Label", "#Samples", "FAIL", "Error %", "Average", "Min", "Max", "Median", "90th pct", "95th pct", "99th pct", "Transactions/s", "Received", "Sent"], "items": [{"data": ["Checkout", 30, 0, 0.0, 5069.666666666667, 4954, 5213, 5061.5, 5193.2, 5206.4, 5213.0, 5.749329244921426, 1.9314152932157915, 1.1397596061709467], "isController": false}, {"data": ["Add (50) to Cart", 30, 0, 0.0, 347.1666666666667, 327, 420, 331.5, 407.8, 414.5, 420.0, 70.75471698113208, 26.620540978773587, 16.85952240566038], "isController": false}, {"data": ["HTTP Request", 1, 0, 0.0, 5290.0, 5290, 5290, 5290.0, 5290.0, 5290.0, 5290.0, 0.1890359168241966, 0.05999675094517958, 0.03636726134215501], "isController": false}]}, function(index, item){
         switch(index){
             // Errors pct
             case 3:
